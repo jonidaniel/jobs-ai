@@ -1,5 +1,8 @@
 # ---------- SCHEMA (PYDANTIC) ----------
 
+from typing import List
+from pydantic import BaseModel, Field
+
 class ExperienceLevels(BaseModel):
     Python: int = 0
     JavaScript: int = 0
