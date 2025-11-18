@@ -8,4 +8,5 @@ dependencies = [
     "langchain>=1.0.7",
     "openai>=2.8.1",
     "pydantic>=2.12.4",
+    "python-dotenv>=1.2.1",
 ]
