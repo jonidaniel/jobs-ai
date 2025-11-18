@@ -70,28 +70,17 @@ client.api_key = OPENAI_API_KEY
 MEMORY_PATH = Path("memory/vector_db/skills.json")
 MEMORY_PATH.parent.mkdir(parents=True, exist_ok=True)
 
+# assess
+# _call_llm
+# _extract_json
+# _normalize_parsed
+# save
+# load_existing
+# merge_update
 class SkillAssessor:
     def __init__(self, model: str = OPENAI_MODEL, memory_path: Path = MEMORY_PATH):
         self.model = model
         self.memory_path = memory_path
-
-    def _call_llm(self, prompt: str, max_tokens: int = 800) -> str:
-        #if not openai.api_key:
-        if not client.api_key:
-            raise RuntimeError("OpenAI API key not configured. Set OPENAI_API_KEY env var.")
-        logger.info("Calling LLM...")
-        resp = client.chat.completions.create(
-            model="gpt-4.1-mini",
-            messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": prompt}
-            ],
-            temperature=0.2,
-        )
-
-        text = resp.choices[0].message.content
-        logger.debug("LLM response: %s", text[:500])
-        return text
 
     def assess(self, input_text: str, name_hint: str = "") -> SkillProfile:
         user_prompt = USER_PROMPT_TEMPLATE.format(input_text=input_text)
@@ -113,6 +102,23 @@ class SkillAssessor:
         if not profile.name and name_hint:
             profile.name = name_hint
         return profile
+
+    def _call_llm(self, prompt: str, max_tokens: int = 800) -> str:
+        if not client.api_key:
+            raise RuntimeError("OpenAI API key not configured. Set OPENAI_API_KEY env var.")
+        logger.info("Calling LLM...")
+        resp = client.chat.completions.create(
+            model="gpt-4.1-mini", # !!!!!!!!!!!
+            messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt}
+            ],
+            temperature=0.2,
+        )
+
+        text = resp.choices[0].message.content
+        logger.debug("LLM response: %s", text[:500])
+        return text
 
     def _extract_json(self, text: str) -> Optional[str]:
         # crude extraction: find first { and the matching }
@@ -168,23 +174,6 @@ class SkillAssessor:
             parsed["name"] = parsed["name"].strip()
         return parsed
 
-    def save(self, profile: SkillProfile):
-        # Write JSON to memory path
-        out = json.loads(profile.json(by_alias=True))
-        with open(self.memory_path, "w", encoding="utf-8") as f:
-            json.dump(out, f, ensure_ascii=False, indent=2)
-        logger.info("Saved skill profile to %s", self.memory_path)
-
-    def load_existing(self) -> Optional[SkillProfile]:
-        if not self.memory_path.exists():
-            return None
-        with open(self.memory_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        try:
-            return SkillProfile(**data)
-        except ValidationError:
-            return None
-
     def merge_update(self, new_profile: SkillProfile) -> SkillProfile:
         """Merge new_profile into existing profile (union lists, max experience levels)."""
         existing = self.load_existing()
@@ -207,6 +196,23 @@ class SkillAssessor:
         merged_profile = SkillProfile(**merged)
         self.save(merged_profile)
         return merged_profile
+
+    def save(self, profile: SkillProfile):
+        # Write JSON to memory path
+        out = json.loads(profile.json(by_alias=True))
+        with open(self.memory_path, "w", encoding="utf-8") as f:
+            json.dump(out, f, ensure_ascii=False, indent=2)
+        logger.info("Saved skill profile to %s", self.memory_path)
+
+    def load_existing(self) -> Optional[SkillProfile]:
+        if not self.memory_path.exists():
+            return None
+        with open(self.memory_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        try:
+            return SkillProfile(**data)
+        except ValidationError:
+            return None
 
 # ---------- SIMPLE CLI USAGE ----------
 
