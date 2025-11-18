@@ -1,3 +1,5 @@
+# ---------- PROMPT TEMPLATES ----------
+
 SYSTEM_PROMPT = """
 You are the Skill Assessment Agent for an automated job-seeking system.
 
