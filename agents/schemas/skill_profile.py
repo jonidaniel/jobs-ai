@@ -10,8 +10,8 @@ class ExperienceLevels(BaseModel):
     AI_ML: int = Field(0, alias="AI/ML")
 
     class Config:
-        allow_population_by_field_name = True
-        schema_extra = {
+        validate_by_name = True
+        json_schema_extra = {
             "example": {
                 "Python": 7,
                 "JavaScript": 6,
@@ -33,4 +33,4 @@ class SkillProfile(BaseModel):
     job_search_keywords: List[str] = []
 
     class Config:
-        allow_population_by_field_name = True
+        validate_by_name = True
