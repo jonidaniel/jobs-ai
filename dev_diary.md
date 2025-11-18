@@ -6,8 +6,6 @@
 
 - Fed the initial project idea of an autonomous job seeker system to a chat model and started refining it
 
-- Came up with an end-to-end job searcher/
-
 - Carved out an implementation roadmap with about a dozen phases
 
 - Defined the projects' scope and goals, its tech stack, and the agents' roles
