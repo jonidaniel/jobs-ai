@@ -22,80 +22,99 @@
 # • Saved raw job JSON under /data/job_listings/
 # • Metadata about the search (query coverage, failure logs)
 
+from typing import List, Dict
 import os
 import json
+import logging
 
-from typing import List, Dict
 from utils.query_builder import build_queries
 from utils.scraper_duunitori import fetch_search_results
 
-class SearcherAgent:
-    def __init__(self, job_boards: List[str] = None, deep: bool = False):
-        """
-        Searcher Agent orchestrates job search across multiple job boards.
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
-        Args:
-            job_boards: list of job board names, e.g., ["duunitori"]
-            deep: whether to fetch full job description
-        """
+
+class SearcherAgent:
+    """
+    SearcherAgent orchestrates job search using a skill profile.
+
+    Responsibilities:
+    1. Build queries from skill profile
+    2. Fetch job listings from supported job boards
+    3. Deduplicate listings
+    4. Save raw JSON for inspection
+    """
+
+    def __init__(self, job_boards: List[str] = None, deep: bool = True, save_path: str = "data/job_listings"):
         self.job_boards = job_boards or ["duunitori"]
         self.deep = deep
+        self.save_path = save_path
+        os.makedirs(self.save_path, exist_ok=True)
 
     def search_jobs(self, skill_profile: dict) -> List[Dict]:
         """
-        1. Build deterministic queries
-        2. Search each job board
-        3. Deduplicate results
-        4. Optionally save raw JSON
+        Run searches on all job boards using queries from the skill profile.
+        Returns a deduplicated list of jobs.
         """
-        all_jobs = []
 
-        # 1️⃣ Build queries
+        all_jobs = []
         queries = build_queries(skill_profile)
 
-        # 2️⃣ Iterate queries and job boards
         for query in queries:
             for board in self.job_boards:
+                logger.info("Searching %s for query '%s'", board, query)
                 if board.lower() == "duunitori":
-                    # call your existing scraper
                     jobs = fetch_search_results(query, deep=self.deep)
                 else:
-                    # placeholder for future boards
+                    # Placeholder for other boards
                     jobs = []
 
                 all_jobs.extend(jobs)
-
-                # 3️⃣ Save raw results
                 self._save_raw_jobs(jobs, board, query)
 
-        # 4️⃣ Deduplicate by URL
-        deduped_jobs = self._deduplicate_jobs(all_jobs)
-
-        return deduped_jobs
+        return self._deduplicate_jobs(all_jobs)
 
     # ----------------------------
-    # Helper: save raw JSON
+    # Helpers
     # ----------------------------
+    def _deduplicate_jobs(self, jobs: List[Dict]) -> List[Dict]:
+        seen_urls = set()
+        deduped = []
+        for job in jobs:
+            url = job.get("url")
+            if url and url not in seen_urls:
+                deduped.append(job)
+                seen_urls.add(url)
+        return deduped
+
     def _save_raw_jobs(self, jobs: List[Dict], board: str, query: str):
         if not jobs:
             return
         safe_query = query.replace(" ", "_").replace("/", "_")
-        os.makedirs("data/job_listings", exist_ok=True)
-        path = os.path.join("data/job_listings", f"{board}_{safe_query}.json")
+        filename = f"{board}_{safe_query}.json"
+        path = os.path.join(self.save_path, filename)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(jobs, f, ensure_ascii=False, indent=2)
+        logger.info("Saved %d raw jobs to %s", len(jobs), path)
 
-    # ----------------------------
-    # Helper: deduplicate jobs
-    # ----------------------------
-    def _deduplicate_jobs(self, jobs: List[Dict]) -> List[Dict]:
-        seen = set()
-        deduped = []
-        for job in jobs:
-            url = job.get("url")
-            if not url:
-                continue
-            if url not in seen:
-                deduped.append(job)
-                seen.add(url)
-        return deduped
+
+# ----------------------------
+# Simple CLI usage
+# ----------------------------
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run SearcherAgent using a skill profile JSON.")
+    parser.add_argument("profile", help="Path to skill profile JSON")
+    parser.add_argument("--deep", action="store_true", help="Fetch full job descriptions")
+    args = parser.parse_args()
+
+    if not os.path.exists(args.profile):
+        raise FileNotFoundError(f"Skill profile not found: {args.profile}")
+
+    with open(args.profile, "r", encoding="utf-8") as f:
+        skill_profile = json.load(f)
+
+    agent = SearcherAgent(deep=args.deep)
+    jobs = agent.search_jobs(skill_profile)
+    print(f"Found {len(jobs)} unique jobs.")
