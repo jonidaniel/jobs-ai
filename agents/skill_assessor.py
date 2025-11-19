@@ -70,7 +70,7 @@ client.api_key = OPENAI_API_KEY
 MEMORY_PATH = Path("memory/vector_db/skills.json")
 MEMORY_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-class SkillAssessor:
+class AssessorAgent:
     def __init__(self, model: str = OPENAI_MODEL, memory_path: Path = MEMORY_PATH):
         self.model = model
         self.memory_path = memory_path
