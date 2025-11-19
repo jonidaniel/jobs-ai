@@ -28,7 +28,11 @@
 def build_queries(skill_profile: dict) -> list[str]:
     """
     Build deterministic job search queries from a structured skill profile.
+
     This does NOT call an LLM — purely rule-based keyword generation.
+
+    Args:
+        skill_profile: asd
     """
 
     queries = set()
