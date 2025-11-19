@@ -1,7 +1,8 @@
-from agents import SkillAssessor
+from agents import SkillAssessor, SearcherAgent
 
 def main():
     assessor = SkillAssessor()
+    searcher = SearcherAgent()
 
     text = """
     Joni Mäkinen has developed software since 2020.
@@ -22,8 +23,9 @@ def main():
     He is an AWS Certified Cloud Practitioner (CLF-C02).
     """
 
-    result = assessor.assess(text)
-    print(result)
+    assessment = assessor.assess(text)
+    searches = searcher.search_jobs(assessment.model_dump())
+    print(searches)
 
     #assessor.save(result)
     #loaded = assessor.load_existing()
