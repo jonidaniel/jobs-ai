@@ -24,8 +24,10 @@ DEFAULT_HEADERS = {
 def slugify_query(query: str) -> str:
     """
     Convert "python developer" -> "python-developer"
+
     Also encode special characters safely.
     """
+
     if not query:
         return ""
     # Replace whitespace with hyphens and remove unsafe chars
@@ -34,6 +36,10 @@ def slugify_query(query: str) -> str:
     return quote_plus(q, safe="-")
 
 def safe_get(session: requests.Session, url: str, retries: int = 3, backoff: float = 1.0, timeout: float = 10.0) -> Optional[requests.Response]:
+    """
+    asd
+    """
+
     for attempt in range(1, retries + 1):
         try:
             resp = session.get(url, timeout=timeout)
@@ -53,8 +59,10 @@ def safe_get(session: requests.Session, url: str, retries: int = 3, backoff: flo
 def parse_job_card(card: BeautifulSoup) -> Dict:
     """
     Parse a search-result job card into a partial job dict.
+
     Defensive parsing: returns empty strings for missing fields.
     """
+
     # Title and link
     title_tag = card.select_one(".job-box__title a, .job-box__title-link, h3 a")
     title = title_tag.get_text(strip=True) if title_tag else (card.select_one(".job-box__title").get_text(strip=True) if card.select_one(".job-box__title") else "")
@@ -90,8 +98,10 @@ def parse_job_card(card: BeautifulSoup) -> Dict:
 def fetch_job_detail(session: requests.Session, job_url: str, retries: int = 2) -> str:
     """
     Fetch the job detail page and attempt to extract the full job description text.
+
     Returns an empty string on failure.
     """
+
     resp = safe_get(session, job_url, retries=retries)
     if not resp or resp.status_code != 200:
         logger.debug("Failed to fetch job detail: %s (status=%s)", job_url, getattr(resp, "status_code", None))
@@ -142,6 +152,7 @@ def fetch_search_results(
     Returns:
         List of normalized job dictionaries.
     """
+
     if session is None:
         session = requests.Session()
     session.headers.update(headers or DEFAULT_HEADERS)
