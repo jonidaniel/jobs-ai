@@ -21,6 +21,7 @@ def main():
     He is an AWS Certified Solutions Architect (SAA-C03).
     He is an AWS Certified Cloud Practitioner (CLF-C02).
     """
+
     result = assessor.assess(text)
     print(result)
 
@@ -28,8 +29,8 @@ def main():
     #loaded = assessor.load_existing()
     #print(loaded == result)
 
-    loaded = assessor.load_existing()
-    print(loaded)
+    #loaded = assessor.load_existing()
+    #print(loaded)
 
 if __name__ == "__main__":
     main()
