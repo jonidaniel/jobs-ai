@@ -1,99 +1,47 @@
 import pytest
-from urllib.parse import urlparse, parse_qs
+from utils.query_builder import build_queries
 
-from utils.query_builder import build_duunitori_query
+def test_core_languages():
+    skill_profile = {"core_languages": ["Python"]}
+    queries = build_queries(skill_profile)
+    assert "python developer" in queries
+    assert "junior python developer" in queries
+    assert "python engineer" in queries
 
-# ---------------------------------------------------
-# 1. Single keyword
-# ---------------------------------------------------
-def test_single_keyword_query():
-    url = build_duunitori_query(["python"])
-    parsed = urlparse(url)
-    params = parse_qs(parsed.query)
+def test_agentic_frameworks():
+    skill_profile = {"agentic_ai_experience": ["LangChain"]}
+    queries = build_queries(skill_profile)
+    assert "langchain" in queries
+    assert "langchain developer" in queries
 
-    assert "python" in params.get("search", [""])[0]
+def test_ai_ml_skills():
+    skill_profile = {"ai_ml_experience": ["TensorFlow"]}
+    queries = build_queries(skill_profile)
+    assert "ai engineer" in queries
+    assert "junior ai engineer" in queries
+    assert "machine learning engineer" in queries
 
+def test_fallback_queries_always_present():
+    queries = build_queries({})
+    for q in ["junior software developer", "junior full stack developer", "entry level developer"]:
+        assert q in queries
 
-# ---------------------------------------------------
-# 2. Multiple keywords
-# ---------------------------------------------------
-def test_multiple_keywords_query():
-    url = build_duunitori_query(["python", "developer"])
-    parsed = urlparse(url)
-    params = parse_qs(parsed.query)
+def test_agentic_ai_roles_always_present():
+    queries = build_queries({})
+    for q in ["llm engineer", "agentic ai"]:
+        assert q in queries
 
-    assert "python developer" in params.get("search", [""])[0]
+def test_deterministic_ordering():
+    queries1 = build_queries({"core_languages": ["Python"]})
+    queries2 = build_queries({"core_languages": ["Python"]})
+    assert queries1 == queries2
 
+def test_case_normalization():
+    skill_profile = {"core_languages": ["PYTHON"]}
+    queries = build_queries(skill_profile)
+    assert "python developer" in queries
 
-# ---------------------------------------------------
-# 3. Special characters encoded correctly
-# ---------------------------------------------------
-def test_query_encoding_special_chars():
-    url = build_duunitori_query(["c++", "näkö"])
-    assert "c%2B%2B" in url
-    assert "n%C3%A4k%C3%B6" in url
-
-
-# ---------------------------------------------------
-# 4. Location parameter appears when provided
-# ---------------------------------------------------
-def test_location_added():
-    url = build_duunitori_query(["python"], location="helsinki")
-    parsed = urlparse(url)
-    params = parse_qs(parsed.query)
-
-    assert params.get("location", [""])[0] == "helsinki"
-
-
-# ---------------------------------------------------
-# 5. Pagination
-# ---------------------------------------------------
-def test_pagination_parameter():
-    url = build_duunitori_query(["python"], page=3)
-    parsed = urlparse(url)
-    params = parse_qs(parsed.query)
-
-    assert params.get("page", [""])[0] == "3"
-
-
-# ---------------------------------------------------
-# 6. Default behavior for empty keywords
-# ---------------------------------------------------
-def test_default_keyword_behavior():
-    url = build_duunitori_query([])
-    parsed = urlparse(url)
-    params = parse_qs(parsed.query)
-
-    assert "search" in params
-    assert params["search"][0] != ""  # Should fall back to something meaningful
-
-
-# ---------------------------------------------------
-# 7. Invalid input
-# ---------------------------------------------------
-def test_invalid_keyword_input():
-    with pytest.raises(ValueError):
-        build_duunitori_query(None)
-
-
-# ---------------------------------------------------
-# 8. Platform-specific rules
-# Duunitori uses 'search', not 'haku'
-# ---------------------------------------------------
-def test_duunitori_uses_search_param():
-    url = build_duunitori_query(["python"])
-
-    assert "search=" in url
-    assert "haku=" not in url
-
-
-# ---------------------------------------------------
-# 9. Snapshot test (optional)
-# ---------------------------------------------------
-def test_query_snapshot(snapshot):
-    url = build_duunitori_query(
-        ["python", "developer"],
-        page=2,
-        location="helsinki"
-    )
-    snapshot.assert_match(url)
+def test_no_duplicates():
+    skill_profile = {"core_languages": ["Python", "python"]}
+    queries = build_queries(skill_profile)
+    assert queries.count("python developer") == 1
