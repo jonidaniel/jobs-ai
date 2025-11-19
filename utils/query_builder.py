@@ -1,3 +1,5 @@
+# ---------- DETERMINISTIC KEYWORD GENERATOR ----------
+
 # Input: The skill profile JSON
 # Output: A priority-ordered list of job search queries, that's been deduplicated and normalized
 
