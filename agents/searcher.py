@@ -22,6 +22,19 @@
 # • Saved raw job JSON under /data/job_listings/
 # • Metadata about the search (query coverage, failure logs)
 
+
+
+# 1.	Query Generation
+# Uses build_queries(skill_profile) to get a deterministic set of queries.
+# 	2.	Multi-board Support
+# Currently only Duunitori; placeholder for Jobly/Oikotie/etc.
+# 	3.	Deduplication
+# By URL.
+# 	4.	Raw JSON Storage
+# Stores per-query per-board results under data/job_listings.
+# 	5.	CLI Mode
+# Allows running the agent manually with a skill profile JSON.
+
 from typing import List, Dict
 import os
 import json
