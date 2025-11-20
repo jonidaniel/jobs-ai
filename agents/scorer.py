@@ -1,12 +1,15 @@
+# ---------- SCORER AGENT ----------
+
 import logging
+
 from typing import List, Dict
-from utils.normalization import normalize_list
-from agents.skill_assessor import SkillProfile
+
+from agents import SkillProfile
+from utils import normalize_list
 
 # Logging configuration
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
 
 class ScorerAgent:
     def __init__(self, weight_agentic_ai: float = 2.0):
@@ -122,7 +125,7 @@ if __name__ == "__main__":
     jobs = json.loads(Path(args.job_json).read_text(encoding="utf-8"))
     profile_data = json.loads(Path(args.profile_json).read_text(encoding="utf-8"))
 
-    from agents.skill_assessor import SkillProfile
+    from agents import SkillProfile
     profile = SkillProfile(**profile_data)
 
     scorer = ScorerAgent()
