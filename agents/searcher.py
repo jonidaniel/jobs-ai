@@ -57,7 +57,7 @@ class SearcherAgent:
     4. Save raw JSON for inspection
     """
 
-    def __init__(self, job_boards: List[str] = None, deep: bool = True, save_path: str = "data/job_listings"):
+    def __init__(self, job_boards: List[str] = None, deep: bool = True, save_path: str = "data/job_listings/raw"):
         self.job_boards = job_boards or ["duunitori"]
         self.deep = deep
         self.save_path = save_path
