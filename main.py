@@ -1,19 +1,20 @@
 # ---------- JOBSAI MAIN ----------
 
-from agents import AssessorAgent, SearcherAgent, INPUT_TEXT#, ScorerAgent, ReporterAgent, GeneratorAgent, NotifierAgent
+from agents import AssessorAgent, SearcherAgent, ScorerAgent, INPUT_TEXT#, ReporterAgent, GeneratorAgent, NotifierAgent
 
 def main():
     #planner = PlannerAgent()
     assessor = AssessorAgent()
     searcher = SearcherAgent()
-    #scorer = ScorerAgent()
+    scorer = ScorerAgent()
     #reporter = ReporterAgent()
     #generator = GeneratorAgent()
     #notifier = NotifierAgent()
 
     assessment = assessor.assess(INPUT_TEXT)
-    searches = searcher.search_jobs(assessment.model_dump())
-    #print(searches)
+    searcher.search_jobs(assessment.model_dump())
+    result = scorer.score_jobs()
+    print(result)
 
 if __name__ == "__main__":
     main()
