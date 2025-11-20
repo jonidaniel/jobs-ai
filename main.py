@@ -1,29 +1,42 @@
-# ---------- JOBSAI MAIN ----------
+# ---------- JOBSAI ----------
 
-from agents import AssessorAgent, SearcherAgent, ScorerAgent, ReporterAgent, INPUT_TEXT#, GeneratorAgent, NotifierAgent
+# Version: 0.1.0
+# Date: Fall 2025
+# Author: Joni Mäkinen
+
+# An agentic AI system for end-to-end automated job searching and job application document generation:
+# enter your skills and preferences to the system once and get job recommendations and cover letters continuously.
+# Checks input resources consistently and updates search queries autonomously.
+
+from agents import (
+    AssessorAgent,
+    SearcherAgent,
+    ScorerAgent,
+    ReporterAgent,
+    INPUT_TEXT) # Initial user input (i.e. skill & experience description)
 
 def main():
-    # 1️⃣ Assess input text / user profile
-    assessor = AssessorAgent()
-    assessment = assessor.assess(INPUT_TEXT)  # Returns a SkillProfile object
+    # 1. Assess candidate
+    # Returns a SkillProfile object
+    skill_profile = AssessorAgent().assess(INPUT_TEXT)
 
-    # 2️⃣ Search jobs based on assessment
-    searcher = SearcherAgent(job_boards=["duunitori"], deep=True)
-    searcher.search_jobs(assessment.model_dump())  # Stores JSON to /data/job_listings/
+    # 2. Search jobs based on assessment
+    # Uses skill_profile to form keyword searches
+    # The keyword searches are then used to scrape popular job listing websites
+    # Stores acquired job listings as JSON to /data/job_listings/raw/*.json
+    SearcherAgent(job_boards=["duunitori"], deep=True).search_jobs(skill_profile.model_dump())
+    print("Searching job listings complete. Listings saved in /data/job_listings/")
 
-    # 3️⃣ Score the jobs automatically
-    scorer = ScorerAgent()
-    scorer.score_jobs(skill_profile=assessment)  # Loads from /data/job_listings/, saves scored JSON
+    # 3. Score the jobs
+    # Loads raw job listings JSON from /data/job_listings/raw/*.json
+    # Saves scored job listings as JSON to /data/job_listings/scored/*.json
+    ScorerAgent().score_jobs(skill_profile=skill_profile)
+    print("Scoring jobs complete. Scored jobs saved in /data/job_listings/scored/")
 
-    # 4️⃣ ReporterAgent (example usage)
-    # reporter = ReporterAgent()
-    # reporter.generate_report()  # Reads scored jobs from data/job_listings/scored/
-
-    reporter = ReporterAgent()
-    report_text = reporter.generate_report(top_n=10)
-    print(report_text)
-
-    print("Job search & scoring pipeline complete. Scored jobs saved in data/job_listings/scored/")
+    # 4. Write a job listing report
+    # Saves the report to /data/reports/job_report.txt
+    ReporterAgent().generate_report(top_n=10)
+    print("Writing job listing report complete. Report saved to /data/reports/job_report.txt successfully")
 
 if __name__ == "__main__":
     main()
