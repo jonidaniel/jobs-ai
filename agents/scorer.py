@@ -52,14 +52,14 @@ class ScorerAgent:
                         jobs.extend(data)
             except Exception as e:
                 print(f"Failed to load {path}: {e}")
-        # Deduplicate by URL
+        # Deduplicate by URL (falling back to lightweight fingerprint when URL missing)
         seen = set()
         unique_jobs = []
         for job in jobs:
-            url = job.get("url")
-            if url and url not in seen:
+            fingerprint = self._job_identity(job)
+            if fingerprint and fingerprint not in seen:
                 unique_jobs.append(job)
-                seen.add(url)
+                seen.add(fingerprint)
         return unique_jobs
 
     def compute_job_score(self, job: Dict, skill_profile: SkillProfile) -> Dict:
@@ -112,3 +112,22 @@ class ScorerAgent:
                 json.dump(scored_jobs, f, ensure_ascii=False, indent=2)
         except Exception as e:
             print(f"Failed to save scored jobs: {e}")
+
+    @staticmethod
+    def _job_identity(job: Dict) -> str:
+        """
+        Build a repeatable identifier for a job. Prefer URL, otherwise a hashable
+        combo of fields that tends to be stable across scrapes.
+        """
+        url = (job.get("url") or "").strip()
+        if url:
+            return url
+
+        title = (job.get("title") or "").strip().lower()
+        query = (job.get("query_used") or "").strip().lower()
+        snippet = (job.get("description_snippet") or "").strip().lower()
+        if not title and not query and not snippet:
+            return ""
+        # Limit snippet length to keep keys short while remaining distinctive.
+        snippet_prefix = snippet[:80]
+        return f"{title}|{query}|{snippet_prefix}"
