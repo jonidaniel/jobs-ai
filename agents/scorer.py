@@ -2,16 +2,17 @@
 
 import os
 import json
+
 from typing import List, Dict
 from .schemas.skill_profile import SkillProfile
 from utils.normalization import normalize_list
 
-RAW_JOB_LISTINGS_DIR = "data/job_listings"
-SCORED_JOB_LISTINGS_DIR = "data/job_listings/scored"
+# RAW_JOB_LISTINGS_DIR = "data/job_listings/raw"
+# SCORED_JOB_LISTINGS_DIR = "data/job_listings/scored"
 
 class ScorerAgent:
-    def __init__(self):
-        os.makedirs(SCORED_JOB_LISTINGS_DIR, exist_ok=True)
+    def __init__(self, jobs_raw, jobs_scored):
+        os.makedirs(jobs_raw, exist_ok=True)
 
     # -----------------------------
     # Public interface

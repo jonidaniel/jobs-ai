@@ -1,49 +1,17 @@
 # ---------- ASSESSOR AGENT ----------
 
-# DESCRIPTION:
-# • Builds a structured skill profile of the user, based on their résumé, web portfolio, GitHub repos, and any text inputs
-# • The profile is stored in a vector database and refreshed over time
-# • SkillAssessor is triggered by Planner
-
-# RESPONSIBILITIES:
-# A. Parses input text (resume, metadata)
-#   • Extracts:
-#     • Programming languages
-#     • Frameworks
-#     • Tools & libraries
-#     • Cloud services
-#     • AI/agentic experience
-#     • Project descriptions
-#     • Soft skills
-#     • Estimated proficiency scores
-#     • Job search keywords (LLM-generated)
-# B. Normalizes the data
-#   • Converts to a consistent format
-# C. Saves to memory
-#   • Writes JSON to /memory/vector_db/skills.json
-
-# ACTS AS THE BASIS FOR:
-# • Search keyword generation
-# • Job scoring
-# • Resume tailoring
-# • Prioritization & recommendations
-# • Iterative improvement
-
-import os
-import json
 import logging
+import json
 
-from dotenv import load_dotenv
 from pathlib import Path
 from typing import Dict, Any, Optional
 from pydantic import ValidationError
 from openai import OpenAI
 
-from agents import SkillProfile, SYSTEM_PROMPT, USER_PROMPT_TEMPLATE, OUTPUT_SCHEMA_INSTRUCTION
-from utils import normalize_list
+from agents import SkillProfile
+#from agents import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE, OUTPUT_SCHEMA_INSTRUCTION
 
-# Load environment variables
-load_dotenv()
+from utils import normalize_list
 
 # Init OpenAI client
 client = OpenAI()
@@ -52,25 +20,16 @@ client = OpenAI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# OpenAI model configuration
-OPENAI_MODEL = os.getenv("OPENAI_MODEL")
-if not OPENAI_MODEL:
-    logger.warning("OPENAI_MODEL not found in environment. OpenAI calls will fail without it.")
-
-# OpenAI API key configuration
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    logger.warning("OPENAI_API_KEY not found in environment. OpenAI calls will fail without it.")
-client.api_key = OPENAI_API_KEY
-
-# Path for the structured skill profile
-MEMORY_PATH = Path("memory/vector_db/skills.json")
-MEMORY_PATH.parent.mkdir(parents=True, exist_ok=True)
-
 class AssessorAgent:
-    def __init__(self, model: str = OPENAI_MODEL, memory_path: Path = MEMORY_PATH):
+    # def __init__(self, model: str = OPENAI_MODEL, memory_path: Path = MEMORY_PATH):
+    def __init__(self, model: str, key: str, memory_path: Path):
         self.model = model
         self.memory_path = memory_path
+        if not model:
+            logger.warning("OPENAI_MODEL not found in environment. OpenAI calls will fail without it.")
+        if not key:
+            logger.warning("OPENAI_API_KEY not found in environment. OpenAI calls will fail without it.")
+        client.api_key = key
 
     def assess(self, input_text: str, name_hint: str = "") -> SkillProfile:
         """
@@ -122,7 +81,8 @@ class AssessorAgent:
         logger.info("Calling LLM...")
 
         response = client.chat.completions.create(
-            model=OPENAI_MODEL,
+            # model=OPENAI_MODEL,
+            model=self.model,
             messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt}

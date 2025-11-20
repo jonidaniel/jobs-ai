@@ -1,13 +1,12 @@
+# ---------- REPORTER AGENT ----------
+
 import os
 import json
 from typing import List, Dict
 
-SCORED_JOB_LISTINGS_DIR = "data/job_listings/scored"
-REPORTS_DIR = "data/reports"
-
 class ReporterAgent:
-    def __init__(self):
-        os.makedirs(REPORTS_DIR, exist_ok=True)
+    def __init__(self, jobs_scored, report_path):
+        os.makedirs(report_path, exist_ok=True)
 
     # -----------------------------
     # Public interface
