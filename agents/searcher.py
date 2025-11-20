@@ -22,8 +22,6 @@
 # • Saved raw job JSON under /data/job_listings/
 # • Metadata about the search (query coverage, failure logs)
 
-
-
 # 1.	Query Generation
 # Uses build_queries(skill_profile) to get a deterministic set of queries.
 # 	2.	Multi-board Support
@@ -35,17 +33,18 @@
 # 	5.	CLI Mode
 # Allows running the agent manually with a skill profile JSON.
 
-from typing import List, Dict
 import os
 import json
 import logging
 
-from utils.query_builder import build_queries
-from utils.scraper_duunitori import fetch_search_results
+from typing import List, Dict
 
+from utils import build_queries
+from utils import fetch_search_results
+
+# Logging configuration
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
 
 class SearcherAgent:
     """
@@ -109,7 +108,6 @@ class SearcherAgent:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(jobs, f, ensure_ascii=False, indent=2)
         logger.info("Saved %d raw jobs to %s", len(jobs), path)
-
 
 # ----------------------------
 # Simple CLI usage
