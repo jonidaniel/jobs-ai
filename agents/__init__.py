@@ -5,3 +5,4 @@ from .schemas.skill_profile import SkillProfile
 from .assessor import AssessorAgent
 from .searcher import SearcherAgent
 from .scorer import ScorerAgent
+from .reporter import ReporterAgent
