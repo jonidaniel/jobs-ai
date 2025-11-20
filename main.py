@@ -5,7 +5,7 @@
 # Author: Joni Mäkinen
 
 # An agentic AI system for end-to-end automated job searching and job application document generation:
-# enter your skills and preferences to the system once and get job recommendations and cover letters continuously.
+# enter your skills and preferences to the system once and get job recommendations and cover letters delivered to you continuously.
 # Checks input resources consistently and updates search queries autonomously.
 
 from agents import (
@@ -13,12 +13,17 @@ from agents import (
     SearcherAgent,
     ScorerAgent,
     ReporterAgent,
-    INPUT_TEXT) # Initial user input (i.e. skill & experience description)
+    )
+
+from config import (
+    USER_INPUT, # Initial skill and experience description of a candidate
+    SKILL_PROFILE_PATH
+    )
 
 def main():
     # 1. Assess candidate
     # Returns a SkillProfile object
-    skill_profile = AssessorAgent().assess(INPUT_TEXT)
+    skill_profile = AssessorAgent().assess(USER_INPUT)
 
     # 2. Search jobs based on assessment
     # Uses skill_profile to form keyword searches
