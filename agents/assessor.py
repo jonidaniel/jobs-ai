@@ -290,7 +290,7 @@ if __name__ == "__main__":
         raise SystemExit(1)
 
     text = Path(args.file).read_text(encoding="utf-8")
-    assessor = SkillAssessor()
+    assessor = AssessorAgent()
     try:
         profile = assessor.assess(text, name_hint=args.name)
     except Exception as e:
