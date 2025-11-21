@@ -1,4 +1,4 @@
-# ---------- SCHEMAS (PYDANTIC) ----------
+# ---------- SCHEMAS ----------
 
 from typing import List
 
@@ -19,6 +19,37 @@ SKILL_ALIAS_MAP = {
     "postgres": "PostgreSQL",
     "sql": "SQL",
 }
+
+# ----- PROMPTING -----
+
+OUTPUT_SCHEMA = """
+The output must be valid JSON matching this schema exactly:
+
+{
+  "name": "",
+  "core_languages": [],
+  "frameworks_and_libraries": [],
+  "tools_and_platforms": [],
+  "agentic_ai_experience": [],
+  "ai_ml_experience": [],
+  "soft_skills": [],
+  "projects_mentioned": [],
+  "experience_level": {
+      "Python": 0,
+      "JavaScript": 0,
+      "Agentic AI": 0,
+      "AI/ML": 0
+  },
+  "job_search_keywords": []
+}
+
+Notes:
+- Include fields even if empty.
+- "experience_level" MUST contain at least: Python, JavaScript, Agentic AI, AI/ML.
+- "projects_mentioned" should be short slugs or titles (no full descriptions).
+- job_search_keywords should be realistic search terms.
+- Values must be normalized, deduplicated, and concise.
+"""
 
 # ----- PYDANTIC -----
 
