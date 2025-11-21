@@ -24,15 +24,10 @@ class AssessorAgent:
     # def __init__(self, model: str = OPENAI_MODEL, memory_path: Path = MEMORY_PATH):
     def __init__(self, model: str, key: str, memory_path: Path):
         self.model = model
+        self.key = key
         self.memory_path = memory_path
-        if not model:
-            logger.warning("OPENAI_MODEL not found in environment. OpenAI calls will fail without it.")
-        if not key:
-            logger.warning("OPENAI_API_KEY not found in environment. OpenAI calls will fail without it.")
-        client = OpenAI()
-        client.api_key = key
 
-    def assess(self, input_text: str, name_hint: str = "") -> SkillProfile:
+    def assess(self, prompt: str, system_prompt: str, name_hint: str = "") -> SkillProfile:
         """
         Assess the candidate's skills.
         
@@ -43,11 +38,11 @@ class AssessorAgent:
         input_text is the input text given by the user
         """
 
-        # Inject the input text into the user prompt template
-        user_prompt = USER_PROMPT_TEMPLATE.format(input_text=input_text, OUTPUT_SCHEMA_INSTRUCTION=OUTPUT_SCHEMA_INSTRUCTION)
+        # # Inject the input text into the user prompt template
+        # user_prompt = USER_PROMPT_TEMPLATE.format(input_text=input_text, OUTPUT_SCHEMA_INSTRUCTION=OUTPUT_SCHEMA_INSTRUCTION)
 
         # Retrieve the raw LLM response
-        raw = self._call_llm(user_prompt)
+        raw = self._call_llm(prompt, system_prompt)
 
         # Extract the JSON substring from the raw response
         json_text = self._extract_json(raw)
@@ -69,15 +64,24 @@ class AssessorAgent:
             profile.name = name_hint
         return profile
 
-    def _call_llm(self, prompt: str, max_tokens: int = 800) -> str:
+    def _call_llm(self, prompt: str, system_prompt: str, max_tokens: int = 800) -> str:
         """
         Call an LLM with the user prompt.
         
         prompt is the user prompt template injected with an input text and an output schema instruction
         """
 
+        if not self.model:
+            logger.warning("OPENAI_MODEL not found in environment. OpenAI calls will fail without it.")
+        if not self.key:
+            logger.warning("OPENAI_API_KEY not found in environment. OpenAI calls will fail without it.")
+        client = OpenAI()
+        client.api_key = self.key
         if not client.api_key:
             raise RuntimeError("OpenAI API key not configured. Set OPENAI_API_KEY env var.")
+
+        # if not client.api_key:
+        #     raise RuntimeError("OpenAI API key not configured. Set OPENAI_API_KEY env var.")
 
         logger.info("Calling LLM...")
 
@@ -85,7 +89,7 @@ class AssessorAgent:
             # model=OPENAI_MODEL,
             model=self.model,
             messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt}
             ],
             temperature=0.2,
