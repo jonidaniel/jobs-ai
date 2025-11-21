@@ -54,12 +54,23 @@ Notes:
 # ----- PYDANTIC -----
 
 class ExperienceLevels(BaseModel):
+    """
+    asd
+
+    Args:
+        BaseModel:
+    """
+
     Python: int = 0
     JavaScript: int = 0
     Agentic_Ai: int = Field(0, alias="Agentic AI")
     AI_ML: int = Field(0, alias="AI/ML")
 
     class Config:
+        """
+        asd
+        """
+
         validate_by_name = True
         json_schema_extra = {
             "example": {
@@ -71,6 +82,13 @@ class ExperienceLevels(BaseModel):
         }
 
 class SkillProfile(BaseModel):
+    """
+    asd
+
+    Args:
+        BaseModel:
+    """
+
     name: str = ""
     core_languages: List[str] = []
     frameworks_and_libraries: List[str] = []
@@ -83,4 +101,8 @@ class SkillProfile(BaseModel):
     job_search_keywords: List[str] = []
 
     class Config:
+        """
+        asd
+        """
+
         validate_by_name = True
