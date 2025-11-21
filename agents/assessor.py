@@ -14,7 +14,8 @@ from utils import normalize_list
 from config.schemas import SkillProfile
 
 # Logging configuration
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
 logger = logging.getLogger(__name__)
 
 class AssessorAgent:

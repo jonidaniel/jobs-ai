@@ -8,8 +8,9 @@ from typing import List, Dict
 from utils import build_queries, fetch_search_results
 
 # Logging configuration
+# logger = logging.getLogger(__name__)
+# logger.setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 class SearcherAgent:
     """

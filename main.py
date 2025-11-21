@@ -9,30 +9,24 @@
 # Checks input resources consistently and updates search queries autonomously.
 
 import os
+import logging
 
 from dotenv import load_dotenv
 
-from agents import (
-    AssessorAgent,
-    SearcherAgent,
-    ScorerAgent,
-    ReporterAgent,
-    )
+from agents import AssessorAgent, SearcherAgent, ScorerAgent,ReporterAgent
 
-from config.paths import (
-    SKILL_PROFILE_PATH,
-    JOB_LISTINGS_RAW_PATH,
-    JOB_LISTINGS_SCORED_PATH,
-    REPORTS_PATH
-    )
+from config.paths import SKILL_PROFILE_PATH, JOB_LISTINGS_RAW_PATH, JOB_LISTINGS_SCORED_PATH, REPORTS_PATH
 from config.prompts import PROMPT, SYSTEM_PROMPT
 from config.settings import JOB_BOARDS, DEEP_MODE
 
-def main():
-    load_dotenv()
-    OPENAI_MODEL = os.getenv("OPENAI_MODEL")
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+logging.basicConfig(level=logging.INFO)
+logging.getLogger(__name__)
 
+load_dotenv()
+OPENAI_MODEL = os.getenv("OPENAI_MODEL")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+def main():
     assessor = AssessorAgent(OPENAI_MODEL, OPENAI_API_KEY, SKILL_PROFILE_PATH)
     searcher = SearcherAgent(JOB_BOARDS, DEEP_MODE)
     scorer = ScorerAgent(JOB_LISTINGS_RAW_PATH, JOB_LISTINGS_SCORED_PATH)
@@ -41,25 +35,25 @@ def main():
     # 1. Assess candidate
     # Returns a SkillProfile object
     skill_profile = assessor.assess(PROMPT, SYSTEM_PROMPT)
-    print("Skill assessment complete")
+    print("\nSkill assessment complete\n")
 
     # 2. Search jobs based on assessment
     # Uses skill_profile to form keyword searches
     # The keyword searches are then used to scrape popular job listing websites
     # Stores acquired job listings as JSON to /data/job_listings/raw/*.json
     searcher.search_jobs(skill_profile.model_dump())
-    print("Searching job listings complete. Listings saved in /data/job_listings/")
+    print("\nSearching job listings complete. Listings saved in /data/job_listings/\n")
 
     # 3. Score the jobs
     # Loads raw job listings JSON from /data/job_listings/raw/*.json
     # Saves scored job listings as JSON to /data/job_listings/scored/*.json
     scorer.score_jobs(skill_profile=skill_profile)
-    print("Scoring jobs complete. Scored jobs saved in /data/job_listings/scored/")
+    print("\nScoring jobs complete. Scored jobs saved in /data/job_listings/scored/\n")
 
     # 4. Write a job listing report
     # Saves the report to /data/reports/job_report.txt
     reporter.generate_report(top_n=10)
-    print("Writing job listing report complete. Report saved to /data/reports/job_report.txt successfully")
+    print("\nWriting job listing report complete. Report saved to /data/reports/job_report.txt successfully\n")
 
 if __name__ == "__main__":
     main()

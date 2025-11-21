@@ -49,8 +49,9 @@ from urllib.parse import quote_plus, urljoin
 from bs4 import BeautifulSoup
 
 # Configure logging
+# logger = logging.getLogger(__name__)
+# logger.setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 BASE_SEARCH_URL = "https://duunitori.fi/tyopaikat/haku/{query_slug}?sivu={page}"
 BASE_HOST = "https://duunitori.fi"
