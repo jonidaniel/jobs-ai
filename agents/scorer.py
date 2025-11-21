@@ -4,15 +4,16 @@ import os
 import json
 
 from typing import List, Dict
+
 from .schemas.skill_profile import SkillProfile
+
 from utils.normalization import normalize_list
 
-# RAW_JOB_LISTINGS_DIR = "data/job_listings/raw"
-# SCORED_JOB_LISTINGS_DIR = "data/job_listings/scored"
-
 class ScorerAgent:
-    def __init__(self, jobs_raw, jobs_scored):
-        os.makedirs(jobs_raw, exist_ok=True)
+    def __init__(self, jobs_raw_path, jobs_scored_path):
+        self.jobs_raw_path = jobs_raw_path
+        self.jobs_scored_path = jobs_scored_path
+        os.makedirs(jobs_raw_path, exist_ok=True)
 
     # -----------------------------
     # Public interface
@@ -32,7 +33,7 @@ class ScorerAgent:
         # Sort by score descending
         scored_jobs.sort(key=lambda x: x["score"], reverse=True)
         self.save_scored_jobs(scored_jobs)
-        print(f"Scored {len(scored_jobs)} jobs and saved to {SCORED_JOB_LISTINGS_DIR}")
+        print(f"Scored {len(scored_jobs)} jobs and saved to {self.jobs_scored_path}")
 
     # -----------------------------
     # Internal helpers
@@ -42,10 +43,10 @@ class ScorerAgent:
         Load all JSON files from RAW_JOB_LISTINGS_DIR and return as a list of jobs.
         """
         jobs = []
-        for f in os.listdir(RAW_JOB_LISTINGS_DIR):
+        for f in os.listdir(self.jobs_raw_path):
             if not f.endswith(".json"):
                 continue
-            path = os.path.join(RAW_JOB_LISTINGS_DIR, f)
+            path = os.path.join(self.jobs_raw_path, f)
             try:
                 with open(path, "r", encoding="utf-8") as file:
                     data = json.load(file)
@@ -107,7 +108,7 @@ class ScorerAgent:
         if not scored_jobs:
             return
         filename = f"scored_jobs.json"
-        path = os.path.join(SCORED_JOB_LISTINGS_DIR, filename)
+        path = os.path.join(self.jobs_scored_path, filename)
         try:
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(scored_jobs, f, ensure_ascii=False, indent=2)
