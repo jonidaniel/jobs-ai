@@ -53,6 +53,86 @@ from config.headers import HEADERS_DUUNITORI
 
 logger = logging.getLogger(__name__)
 
+def fetch_search_results(
+    query: str,
+    max_pages: int = 10,
+    deep: bool = True,
+    session: Optional[requests.Session] = None,
+    headers: Optional[dict] = None,
+    per_page_limit: Optional[int] = None
+    ) -> List[Dict]:
+    """
+    Fetch job listings from Duunitori for the given query.
+
+    Args:
+        query: search query string, e.g. "python developer"
+        max_pages: maximum number of pages to crawl (default 10)
+        deep: if True, fetch each job's detail page to extract the full description
+        session: requests.Session to reuse connections (recommended)
+        headers: optional headers override
+        per_page_limit: optional cap on total listings (stops when reached)
+
+    Returns:
+        results: List of normalized job dictionaries.
+    """
+
+    if session is None:
+        session = requests.Session()
+    session.headers.update(headers or HEADERS_DUUNITORI)
+
+    query_slug = slugify_query(query)
+    results = []
+    total_fetched = 0
+
+    for page in range(1, max_pages + 1):
+        search_url = SEARCH_URL_BASE.format(query_slug=query_slug, page=page)
+        logger.info(" Fetching Duunitori search page: %s", search_url)
+        resp = safe_get(session, search_url)
+        if not resp:
+            logger.warning(" Failed to fetch search page %s — stopping.", search_url)
+            break
+        if resp.status_code != 200:
+            logger.warning(" Non-200 status (%s) for %s — stopping.", resp.status_code, search_url)
+            break
+
+        soup = BeautifulSoup(resp.text, "html.parser")
+        # find all job cards; multiple fallbacks
+        cards = soup.select(".job-box, .job-list-item, .search-result__item, .job-card")
+        if not cards:
+            # No results on this page — likely end
+            logger.info(" No job cards found on page %s for query '%s' — stopping pagination.", page, query)
+            break
+
+        for card in cards:
+            job = parse_job_card(card)
+            # If deep mode, and we have a URL, fetch full description
+            if deep and job.get("url"):
+                try:
+                    detail = fetch_job_detail(session, job["url"])
+                    if detail:
+                        job["full_description"] = detail
+                except Exception as e:
+                    logger.warning(" Error fetching detail for %s: %s", job.get("url"), e)
+                    job["full_description"] = ""
+            else:
+                job["full_description"] = ""
+
+            # Metadata enrichment
+            job["query_used"] = query
+            results.append(job)
+            total_fetched += 1
+
+            if per_page_limit and total_fetched >= per_page_limit:
+                logger.info(" Reached per_page_limit (%s). Stopping.", per_page_limit)
+                return results
+
+        # polite delay to avoid hammering the site
+        time.sleep(0.8)
+
+    logger.info(" Fetched %s listings for query '%s'", len(results), query)
+
+    return results
+
 def slugify_query(query: str) -> str:
     """
     Convert "python developer" -> "python-developer"
@@ -206,83 +286,3 @@ def fetch_job_detail(session: requests.Session, job_url: str, retries: int = 2) 
             return text
     # fallback to concatenation
     return " ".join(c.get_text(" ", strip=True) for c in desc_candidates)
-
-def fetch_search_results(
-    query: str,
-    max_pages: int = 10,
-    deep: bool = True,
-    session: Optional[requests.Session] = None,
-    headers: Optional[dict] = None,
-    per_page_limit: Optional[int] = None
-    ) -> List[Dict]:
-    """
-    Fetch job listings from Duunitori for the given query.
-
-    Args:
-        query: search query string, e.g. "python developer"
-        max_pages: maximum number of pages to crawl (default 10)
-        deep: if True, fetch each job's detail page to extract the full description
-        session: requests.Session to reuse connections (recommended)
-        headers: optional headers override
-        per_page_limit: optional cap on total listings (stops when reached)
-
-    Returns:
-        results: List of normalized job dictionaries.
-    """
-
-    if session is None:
-        session = requests.Session()
-    session.headers.update(headers or HEADERS_DUUNITORI)
-
-    query_slug = slugify_query(query)
-    results = []
-    total_fetched = 0
-
-    for page in range(1, max_pages + 1):
-        search_url = SEARCH_URL_BASE.format(query_slug=query_slug, page=page)
-        logger.info(" Fetching Duunitori search page: %s", search_url)
-        resp = safe_get(session, search_url)
-        if not resp:
-            logger.warning(" Failed to fetch search page %s — stopping.", search_url)
-            break
-        if resp.status_code != 200:
-            logger.warning(" Non-200 status (%s) for %s — stopping.", resp.status_code, search_url)
-            break
-
-        soup = BeautifulSoup(resp.text, "html.parser")
-        # find all job cards; multiple fallbacks
-        cards = soup.select(".job-box, .job-list-item, .search-result__item, .job-card")
-        if not cards:
-            # No results on this page — likely end
-            logger.info(" No job cards found on page %s for query '%s' — stopping pagination.", page, query)
-            break
-
-        for card in cards:
-            job = parse_job_card(card)
-            # If deep mode, and we have a URL, fetch full description
-            if deep and job.get("url"):
-                try:
-                    detail = fetch_job_detail(session, job["url"])
-                    if detail:
-                        job["full_description"] = detail
-                except Exception as e:
-                    logger.warning(" Error fetching detail for %s: %s", job.get("url"), e)
-                    job["full_description"] = ""
-            else:
-                job["full_description"] = ""
-
-            # Metadata enrichment
-            job["query_used"] = query
-            results.append(job)
-            total_fetched += 1
-
-            if per_page_limit and total_fetched >= per_page_limit:
-                logger.info(" Reached per_page_limit (%s). Stopping.", per_page_limit)
-                return results
-
-        # polite delay to avoid hammering the site
-        time.sleep(0.8)
-
-    logger.info(" Fetched %s listings for query '%s'", len(results), query)
-
-    return results
