@@ -2,11 +2,6 @@ import os
 
 from pathlib import Path
 
-# ---------- ENV VARS ----------
-
-OPENAI_MODEL = os.getenv("OPENAI_MODEL")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
 # ---------- SETTINGS ----------
 
 JOB_BOARDS = ["duunitori"]
@@ -104,11 +99,14 @@ Also generate job search keywords based on the overall profile.
 
 INPUT TEXT:
 \"\"\"
-{USER_PROMPT}
+{user_prompt}
 \"\"\"
 
 Now produce a structured skill profile following the JSON schema provided below.
 \"\"\"
-{OUTPUT_SCHEMA}
+{output_schema}
 \"\"\"
 """
+
+# Inject user prompt and output schema into the user prompt base
+PROMPT = USER_PROMPT_BASE.format(user_prompt=USER_PROMPT, output_schema=OUTPUT_SCHEMA)
