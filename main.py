@@ -20,7 +20,6 @@ from config.prompts import PROMPT, SYSTEM_PROMPT
 from config.settings import JOB_BOARDS, DEEP_MODE
 
 logging.basicConfig(level=logging.INFO)
-logging.getLogger(__name__)
 
 load_dotenv()
 OPENAI_MODEL = os.getenv("OPENAI_MODEL")
@@ -35,25 +34,21 @@ def main():
     # 1. Assess candidate
     # Returns a SkillProfile object
     skill_profile = assessor.assess(PROMPT, SYSTEM_PROMPT)
-    print("\nSkill assessment complete\n")
 
     # 2. Search jobs based on assessment
     # Uses skill_profile to form keyword searches
     # The keyword searches are then used to scrape popular job listing websites
     # Stores acquired job listings as JSON to /data/job_listings/raw/*.json
     searcher.search_jobs(skill_profile.model_dump())
-    print("\nSearching job listings complete. Listings saved in /data/job_listings/\n")
 
     # 3. Score the jobs
     # Loads raw job listings JSON from /data/job_listings/raw/*.json
     # Saves scored job listings as JSON to /data/job_listings/scored/*.json
     scorer.score_jobs(skill_profile=skill_profile)
-    print("\nScoring jobs complete. Scored jobs saved in /data/job_listings/scored/\n")
 
     # 4. Write a job listing report
     # Saves the report to /data/reports/job_report.txt
     reporter.generate_report(top_n=10)
-    print("\nWriting job listing report complete. Report saved to /data/reports/job_report.txt successfully\n")
 
 if __name__ == "__main__":
     main()
