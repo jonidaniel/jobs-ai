@@ -4,6 +4,24 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
+# ----- MAPPING -----
+
+SKILL_ALIAS_MAP = {
+    "py": "Python",
+    "python3": "Python",
+    "python": "Python",
+    "js": "JavaScript",
+    "node": "Node.js",
+    "nodejs": "Node.js",
+    "reactjs": "React",
+    "fastapi": "FastAPI",
+    "flask": "Flask",
+    "postgres": "PostgreSQL",
+    "sql": "SQL",
+}
+
+# ----- PYDANTIC -----
+
 class ExperienceLevels(BaseModel):
     Python: int = 0
     JavaScript: int = 0
