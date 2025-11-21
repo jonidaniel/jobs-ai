@@ -47,3 +47,11 @@
 - Did more tests on the query builder
 
 - Started to develop the Scorer agent
+
+### 2025/11/20
+
+- Finished the scorer agent
+
+- Started to develop the Reporter agent
+
+- Optimized/refactored the current workflow
