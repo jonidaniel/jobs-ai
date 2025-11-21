@@ -58,18 +58,42 @@ def slugify_query(query: str) -> str:
     Convert "python developer" -> "python-developer"
 
     Also encode special characters safely.
+
+    Args:
+        query:
+
+    Returns:
+        quote_plus(q, safe="-"):
     """
 
     if not query:
         return ""
     # Replace whitespace with hyphens and remove unsafe chars
     q = re.sub(r"\s+", "-", query.strip().lower())
+
     # percent-encode remaining unsafe chars for URL path
     return quote_plus(q, safe="-")
 
-def safe_get(session: requests.Session, url: str, retries: int = 3, backoff: float = 1.0, timeout: float = 10.0) -> Optional[requests.Response]:
+def safe_get(
+    session: requests.Session,
+    url: str,
+    retries: int = 3,
+    backoff: float = 1.0,
+    timeout: float = 10.0
+    ) -> Optional[requests.Response]:
     """
     asd
+
+    Args:
+        session:
+        url:
+        retries:
+        backoff:
+        timeout:
+
+    Returns:
+        resp:
+        None
     """
 
     for attempt in range(1, retries + 1):
@@ -93,6 +117,20 @@ def parse_job_card(card: BeautifulSoup) -> Dict:
     Parse a search-result job card into a partial job dict.
 
     Defensive parsing: returns empty strings for missing fields.
+
+    Args:
+        card:
+
+    Returns:
+        {
+          "title": title,
+          "company": company,
+          "location": location,
+          "url": full_url,
+          "description_snippet": snippet,
+          "published_date": published,
+          "source": "duunitori"
+        }:
     """
 
     # Title and link
@@ -137,7 +175,8 @@ def fetch_job_detail(session: requests.Session, job_url: str, retries: int = 2) 
         retries: asd
 
     Returns:
-        An empty string on failure.
+        best:
+        "": An empty string on failure.
     """
 
     resp = safe_get(session, job_url, retries=retries)
@@ -188,7 +227,7 @@ def fetch_search_results(
         per_page_limit: optional cap on total listings (stops when reached)
 
     Returns:
-        List of normalized job dictionaries.
+        results: List of normalized job dictionaries.
     """
 
     if session is None:
@@ -245,4 +284,5 @@ def fetch_search_results(
         time.sleep(0.8)
 
     logger.info(" Fetched %s listings for query '%s'", len(results), query)
+
     return results

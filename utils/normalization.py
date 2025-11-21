@@ -5,6 +5,17 @@ from typing import List
 from config.schemas import SKILL_ALIAS_MAP
 
 def normalize_token(tok: str) -> str:
+    """
+    asd
+
+    Args:
+        tok:
+
+    Returns:
+        t:
+        t.capitalize():
+    """
+
     t = tok.strip()
     if not t:
         return t
@@ -17,6 +28,16 @@ def normalize_token(tok: str) -> str:
     return t if any(c.isupper() for c in t) else t.capitalize()
 
 def normalize_list(items: List[str]) -> List[str]:
+    """
+    asd
+
+    Args:
+        items:
+
+    Returns:
+        normalized:
+    """
+
     normalized = []
     seen = set()
     for it in items:
@@ -26,4 +47,5 @@ def normalize_list(items: List[str]) -> List[str]:
         if val and val not in seen:
             normalized.append(val)
             seen.add(val)
+
     return normalized

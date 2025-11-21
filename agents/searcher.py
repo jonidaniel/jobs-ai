@@ -21,6 +21,15 @@ class SearcherAgent:
     """
 
     def __init__(self, job_boards: List[str], deep_mode: bool, jobs_raw_path: str):
+        """
+        asd
+
+        Args:
+            job_boards:
+            deep_mode:
+            jobs_raw_path:
+        """
+
         self.job_boards = job_boards
         self.deep_mode = deep_mode
         self.jobs_raw_path = jobs_raw_path
@@ -31,7 +40,12 @@ class SearcherAgent:
     def search_jobs(self, skill_profile: dict) -> List[Dict]:
         """
         Run searches on all job boards using queries from the skill profile.
-        Returns a deduplicated list of jobs.
+
+        Args:
+            skill_profile:
+
+        Returns:
+            self._deduplicate_jobs(all_jobs): a deduplicated list of jobs.
         """
 
         logger.info(" WEB SCRAPING STARTING...\n")
@@ -60,6 +74,16 @@ class SearcherAgent:
     # ------------------------------
 
     def _deduplicate_jobs(self, jobs: List[Dict]) -> List[Dict]:
+        """
+        asd
+
+        Args:
+            jobs:
+
+        Returns:
+            deduped:
+        """
+
         seen_urls = set()
         deduped = []
         for job in jobs:
@@ -70,6 +94,15 @@ class SearcherAgent:
         return deduped
 
     def _save_raw_jobs(self, jobs: List[Dict], board: str, query: str):
+        """
+        asd
+
+        Args:
+            jobs:
+            board:
+            query:
+        """
+
         if not jobs:
             return
         safe_query = query.replace(" ", "_").replace("/", "_")

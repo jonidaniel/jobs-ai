@@ -3,28 +3,6 @@
 # Input: The skill profile JSON
 # Output: A priority-ordered list of job search queries, that's been deduplicated and normalized
 
-# PSEUDO-RULES:
-
-# For each language:
-#     add "<language> developer"
-#     add "junior <language> developer"
-#     add "<language> engineer"
-
-# For each agentic ai framework (e.g., LangChain):
-#     add "<framework>"
-#     add "<framework> developer"
-
-# If AI/ML skills present:
-#     add "ai engineer"
-#     add "junior ai engineer"
-#     add "machine learning engineer" (optional)
-
-# Always add:
-#     "junior software developer"
-#     "junior full stack developer"
-#     "entry level developer"
-#     "llm engineer" (since you’re agentic AI focused)
-
 def build_queries(skill_profile: dict) -> list[str]:
     """
     Build deterministic job search queries from a structured skill profile.
@@ -33,6 +11,9 @@ def build_queries(skill_profile: dict) -> list[str]:
 
     Args:
         skill_profile: asd
+
+    Returns:
+        sorted(queries):
     """
 
     queries = set()

@@ -16,7 +16,20 @@ from config.schemas import SkillProfile
 logger = logging.getLogger(__name__)
 
 class AssessorAgent:
+    """
+    asd
+    """
+
     def __init__(self, model: str, key: str, profile_path: Path):
+        """
+        asd
+
+        Args:
+            model:
+            key:
+            profile_path:
+        """
+
         self.model = model
         self.key = key
         self.profile_path = profile_path
@@ -33,6 +46,14 @@ class AssessorAgent:
         Return a SkillProfile that's filled with the skills JSON.
 
         input_text is the input text given by the user
+
+        Args:
+            prompt:
+            system_prompt:
+            name_hint:
+
+        Returns:
+            profile:
         """
 
         # Retrieve the raw LLM response
@@ -71,6 +92,14 @@ class AssessorAgent:
         Call an LLM with the user prompt.
         
         prompt is the user prompt template injected with an input text and an output schema instruction
+
+        Args:
+            prompt:
+            system_prompt:
+            max_tokens:
+
+        Returns:
+            text:
         """
 
         if not self.model:
@@ -104,6 +133,13 @@ class AssessorAgent:
         Extract the JSON substring from the raw LLM response.
         
         text is the raw LLM response
+
+        Args:
+            text:
+
+        Returns:
+            text:
+            None
         """
 
         # Find where the JSON starts
@@ -134,6 +170,12 @@ class AssessorAgent:
         Normalize the parsed JSON.
         
         parsed is the parsed skills JSON
+
+        Args:
+            parsed:
+
+        Returns:
+            parsed:
         """
 
         keys = [
@@ -176,6 +218,13 @@ class AssessorAgent:
         Merge new_profile into existing profile (union lists, max experience levels).
         
         new_profile is the new skill profile
+
+        Args:
+            new_profile:
+
+        Returns:
+            new_profile:
+            merged_profile:
         """
 
         existing = self.load_existing()
@@ -204,8 +253,9 @@ class AssessorAgent:
     def save(self, profile: SkillProfile):
         """
         Save the skills JSON to the vector database.
-        
-        profile is the merged skill profile
+
+        Args:
+            profile: the merged skill profile
         """
 
         # Write JSON to memory path
@@ -219,8 +269,9 @@ class AssessorAgent:
         """
         Load existing SkillProfile.
 
-        Return None if skills.json is corrupt
-        Return the existing skill profile if skills.json is intact
+        Returns:
+            SkillProfile(**data): the existing skill profile if skills.json is intact
+            None: if skills.json is corrupt
         """
 
         if not self.profile_path.exists():

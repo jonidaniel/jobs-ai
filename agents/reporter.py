@@ -8,7 +8,19 @@ from typing import List, Dict
 logger = logging.getLogger(__name__)
 
 class ReporterAgent:
+    """
+    asd
+    """
+
     def __init__(self, jobs_scored_path: str, reports_path: str):
+        """
+        asd
+
+        Args:
+            jobs_scored_path:
+            reports_path:
+        """
+
         self.jobs_scored_path = jobs_scored_path
         self.reports_path = reports_path
 
@@ -19,6 +31,9 @@ class ReporterAgent:
         """
         Load scored jobs, generate a summary report (text),
         save it to REPORTS_DIR, and return the report text.
+
+        Args:
+            top_n:
         """
 
         logger.info(" WRITING JOB LISTINGS REPORT STARTING...")
@@ -70,7 +85,12 @@ class ReporterAgent:
     def load_scored_jobs(self) -> List[Dict]:
         """
         Load scored jobs JSON from SCORED_JOB_LISTINGS_DIR.
+
+        Returns:
+            []:
+            data:
         """
+
         path = os.path.join(self.jobs_scored_path, "scored_jobs.json")
         if not os.path.exists(path):
             return []
