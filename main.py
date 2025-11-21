@@ -28,6 +28,10 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 def main():
+    """
+    asd
+    """
+
     assessor = AssessorAgent(OPENAI_MODEL, OPENAI_API_KEY, SKILL_PROFILE_PATH)
     searcher = SearcherAgent(JOB_BOARDS, DEEP_MODE, JOB_LISTINGS_RAW_PATH)
     scorer = ScorerAgent(JOB_LISTINGS_RAW_PATH, JOB_LISTINGS_SCORED_PATH)
