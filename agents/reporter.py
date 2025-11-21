@@ -2,11 +2,14 @@
 
 import os
 import json
+
 from typing import List, Dict
 
 class ReporterAgent:
-    def __init__(self, jobs_scored, report_path):
-        os.makedirs(report_path, exist_ok=True)
+    def __init__(self, jobs_scored_path: str, reports_path: str):
+        self.jobs_scored_path = jobs_scored_path
+        self.reports_path = reports_path
+        os.makedirs(reports_path, exist_ok=True)
 
     # -----------------------------
     # Public interface
@@ -49,7 +52,7 @@ class ReporterAgent:
 
         # Save report to file
         filename = f"job_report.txt"
-        path = os.path.join(REPORTS_DIR, filename)
+        path = os.path.join(self.reports_path, filename)
         try:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(report_text)
@@ -66,7 +69,7 @@ class ReporterAgent:
         """
         Load scored jobs JSON from SCORED_JOB_LISTINGS_DIR.
         """
-        path = os.path.join(SCORED_JOB_LISTINGS_DIR, "scored_jobs.json")
+        path = os.path.join(self.jobs_scored_path, "scored_jobs.json")
         if not os.path.exists(path):
             return []
 
