@@ -11,7 +11,6 @@ class ReporterAgent:
     def __init__(self, jobs_scored_path: str, reports_path: str):
         self.jobs_scored_path = jobs_scored_path
         self.reports_path = reports_path
-        os.makedirs(reports_path, exist_ok=True)
 
     # ------------------------------
     # Public interface

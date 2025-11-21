@@ -12,10 +12,9 @@ from config.schemas import SkillProfile
 logger = logging.getLogger(__name__)
 
 class ScorerAgent:
-    def __init__(self, jobs_raw_path, jobs_scored_path):
+    def __init__(self, jobs_raw_path: str, jobs_scored_path: str):
         self.jobs_raw_path = jobs_raw_path
         self.jobs_scored_path = jobs_scored_path
-        os.makedirs(jobs_raw_path, exist_ok=True)
 
     # ------------------------------
     # Public interface

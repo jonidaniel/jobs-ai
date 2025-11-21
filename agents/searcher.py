@@ -20,11 +20,10 @@ class SearcherAgent:
     4. Save raw JSON for inspection
     """
 
-    def __init__(self, job_boards: List[str] = None, deep: bool = True, save_path: str = "data/job_listings/raw"):
-        self.job_boards = job_boards or ["duunitori"]
-        self.deep = deep
-        self.save_path = save_path
-        os.makedirs(self.save_path, exist_ok=True)
+    def __init__(self, job_boards: List[str], deep_mode: bool, jobs_raw_path: str):
+        self.job_boards = job_boards
+        self.deep_mode = deep_mode
+        self.jobs_raw_path = jobs_raw_path
 
     # ------------------------------
     # Public interface
@@ -44,7 +43,7 @@ class SearcherAgent:
             for board in self.job_boards:
                 logger.info(" Searching %s for query '%s'", board, query)
                 if board.lower() == "duunitori":
-                    jobs = fetch_search_results(query, deep=self.deep)
+                    jobs = fetch_search_results(query, deep=self.deep_mode)
                 else:
                     # Placeholder for other boards
                     jobs = []
@@ -75,7 +74,7 @@ class SearcherAgent:
             return
         safe_query = query.replace(" ", "_").replace("/", "_")
         filename = f"{board}_{safe_query}.json"
-        path = os.path.join(self.save_path, filename)
+        path = os.path.join(self.jobs_raw_path, filename)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(jobs, f, ensure_ascii=False, indent=2)
         logger.info(" Saved %d raw jobs to /%s\n", len(jobs), path)

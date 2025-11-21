@@ -16,10 +16,10 @@ from config.schemas import SkillProfile
 logger = logging.getLogger(__name__)
 
 class AssessorAgent:
-    def __init__(self, model: str, key: str, memory_path: Path):
+    def __init__(self, model: str, key: str, profile_path: Path):
         self.model = model
         self.key = key
-        self.memory_path = memory_path
+        self.profile_path = profile_path
 
     # ------------------------------
     # Public interface
@@ -210,10 +210,10 @@ class AssessorAgent:
 
         # Write JSON to memory path
         out = json.loads(profile.model_dump_json(by_alias=True))
-        with open(self.memory_path, "w", encoding="utf-8") as f:
+        with open(self.profile_path, "w", encoding="utf-8") as f:
             json.dump(out, f, ensure_ascii=False, indent=2)
 
-        logger.info(" Saved skill profile to %s", self.memory_path)
+        logger.info(" Saved skill profile to %s", self.profile_path)
 
     def load_existing(self) -> Optional[SkillProfile]:
         """
@@ -223,11 +223,11 @@ class AssessorAgent:
         Return the existing skill profile if skills.json is intact
         """
 
-        if not self.memory_path.exists():
+        if not self.profile_path.exists():
             return None
 
         # Open memory/vector_db/skills.json
-        with open(self.memory_path, "r", encoding="utf-8") as f:
+        with open(self.profile_path, "r", encoding="utf-8") as f:
             try:
                 # Read the JSON file and turn it into a dictionary
                 data = json.load(f)
