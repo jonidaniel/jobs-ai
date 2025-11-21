@@ -34,23 +34,20 @@
 # Published date:   <time datetime="...">
 
 # Notes / Suggestions
-# 	•	The scraper is intentionally defensive: Duunitori’s HTML may change; the parser uses several fallback selectors. If you see missed fields, inspect live HTML and tweak selectors.
-# 	•	Deep mode causes one extra HTTP request per listing — plan API call rate/intervals accordingly.
-# 	•	If you plan to run many queries frequently, add a persistent cache layer (disk/db) and respect robots.txt and Duunitori’s terms of service.
-# 	•	You can easily switch to light mode by calling fetch_search_results(..., deep=False).
+# The scraper is intentionally defensive: Duunitori’s HTML may change; the parser uses several fallback selectors. If you see missed fields, inspect live HTML and tweak selectors.
+# Deep mode causes one extra HTTP request per listing — plan API call rate/intervals accordingly.
+# If you plan to run many queries frequently, add a persistent cache layer (disk/db) and respect robots.txt and Duunitori’s terms of service.
+# You can easily switch to light mode by calling fetch_search_results(..., deep=False).
 
 import time
 import logging
 import requests
 import re
-
 from typing import List, Dict, Optional
 from urllib.parse import quote_plus, urljoin
+
 from bs4 import BeautifulSoup
 
-# Configure logging
-# logger = logging.getLogger(__name__)
-# logger.setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
 BASE_SEARCH_URL = "https://duunitori.fi/tyopaikat/haku/{query_slug}?sivu={page}"
@@ -260,8 +257,3 @@ def fetch_search_results(
 
     logger.info("Fetched %s listings for query '%s'", len(results), query)
     return results
-
-# Example usage (run inside uv-managed REPL):
-# from utils.scraper_duunitori import fetch_search_results
-# listings = fetch_search_results("python developer", max_pages=3, deep=True)
-# print(len(listings))
