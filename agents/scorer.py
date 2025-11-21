@@ -38,7 +38,7 @@ class ScorerAgent:
         scored_jobs.sort(key=lambda x: x["score"], reverse=True)
         self.save_scored_jobs(scored_jobs)
 
-        logger.info(f" SCORING JOBS COMPLETED: Scored {len(scored_jobs)} jobs and saved them to /{self.jobs_scored_path}\n")
+        logger.info(f" SCORING JOBS COMPLETED: Scored {len(scored_jobs)} jobs and saved them to /{self.jobs_scored_path}/\n")
 
     # ------------------------------
     # Internal functions
