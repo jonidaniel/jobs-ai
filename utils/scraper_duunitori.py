@@ -55,10 +55,9 @@ logger = logging.getLogger(__name__)
 
 def fetch_search_results(
     query: str,
-    max_pages: int = 10,
-    deep: bool = True,
+    num_pages: int = 10,
+    deep_mode: bool = True,
     session: Optional[requests.Session] = None,
-    headers: Optional[dict] = None,
     per_page_limit: Optional[int] = None
     ) -> List[Dict]:
     """
@@ -66,50 +65,75 @@ def fetch_search_results(
 
     Args:
         query: search query string, e.g. "python developer"
-        max_pages: maximum number of pages to crawl (default 10)
-        deep: if True, fetch each job's detail page to extract the full description
+        num_pages: number of pages to crawl
+        deep_mode: if True, fetch each job's detail page to extract the full description
         session: requests.Session to reuse connections (recommended)
-        headers: optional headers override
         per_page_limit: optional cap on total listings (stops when reached)
 
     Returns:
-        results: List of normalized job dictionaries.
+        results: list of normalized job dictionaries
     """
 
     if session is None:
+        # Create HTTP session
         session = requests.Session()
-    session.headers.update(headers or HEADERS_DUUNITORI)
+    # Update default headers
+    session.headers.update(HEADERS_DUUNITORI)
 
+    # Make query URL compliant
     query_slug = slugify_query(query)
+
     results = []
     total_fetched = 0
 
-    for page in range(1, max_pages + 1):
+    # Iterate 10 times (by default)
+    for page in range(1, num_pages + 1):
+        # Inject URL with slugified query and page number
         search_url = SEARCH_URL_BASE.format(query_slug=query_slug, page=page)
+
         logger.info(" Fetching Duunitori search page: %s", search_url)
-        resp = safe_get(session, search_url)
-        if not resp:
-            logger.warning(" Failed to fetch search page %s — stopping.", search_url)
+
+        # Get response safely
+        response = safe_get(session, search_url)
+
+        if not response:
+            logger.warning(" Failed to fetch search page %s — stopping", search_url)
             break
-        if resp.status_code != 200:
-            logger.warning(" Non-200 status (%s) for %s — stopping.", resp.status_code, search_url)
+        if response.status_code != 200:
+            logger.warning(" Non-200 status (%s) for %s — stopping", response.status_code, search_url)
             break
 
-        soup = BeautifulSoup(resp.text, "html.parser")
-        # find all job cards; multiple fallbacks
+        # Parse the HTML text with a HTML parser
+        soup = BeautifulSoup(response.text, "html.parser")
+        # Select CSS classes (here: job cards)
         cards = soup.select(".job-box, .job-list-item, .search-result__item, .job-card")
+
+        # If no results on current page
         if not cards:
-            # No results on this page — likely end
-            logger.info(" No job cards found on page %s for query '%s' — stopping pagination.", page, query)
+            logger.info(" No job cards found on page %s for query '%s' — stopping pagination", page, query)
             break
 
+        # Iterate over job cards
         for card in cards:
+            # Parse job card to a dictionary:
+            # {
+            # "title": title,
+            # "company": company,
+            # "location": location,
+            # "url": full_url,
+            # "description_snippet": snippet,
+            # "published_date": published,
+            # "source": "duunitori"
+            # }
             job = parse_job_card(card)
-            # If deep mode, and we have a URL, fetch full description
-            if deep and job.get("url"):
+
+            # If deep mode, and we have a URL
+            if deep_mode and job.get("url"):
                 try:
+                    # Fetch full job description
                     detail = fetch_job_detail(session, job["url"])
                     if detail:
+                        # Save the full job description under its own key
                         job["full_description"] = detail
                 except Exception as e:
                     logger.warning(" Error fetching detail for %s: %s", job.get("url"), e)
@@ -126,7 +150,7 @@ def fetch_search_results(
                 logger.info(" Reached per_page_limit (%s). Stopping.", per_page_limit)
                 return results
 
-        # polite delay to avoid hammering the site
+        # Add delay to avoid hammering the website
         time.sleep(0.8)
 
     logger.info(" Fetched %s listings for query '%s'", len(results), query)
@@ -135,24 +159,25 @@ def fetch_search_results(
 
 def slugify_query(query: str) -> str:
     """
-    Convert "python developer" -> "python-developer"
+    Make query URL compliant (e.g. turn 'python developer' into 'python-developer').
 
     Also encode special characters safely.
 
     Args:
-        query:
+        query: query to be slugified
 
     Returns:
-        quote_plus(q, safe="-"):
+        "": if there wasn't a query
+        quote_plus(q, safe="-"): URL compliant query
     """
 
     if not query:
         return ""
+
     # Replace whitespace with hyphens and remove unsafe chars
     q = re.sub(r"\s+", "-", query.strip().lower())
 
-    # percent-encode remaining unsafe chars for URL path
-    return quote_plus(q, safe="-")
+    return quote_plus(q, safe="-") # Percent-encode remaining unsafe chars
 
 def safe_get(
     session: requests.Session,
@@ -165,25 +190,30 @@ def safe_get(
     asd
 
     Args:
-        session:
-        url:
-        retries:
+        session: current HTTP session
+        url: search URL
+        retries: number of search retries
         backoff:
-        timeout:
+        timeout: time to timeout
 
     Returns:
         resp:
-        None
+        None: 
     """
 
+    # Iterate 3 times (by default)
     for attempt in range(1, retries + 1):
+        # Try to get response
         try:
             resp = session.get(url, timeout=timeout)
+            # If OK, return response
             if resp.status_code == 200:
                 return resp
+            # If 'too many requests' or 'unavailable', wait a bit and continue
             elif resp.status_code in (429, 503):
-                logger.warning(" Rate-limited or service unavailable (status %s) for %s. Backing off.", resp.status_code, url)
+                logger.warning(" Rate-limited or service unavailable (status %s) for %s. Backing off", resp.status_code, url)
                 time.sleep(backoff * attempt)
+            # If error, return response
             else:
                 logger.debug(" Non-200 status %s for %s", resp.status_code, url)
                 return resp  # return to allow caller to handle non-200
@@ -194,12 +224,12 @@ def safe_get(
 
 def parse_job_card(card: BeautifulSoup) -> Dict:
     """
-    Parse a search-result job card into a partial job dict.
+    Parse a search-result job card into a partial job dict
 
-    Defensive parsing: returns empty strings for missing fields.
+    Defensive parsing: returns empty strings for missing fields
 
     Args:
-        card:
+        card: job card
 
     Returns:
         {
@@ -250,39 +280,53 @@ def fetch_job_detail(session: requests.Session, job_url: str, retries: int = 2) 
     Fetch the job detail page and attempt to extract the full job description text.
 
     Args:
-        session: asd
-        job_url: asd
-        retries: asd
+        session: current HTTP session
+        job_url: current job URL
+        retries: number of retries to fetch job detail
 
     Returns:
-        best:
-        "": An empty string on failure.
+        best_guess: best guess for full description div
+        "": empty string on failure
     """
 
-    resp = safe_get(session, job_url, retries=retries)
-    if not resp or resp.status_code != 200:
-        logger.debug(" Failed to fetch job detail: %s (status=%s)", job_url, getattr(resp, "status_code", None))
+    # Get response safely
+    response = safe_get(session, job_url, retries=retries)
+
+    if not response or response.status_code != 200:
+        logger.debug(" Failed to fetch job detail: %s (status=%s)", job_url, getattr(response, "status_code", None))
         return ""
 
-    soup = BeautifulSoup(resp.text, "html.parser")
-    # Look for the main description container
-    desc_candidates = soup.select(".job-body, .job__description, .job-description, .job-detail__content, .advert-content")
-    if not desc_candidates:
-        # fallback: find largest textual div inside the page
-        divs = soup.find_all("div")
-        best = ""
-        max_len = 0
-        for d in divs:
-            txt = d.get_text(" ", strip=True)
-            if len(txt) > max_len:
-                max_len = len(txt)
-                best = txt
-        return best or ""
+    # Parse the HTML text with a HTML parser
+    soup = BeautifulSoup(response.text, "html.parser")
 
-    # prefer the first candidate with enough text
+    # Look for the main description container by guessing class names
+    desc_candidates = soup.select(".job-body, .job__description, .job-description, .job-detail__content, .advert-content")
+
+    # If no class was found, go to fallback
+    if not desc_candidates:
+        # Get all divs
+        divs = soup.find_all("div")
+
+        best_guess = ""
+        longest = 0
+
+        # Iterate over all divs on webpage
+        for div in divs:
+            # Extract all text
+            txt = div.get_text(" ", strip=True) # If child nodes, use space as separator, also strip trailing whitespace
+            # Find longest textual div
+            if len(txt) > longest:
+                longest = len(txt)
+                best_guess = txt
+
+        # return best_guess or ""
+        return best_guess
+
+    # Prefer the first candidate with enough text
     for cand in desc_candidates:
         text = cand.get_text(" ", strip=True)
         if len(text) > 50:
             return text
-    # fallback to concatenation
+
+    # Fallback to concatenation
     return " ".join(c.get_text(" ", strip=True) for c in desc_candidates)

@@ -54,16 +54,17 @@ class SearcherAgent:
         queries = build_queries(skill_profile)
 
         for query in queries:
-            for board in self.job_boards:
-                logger.info(" Searching %s for query '%s'", board, query)
-                if board.lower() == "duunitori":
-                    jobs = fetch_search_results(query, deep=self.deep_mode)
+            # Iterate over all job boards defined in /config/settings.py
+            for job_board in self.job_boards:
+                logger.info(" Searching %s for query '%s'", job_board, query)
+                if job_board.lower() == "duunitori":
+                    jobs = fetch_search_results(query, deep_mode=self.deep_mode)
                 else:
                     # Placeholder for other boards
                     jobs = []
 
                 all_jobs.extend(jobs)
-                self._save_raw_jobs(jobs, board, query)
+                self._save_raw_jobs(jobs, job_board, query)
 
         logger.info(" WEB SCRAPING COMPLETED\n")
 
