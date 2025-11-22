@@ -111,7 +111,7 @@ class SearcherAgent:
         if not jobs:
             return
         safe_query = query.replace(" ", "_").replace("/", "_")
-        filename = f"{board}_{safe_query}.json"
+        filename = f"{board.lower()}_{safe_query}.json"
         path = os.path.join(self.jobs_raw_path, filename)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(jobs, f, ensure_ascii=False, indent=2)
