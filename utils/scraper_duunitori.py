@@ -6,21 +6,13 @@
 # 2. Pagination limit default is 10 pages
 # 3. Returns a list of normalized job dicts (doesn't persist to disk)
 
-# --- INPUT & OUTPUT ---
+# Duunitori’s HTML may change; the parser uses several fallback selectors
+# If you see missed fields, inspect live HTML and tweak selectors
+# Deep mode causes one extra HTTP request per listing — plan API call rate/intervals accordingly
+# If you plan to run many queries frequently, add a persistent cache layer (disk/db) and respect robots.txt and Duunitori’s terms of service
+# You can easily switch to light mode by calling fetch_search_results(..., deep=False)
 
-# Input:            A query, like 'python developer'
-# Output:           {
-#                     "title": "...",
-#                     "company": "...",
-#                     "location": "...",
-#                     "url": "...",
-#                     "published_date": "...",
-#                     "description_snippet": "...",
-#                     "source": "duunitori",
-#                     "query_used": "python developer",
-#                   }
-
-# --- DUUNITORI.FI URL SCHEME ---
+# --- URL SCHEME ---
 
 # Template:         https://duunitori.fi/tyopaikat/haku/<QUERY>?sivu=<PAGE>
 # Example:          https://duunitori.fi/tyopaikat/haku/python-developer?sivu=2
@@ -30,14 +22,8 @@
 # Title:            <h3 class="job-box__title">
 # Company:          <div class="job-box__employer">
 # Location:         <div class="job-box__location">
-# Link:             <a class="job-box__title-link" href="...">
+# URL:              <a class="job-box__title-link" href="...">
 # Published date:   <time datetime="...">
-
-# Notes / Suggestions
-# The scraper is intentionally defensive: Duunitori’s HTML may change; the parser uses several fallback selectors. If you see missed fields, inspect live HTML and tweak selectors.
-# Deep mode causes one extra HTTP request per listing — plan API call rate/intervals accordingly.
-# If you plan to run many queries frequently, add a persistent cache layer (disk/db) and respect robots.txt and Duunitori’s terms of service.
-# You can easily switch to light mode by calling fetch_search_results(..., deep=False).
 
 import time
 import logging
@@ -105,8 +91,20 @@ def fetch_search_results(
 
         # Parse the HTML text with a HTML parser
         soup = BeautifulSoup(response.text, "html.parser")
+
         # Select CSS classes (here: job cards)
         cards = soup.select(".job-box, .job-list-item, .search-result__item, .job-card")
+        # print()
+        # print()
+        # print()
+        # print()
+        # print()
+        # print(cards)
+        # print()
+        # print()
+        # print()
+        # print()
+        # print()
 
         # If no results on current page
         if not cards:
@@ -115,23 +113,26 @@ def fetch_search_results(
 
         # Iterate over job cards
         for card in cards:
-            # Parse job card to a dictionary:
-            # {
-            # "title": title,
-            # "company": company,
-            # "location": location,
-            # "url": full_url,
-            # "description_snippet": snippet,
-            # "published_date": published,
-            # "source": "duunitori"
-            # }
+            # print()
+            # print()
+            # print()
+            # print()
+            # print()
+            # print(card.prettify())
+            # print()
+            # print()
+            # print()
+            # print()
+            # print()
+            # Parse job card to a dictionary containing title, company, location, etc
             job = parse_job_card(card)
 
-            # If deep mode, and we have a URL
+            # If in deep mode, and we have a URL
             if deep_mode and job.get("url"):
                 try:
                     # Fetch full job description
                     detail = fetch_job_detail(session, job["url"])
+
                     if detail:
                         # Save the full job description under its own key
                         job["full_description"] = detail
@@ -203,8 +204,8 @@ def safe_get(
 
     # Iterate 3 times (by default)
     for attempt in range(1, retries + 1):
-        # Try to get response
         try:
+            # Get response
             resp = session.get(url, timeout=timeout)
             # If OK, return response
             if resp.status_code == 200:
@@ -229,7 +230,7 @@ def parse_job_card(card: BeautifulSoup) -> Dict:
     Defensive parsing: returns empty strings for missing fields
 
     Args:
-        card: job card
+        card: the job card
 
     Returns:
         {
@@ -243,27 +244,31 @@ def parse_job_card(card: BeautifulSoup) -> Dict:
         }:
     """
 
-    # Title and link
-    title_tag = card.select_one(".job-box__title a, .job-box__title-link, h3 a")
+    # Title
+    title_tag = card.select_one(".job-box__title")
     title = title_tag.get_text(strip=True) if title_tag else (card.select_one(".job-box__title").get_text(strip=True) if card.select_one(".job-box__title") else "")
-    href = title_tag.get("href") if title_tag and title_tag.has_attr("href") else ""
-    full_url = urljoin(HOST_URL_DUUNITORI, href) if href else ""
 
     # Company
-    company_tag = card.select_one(".job-box__employer, .job-box__employer a")
-    company = company_tag.get_text(strip=True) if company_tag else ""
+    job_tag = card.select_one(".job_box__hover, .gtm-search-result")
+    company = job_tag.get("data-company") if job_tag and job_tag.has_attr("data-company") else ""
 
     # Location
-    location_tag = card.select_one(".job-box__location")
-    location = location_tag.get_text(strip=True) if location_tag else ""
+    location_tag = card.select_one(".job-box__job-location")
+    location = location_tag.get_text(strip=True) if location_tag else (card.select_one(".job-box__job-location").get_text(strip=True) if card.select_one(".job-box__job-location") else "")
 
-    # Description snippet — look for teaser or summary class
-    snippet_tag = card.select_one(".job-box__teaser, .job-box__content__teaser, .job-box__excerpt")
-    snippet = snippet_tag.get_text(strip=True) if snippet_tag else ""
+    # URL
+    href = job_tag.get("href") if job_tag and job_tag.has_attr("href") else ""
+    full_url = urljoin(HOST_URL_DUUNITORI, href) if href else ""
 
-    # Date
-    time_tag = card.select_one("time")
-    published = time_tag.get("datetime") if (time_tag and time_tag.has_attr("datetime")) else (time_tag.get_text(strip=True) if time_tag else "")
+    # Description
+    snippet = ""
+
+    # Published
+    published_tag = card.select_one(".job-box__job-posted")
+    published = published_tag.get_text(strip=True) if published_tag else (card.select_one(".job-box__job-posted").get_text(strip=True) if card.select_one(".job-box__job-posted") else "")
+
+    # Category
+    category = job_tag.get("data-category") if job_tag and job_tag.has_attr("data-category") else ""
 
     return {
         "title": title,
@@ -300,7 +305,22 @@ def fetch_job_detail(session: requests.Session, job_url: str, retries: int = 2) 
     soup = BeautifulSoup(response.text, "html.parser")
 
     # Look for the main description container by guessing class names
-    desc_candidates = soup.select(".job-body, .job__description, .job-description, .job-detail__content, .advert-content")
+    # gtm-apply-clicks description description--jobentry
+    # desc_candidates = soup.select(".job-body, .job__description, .job-description, .job-detail__content, .advert-content")
+    desc_candidates = soup.select(".gtm-apply-clicks, .description, .description--jobentry, .job-body, .job__description, .job-description, .job-detail__content, .advert-content")
+
+    # for desc_candidate in desc_candidates:
+    #     print()
+    #     print()
+    #     print()
+    #     print()
+    #     print()
+    #     print(desc_candidate.prettify())
+    #     print()
+    #     print()
+    #     print()
+    #     print()
+    #     print()
 
     # If no class was found, go to fallback
     if not desc_candidates:
