@@ -52,7 +52,7 @@ def main():
     scorer.score_jobs(skill_profile=skill_profile)
 
     # 4. Write a report/an analysis on the findings and save it to /data/reports/job_report.txt
-    reporter.generate_report(top_n=10)
+    report_text = reporter.generate_report(top_n=10)
 
 if __name__ == "__main__":
     main()
