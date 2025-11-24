@@ -5,7 +5,8 @@ import logging
 import json
 from typing import List, Dict
 
-from utils import build_queries, fetch_search_results
+from utils.query_builder import build_queries
+from utils.scraper_duunitori import fetch_search_results
 
 logger = logging.getLogger(__name__)
 

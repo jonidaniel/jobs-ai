@@ -9,8 +9,8 @@
 import logging
 from typing import Optional
 
-from utils import call_llm  # BUILD THIS !!!
-from utils import normalize_text  # BUILD THIS !!!
+# from utils.llms import call_llm
+from utils.normalization import normalize_text
 
 from config.schemas import SkillProfile
 

@@ -9,7 +9,7 @@ from pydantic import ValidationError
 
 from openai import OpenAI
 
-from utils import normalize_list
+from utils.normalization import normalize_list
 
 from config.schemas import SkillProfile
 

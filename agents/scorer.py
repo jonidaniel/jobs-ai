@@ -5,7 +5,7 @@ import logging
 import json
 from typing import List, Dict
 
-from utils import normalize_list
+from utils.normalization import normalize_list
 
 from config.schemas import SkillProfile
 
