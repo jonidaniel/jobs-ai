@@ -21,7 +21,7 @@ Normalize skill names (e.g., "js" -> "JavaScript", "py" -> "Python").
 Be concise and avoid duplicates.
 """
 
-USER_PROMPT = """
+USER_INPUT = """
 Joni Mäkinen has developed software since 2020.
 He has built and published multiple full-stack apps (frontend, backend, database, desktop, mobile).
 He has 3 years of experience with Git.
@@ -53,7 +53,7 @@ Also generate job search keywords based on the overall profile.
 
 INPUT TEXT:
 \"\"\"
-{user_prompt}
+{user_input}
 \"\"\"
 
 Now produce a structured skill profile following the JSON schema provided below.
@@ -63,4 +63,6 @@ Now produce a structured skill profile following the JSON schema provided below.
 """
 
 # Inject the user prompt and the output schema into the user prompt base to create the final prompt
-PROMPT = USER_PROMPT_BASE.format(user_prompt=USER_PROMPT, output_schema=OUTPUT_SCHEMA)
+USER_PROMPT = USER_PROMPT_BASE.format(
+    user_input=USER_INPUT, output_schema=OUTPUT_SCHEMA
+)
