@@ -73,7 +73,8 @@ class GeneratorAgent:
 
         logger.info(" GENERATING APPLICATION TEXT...")
 
-        raw = call_llm(user_prompt, system_prompt, model=self.model)
+        # raw = call_llm(user_prompt, system_prompt, model=self.model)
+        raw = "KAKKA"
 
         output = normalize_text(raw)
 
