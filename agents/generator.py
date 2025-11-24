@@ -1,11 +1,5 @@
 # ---------- GENERATOR AGENT ----------
 
-# ✔ Accepts both the merged SkillProfile and the report text
-# ✔ Calls the LLM to produce a tailored job-application email, cover letter, or motivation letter
-# ✔ Can be later extended to generate CV sections, project summaries, etc.
-# ✔ Uses the same internal structure and design conventions as your other agents
-# ✔ Returns the generated text to main.py, where NotifierAgent or others can use it
-
 import logging
 from typing import Optional
 
@@ -68,7 +62,7 @@ class GeneratorAgent:
 
         logger.info(" GENERATING APPLICATION TEXT...")
 
-        raw = call_llm(user_prompt, system_prompt)
+        raw = call_llm(system_prompt, user_prompt)
 
         output = normalize_text(raw)
 
