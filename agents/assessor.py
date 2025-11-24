@@ -7,8 +7,7 @@ from typing import Dict, Any, Optional
 
 from pydantic import ValidationError
 
-from openai import OpenAI
-
+from utils.llms import call_llm
 from utils.normalization import normalize_list
 
 from config.schemas import SkillProfile
@@ -60,7 +59,8 @@ class AssessorAgent:
         """
 
         # Retrieve the raw LLM response
-        raw = self._call_llm(prompt, system_prompt)
+        # raw = self._call_llm(prompt, system_prompt)
+        raw = call_llm(prompt, system_prompt)
 
         # Extract the JSON substring from the raw response
         json_text = self._extract_json(raw)
@@ -90,53 +90,6 @@ class AssessorAgent:
     # ------------------------------
     # Internal functions
     # ------------------------------
-
-    def _call_llm(self, prompt: str, system_prompt: str, max_tokens: int = 800) -> str:
-        """
-        Call an LLM with the user prompt.
-
-        Args:
-            prompt: complete user prompt for the LLM
-            system_prompt: system prompt for the LLM
-            max_tokens: the maximum amount of tokens reserved for the LLM call
-
-        Returns:
-            text: the complete LLM response text
-        """
-
-        if not self.model:
-            logger.warning(
-                " OPENAI_MODEL not found in environment. OpenAI calls will fail without it."
-            )
-        if not self.key:
-            logger.warning(
-                " OPENAI_API_KEY not found in environment. OpenAI calls will fail without it."
-            )
-        client = OpenAI()
-        client.api_key = self.key
-        if not client.api_key:
-            raise RuntimeError(
-                "OpenAI API key not configured. Set OPENAI_API_KEY env var."
-            )
-
-        print()
-        logger.info(" SKILL ASSESSMENT STARTING...\n")
-
-        # Get response from LLM
-        response = client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt},
-            ],
-            max_tokens=max_tokens,
-            temperature=0.2,
-        )
-
-        text = response.choices[0].message.content
-        logger.debug(" LLM response: %s", text[:500])
-
-        return text
 
     def _extract_json(self, text: str) -> Optional[str]:
         """
