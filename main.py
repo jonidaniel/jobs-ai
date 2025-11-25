@@ -9,6 +9,7 @@
 # Checks input resources consistently and updates search queries autonomously.
 
 import logging
+from datetime import datetime
 
 from agents import (
     ProfilerAgent,
@@ -38,12 +39,15 @@ def main():
     Launch JobsAI.
     """
 
+    # A constant timestamp for the whole workflow
+    TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
+
     # Initialize agents with constant values
-    profiler = ProfilerAgent(SKILL_PROFILES_PATH)
-    searcher = SearcherAgent(JOB_BOARDS, DEEP_MODE, JOB_LISTINGS_RAW_PATH)
-    scorer = ScorerAgent(JOB_LISTINGS_RAW_PATH, JOB_LISTINGS_SCORED_PATH)
-    reporter = ReporterAgent(JOB_LISTINGS_SCORED_PATH, REPORTS_PATH)
-    generator = GeneratorAgent(LETTERS_PATH)
+    profiler = ProfilerAgent(SKILL_PROFILES_PATH, TIMESTAMP)
+    searcher = SearcherAgent(JOB_BOARDS, DEEP_MODE, JOB_LISTINGS_RAW_PATH, TIMESTAMP)
+    scorer = ScorerAgent(JOB_LISTINGS_RAW_PATH, JOB_LISTINGS_SCORED_PATH, TIMESTAMP)
+    reporter = ReporterAgent(JOB_LISTINGS_SCORED_PATH, REPORTS_PATH, TIMESTAMP)
+    generator = GeneratorAgent(LETTERS_PATH, TIMESTAMP)
 
     # 1. Assess a candidate and return a skill profile of them
     skill_profile = profiler.create_profile(SYSTEM_PROMPT, USER_PROMPT)
