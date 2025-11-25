@@ -1,21 +1,19 @@
-# ---------- ASSESSOR AGENT ----------
+# ---------- PROFILER AGENT ----------
 
 # create_profile
-# _extract_json
-# _normalize_parsed
-# _merge_update
-# _save
-# _load_existing
+# _merge_profiles
+# _load_profile
+# _save_profile
 
 import logging
 import json
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Optional
 
 from pydantic import ValidationError
 
-from utils.llms import call_llm
-from utils.normalization import normalize_list
+from utils.llms import call_llm, extract_json
+from utils.normalization import normalize_parsed
 
 from config.schemas import SkillProfile
 
@@ -64,20 +62,20 @@ class ProfilerAgent:
         """
 
         print()
-        logger.info(" CREATING SKILL PROFILE...\n")
+        logger.info(" CREATING SKILL PROFILE...")
 
         # Retrieve raw LLM response that contains the skill profile
         raw = call_llm(system_prompt, user_prompt)
 
         # Extract the JSON substring from the raw response
-        json_text = self._extract_json(raw)
+        json_text = extract_json(raw)
 
         if json_text is None:
             raise ValueError("LLM did not return parseable JSON.")
 
         parsed = json.loads(json_text)
         # Normalize lists and keys
-        parsed = self._normalize_parsed(parsed)
+        parsed = normalize_parsed(parsed)
         # Validate with Pydantic
         try:
             profile = SkillProfile(**parsed)
@@ -86,7 +84,7 @@ class ProfilerAgent:
             raise
 
         # Merge the profile with an existing profile
-        merged_profile = self._merge_update(profile)
+        merged_profile = self._merge_profiles(profile)
 
         # return the merged profile
         return merged_profile
@@ -95,107 +93,7 @@ class ProfilerAgent:
     # Internal functions
     # ------------------------------
 
-    def _extract_json(self, text: str) -> Optional[str]:
-        """
-        Extract the JSON substring from the raw LLM response.
-
-        Args:
-            text: the raw LLM response
-
-        Returns:
-            text: the extracted JSON
-            None: if JSON cannot be extracted from the response
-        """
-
-        # Find where the JSON starts
-        start = text.find("{")
-
-        # If a brace isn't present
-        if start == -1:
-            return None
-
-        # Attempt to balance braces
-        brace = 0
-        for i in range(start, len(text)):
-            if text[i] == "{":
-                brace += 1
-            elif text[i] == "}":
-                brace -= 1
-                if brace == 0:
-                    return text[start : i + 1]
-        # Fallback: try direct load
-        try:
-            json.loads(text)
-            return text
-        except Exception:
-            return None
-
-    def _normalize_parsed(self, parsed: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Normalize the parsed JSON.
-
-        Args:
-            parsed: parsed skills JSON
-
-        Returns:
-            parsed: the normalized parsed skills JSON
-        """
-
-        keys = [
-            "name",
-            "core_languages",
-            "frameworks_and_libraries",
-            "tools_and_platforms",
-            "agentic_ai_experience",
-            "ai_ml_experience",
-            "soft_skills",
-            "projects_mentioned",
-            "experience_level",
-            "job_search_keywords",
-        ]
-        # Ensure all keys exist in the JSON the LLM generated
-        for k in keys:
-            if k not in parsed:
-                parsed[k] = (
-                    []
-                    if k != "experience_level"
-                    else {"Python": 0, "JavaScript": 0, "Agentic AI": 0, "AI/ML": 0}
-                )
-
-        # Normalize lists
-        for list_key in [
-            "core_languages",
-            "frameworks_and_libraries",
-            "tools_and_platforms",
-            "agentic_ai_experience",
-            "ai_ml_experience",
-            "soft_skills",
-            "projects_mentioned",
-            "job_search_keywords",
-        ]:
-            if isinstance(parsed.get(list_key), list):
-                parsed[list_key] = normalize_list(parsed[list_key])
-            else:
-                parsed[list_key] = []
-
-        # Normalize experience_level keys and values
-        el = parsed.get("experience_level", {})
-        norm_el = {
-            "Python": int(el.get("Python") or 0),
-            "JavaScript": int(el.get("JavaScript") or 0),
-            "Agentic AI": int(el.get("Agentic AI") or el.get("Agentic_Ai") or 0),
-            "AI/ML": int(el.get("AI/ML") or el.get("AI_ML") or 0),
-        }
-        parsed["experience_level"] = norm_el
-
-        # Name normalization
-        if not parsed.get("name") or not isinstance(parsed["name"], str):
-            parsed["name"] = ""
-        else:
-            parsed["name"] = parsed["name"].strip()
-        return parsed
-
-    def _merge_update(self, new_profile: SkillProfile) -> SkillProfile:
+    def _merge_profiles(self, new_profile: SkillProfile) -> SkillProfile:
         """
         Merge new_profile into existing profile (e.g. union lists and max experience levels).
 
@@ -207,10 +105,10 @@ class ProfilerAgent:
             merged_profile: the merged skill profile
         """
         # Load existing skill profile from /memory/vector_db/skill_profile.json
-        existing = self._load_existing()
+        existing = self._load_profile()
 
         if not existing:
-            self._save(new_profile)
+            self._save_profile(new_profile)
             return new_profile
 
         # Merge lists
@@ -244,29 +142,11 @@ class ProfilerAgent:
         merged_profile = SkillProfile(**merged)
 
         # Save merged skill profile to /memory/vector_db/skill_profile.json
-        self._save(merged_profile)
+        self._save_profile(merged_profile)
 
         return merged_profile
 
-    def _save(self, profile: SkillProfile):
-        """
-        Save the skills JSON to the vector database.
-
-        Args:
-            profile: the merged skill profile
-        """
-
-        # Write JSON to /memory/vector_db/skill_profile.json
-        # Convert a JSON-formatted string into a Python object (dict, list, etc.).
-        out = json.loads(profile.model_dump_json(by_alias=True))
-
-        # Open /memory/vector_db/skill_profile.json
-        with open(self.profile_path, "w", encoding="utf-8") as f:
-            json.dump(out, f, ensure_ascii=False, indent=2)
-
-        logger.info(" SKILL PROFILE CREATED: saved to %s", self.profile_path)
-
-    def _load_existing(self) -> Optional[SkillProfile]:
+    def _load_profile(self) -> Optional[SkillProfile]:
         """
         Load existing skill profile.
 
@@ -286,3 +166,21 @@ class ProfilerAgent:
                 return SkillProfile(**data)
             except:
                 return None
+
+    def _save_profile(self, profile: SkillProfile):
+        """
+        Save the skills JSON to the vector database.
+
+        Args:
+            profile: the merged skill profile
+        """
+
+        # Write JSON to /memory/vector_db/skill_profile.json
+        # Convert a JSON-formatted string into a Python object (dict, list, etc.).
+        out = json.loads(profile.model_dump_json(by_alias=True))
+
+        # Open /memory/vector_db/skill_profile.json
+        with open(self.profile_path, "w", encoding="utf-8") as f:
+            json.dump(out, f, ensure_ascii=False, indent=2)
+
+        logger.info(" SKILL PROFILE CREATED: Saved to %s\n", self.profile_path)
