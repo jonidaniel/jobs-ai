@@ -40,13 +40,15 @@ class ReporterAgent:
     # ------------------------------
     # Public interface
     # ------------------------------
-    def generate_report(self, skill_profile: SkillProfile, top_n: int = 10) -> str:
+    def generate_report(
+        self, skill_profile: SkillProfile, report_size: int = 10
+    ) -> str:
         """
         Load scored jobs, generate a summary report (text),
         save it to REPORTS_DIR, and return the report text.
 
         Args:
-            top_n: the number of top jobs to include
+            report_size: the number of top jobs to include
 
         Returns:
             report_text: the generated report as a string
@@ -62,9 +64,9 @@ class ReporterAgent:
         # Sort jobs by score descending (already done in scorer, but safe)
         scored_jobs.sort(key=lambda x: x.get("score", 0), reverse=True)
 
-        report_lines = ["Job Report", "=" * 40, f"Top {top_n} Jobs:\n"]
+        report_lines = ["Job Report", "=" * 40, f"Top {report_size} Jobs:\n"]
 
-        for job in scored_jobs[:top_n]:
+        for job in scored_jobs[:report_size]:
             #
 
             full_description = job.get("full_description")
