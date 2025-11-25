@@ -85,6 +85,9 @@ class GeneratorAgent:
 
         Args:
             style: the style or tone for the cover letter
+
+        Returns:
+            system_prompt: the system prompt
         """
 
         tone_instructions = {
@@ -100,12 +103,14 @@ class GeneratorAgent:
 
         base_style = tone_instructions.get(style, tone_instructions["professional"])
 
-        return (
-            "You are a professional cover letter writer. "
-            "Your goal is to produce polished text suitable for real-world job applications.\n"
-            "Follow this style:\n"
-            f"{base_style}\n"
-        )
+        system_prompt = f"""
+        You are a professional cover letter writer.
+        Your goal is to produce polished text suitable for real-world job applications.
+        Follow this style:
+        {base_style}
+        """
+
+        return system_prompt
 
     def _build_user_prompt(
         self,
@@ -115,32 +120,14 @@ class GeneratorAgent:
         # job_title: Optional[str],
     ) -> str:
         """
-        Build user prompt.
+        Build the user prompt.
 
         Args:
-            skill_profile:
-            job_report:
-            employer:
-            job_title:
+            skill_profile: the skill profile
+            job_report: the job report
 
         Returns:
-            "
-            Generate a tailored job-application message.
-
-            Candidate Skill Profile (JSON):
-            {skill_profile.model_dump_json(indent=2)}
-
-            Job Match Analysis:
-            {job_report}
-
-            {employer_text}{title_text}
-
-            Instructions:
-            - Produce a compelling but concise job-application message.
-            - Highlight the candidate's relevant skills based on the report.
-            - If employer or job title are given, tailor the message to them.
-            - Keep it truthful, specific, and readable.
-            "
+            user_prompt: the user prompt
         """
 
         # employer_text = f"Employer: {employer}\n" if employer else ""
@@ -148,23 +135,25 @@ class GeneratorAgent:
         # title_text = f"Target job title: {job_title}\n" if job_title else ""
         title_text = f"Target job title: empty\n"
 
-        return f"""
-            Generate a tailored job-application message.
+        user_prompt = f"""
+        Generate a tailored job-application message.
 
-            Candidate Skill Profile (JSON):
-            {skill_profile.model_dump_json(indent=2)}
+        Candidate Skill Profile (JSON):
+        {skill_profile.model_dump_json(indent=2)}
 
-            Job Match Analysis:
-            {job_report}
+        Job Match Analysis:
+        {job_report}
 
-            {employer_text}{title_text}
+        {employer_text}{title_text}
 
-            Instructions:
-            - Produce a compelling but concise job-application message.
-            - Highlight the candidate’s relevant skills based on the report.
-            - If employer or job title are given, tailor the message to them.
-            - Keep it truthful, specific, and readable.
-            """
+        Instructions:
+        - Produce a compelling but concise job-application message.
+        - Highlight the candidate's relevant skills based on the report.
+        - If employer or job title are given, tailor the message to them.
+        - Keep it truthful, specific, and readable.
+        """
+
+        return user_prompt
 
     def _write_letter(self):
         doc = Document()
