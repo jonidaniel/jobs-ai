@@ -1,22 +1,15 @@
 # ---------- DUUNITORI SCRAPER ----------
 
-# fetch_duunitori_results
-# _slugify_query
-# _safe_get
+# scrape_duunitori
+# _fetch_page
 # _parse_job_card
-# _fetch_job_detail
+# _fetch_full_job_description
 
 # --- DESCRIPTION ---
 
 # 1. When given a query, fetches the job detail page and extracts the full description for each listing (deep mode)
 # 2. Pagination limit default is 10 pages
 # 3. Returns a list of normalized job dicts (doesn't persist to disk)
-
-# Duunitori’s HTML may change; the parser uses several fallback selectors
-# If you see missed fields, inspect live HTML and tweak selectors
-# Deep mode causes one extra HTTP request per listing — plan API call rate/intervals accordingly
-# If you plan to run many queries frequently, add a persistent cache layer (disk/db) and respect robots.txt and Duunitori’s terms of service
-# You can easily switch to light mode by calling fetch_duunitori_results(..., deep=False)
 
 # --- URL SCHEME ---
 
@@ -31,17 +24,23 @@
 # URL:              <a class="job-box__title-link" href="...">
 # Published date:   <time datetime="...">
 
+# Duunitori’s HTML may change; the parser uses several fallback selectors
+# If you see missed fields, inspect live HTML and tweak selectors
+# Deep mode causes one extra HTTP request per listing — plan API call rate/intervals accordingly
+# If you plan to run many queries frequently, add a persistent cache layer (disk/db) and respect robots.txt and Duunitori’s terms of service
+# You can easily switch to light mode by calling scrape_duunitori(..., deep=False)
+
 import time
 import logging
 import requests
 import re
 from typing import List, Dict, Optional
-from urllib.parse import quote_plus, urljoin
+from urllib.parse import urljoin, quote_plus
 
 from bs4 import BeautifulSoup
 
-from config.paths import HOST_URL_DUUNITORI, SEARCH_URL_BASE_DUUNITORI
 from config.headers import HEADERS_DUUNITORI
+from config.paths import HOST_URL_DUUNITORI, SEARCH_URL_BASE_DUUNITORI
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +48,7 @@ logger = logging.getLogger(__name__)
 # ------------------------------
 # Public interface
 # ------------------------------
-def fetch_duunitori_results(
+def scrape_duunitori(
     query: str,
     num_pages: int = 10,
     deep_mode: bool = True,
@@ -77,7 +76,12 @@ def fetch_duunitori_results(
     session.headers.update(HEADERS_DUUNITORI)
 
     # Make query URL compliant
-    query_slug = _slugify_query(query)
+    # Replace whitespace with hyphens and remove unsafe chars
+    q = re.sub(r"\s+", "-", query.strip().lower())
+    query_slug = quote_plus(q, safe="-")
+
+    # Make query URL compliant
+    # query_slug = _slugify_query(query)
 
     results = []
     total_fetched = 0
@@ -90,7 +94,7 @@ def fetch_duunitori_results(
         logger.info(" Fetching Duunitori search page: %s", search_url)
 
         # Get response safely
-        response = _safe_get(session, search_url)
+        response = _fetch_page(session, search_url)
 
         if not response:
             logger.warning(" Failed to fetch search page %s — stopping", search_url)
@@ -128,7 +132,7 @@ def fetch_duunitori_results(
             if deep_mode and job.get("url"):
                 try:
                     # Fetch full job description
-                    detail = _fetch_job_detail(session, job["url"])
+                    detail = _fetch_full_job_description(session, job["url"])
 
                     if detail:
                         # Save the full job description under its own key
@@ -163,30 +167,27 @@ def fetch_duunitori_results(
 # ------------------------------
 
 
-def _slugify_query(query: str) -> str:
-    """
-    Make query URL compliant (e.g. turn 'python developer' into 'python-developer').
+# def _slugify_query(query: str) -> str:
+#     """
+#     Make query URL compliant (e.g. turn 'python developer' into 'python-developer').
 
-    Also encode special characters safely.
+#     Also encode special characters safely.
 
-    Args:
-        query: query to be slugified
+#     Args:
+#         query: query to be slugified
 
-    Returns:
-        "": if there wasn't a query
-        quote_plus(q, safe="-"): URL compliant query
-    """
+#     Returns:
+#         "": if there wasn't a query
+#         quote_plus(q, safe="-"): URL compliant query
+#     """
 
-    if not query:
-        return ""
+#     if not query:
+#         return ""
 
-    # Replace whitespace with hyphens and remove unsafe chars
-    q = re.sub(r"\s+", "-", query.strip().lower())
-
-    return quote_plus(q, safe="-")  # Percent-encode remaining unsafe chars
+#     return   # Percent-encode remaining unsafe chars
 
 
-def _safe_get(
+def _fetch_page(
     session: requests.Session,
     url: str,
     retries: int = 3,
@@ -318,7 +319,9 @@ def _parse_job_card(card: BeautifulSoup) -> Dict:
     }
 
 
-def _fetch_job_detail(session: requests.Session, job_url: str, retries: int = 2) -> str:
+def _fetch_full_job_description(
+    session: requests.Session, job_url: str, retries: int = 2
+) -> str:
     """
     Fetch the job detail page and attempt to extract the full job description text.
 
@@ -334,7 +337,7 @@ def _fetch_job_detail(session: requests.Session, job_url: str, retries: int = 2)
     """
 
     # Get response safely
-    response = _safe_get(session, job_url, retries=retries)
+    response = _fetch_page(session, job_url, retries=retries)
 
     if not response or response.status_code != 200:
         logger.debug(
