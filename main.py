@@ -63,7 +63,7 @@ def main():
     scorer.score_jobs(skill_profile=skill_profile)
 
     # 4. Write a report/an analysis on the findings and save it to /data/reports/job_report.txt
-    job_report = reporter.generate_report(top_n=10)
+    job_report = reporter.generate_report(skill_profile, top_n=10)
 
     # 5. Generate cover letters for each job
     generator.generate_letters(skill_profile, job_report, LETTER_STYLE)
