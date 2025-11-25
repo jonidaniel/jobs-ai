@@ -37,5 +37,33 @@
 ### 2025/11/21
 
 - Continued optimizing/refactoring the workflow
+- Made big refactors to /config/
 - Refined logging
 - Refined class and function documentation
+- Started creating the reporter agent
+
+### 2025/11/22
+
+- Made the reporter agent work
+- Continued optimizing/refactoring the workflow
+- Refined logging
+- Refined class and function documentation
+
+### 2025/11/23
+
+- Started creating the generator agent
+- Continued optimizing/refactoring the workflow
+- Refined logging
+- Refined class and function documentation
+
+### 2025/11/24
+
+- Continued working with the generator agent
+- Made huge refactors to /utils/
+- Refined class and function documentation
+
+### 2025/11/25
+
+- Made the generator agent somewhat work
+- Implemented versioned skill profile, raw jobs, scored jobs, and job report saving
+- Implemented dated file storing throughout the whole workflow
