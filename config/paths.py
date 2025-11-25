@@ -10,7 +10,7 @@ JOB_LISTINGS_SCORED_PATH = Path("data/job_listings/scored/")
 REPORTS_PATH = Path("data/reports/")
 LETTERS_PATH = Path("data/cover_letters/")
 
-SKILL_PROFILES_PATH.parent.mkdir(parents=True, exist_ok=True)
+SKILL_PROFILES_PATH.mkdir(parents=True, exist_ok=True)
 JOB_LISTINGS_RAW_PATH.mkdir(parents=True, exist_ok=True)
 JOB_LISTINGS_SCORED_PATH.mkdir(parents=True, exist_ok=True)
 REPORTS_PATH.mkdir(parents=True, exist_ok=True)
