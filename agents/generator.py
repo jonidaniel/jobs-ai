@@ -9,6 +9,7 @@ import os
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Dict
 
 from docx import Document
 
@@ -16,7 +17,6 @@ from utils.llms import call_llm
 from utils.normalization import normalize_text
 
 from config.schemas import SkillProfile
-from config.settings import CONTACT_INFORMATION
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +42,7 @@ class GeneratorAgent:
         skill_profile: SkillProfile,
         job_report: str,
         letter_style: str,
+        contact_info: Dict,
         # employer: Optional[str] = None,
         # job_title: Optional[str] = None,
         # ) -> str:
@@ -62,7 +63,7 @@ class GeneratorAgent:
         system_prompt = self._build_system_prompt(letter_style)
         user_prompt = self._build_user_prompt(skill_profile, job_report)
 
-        self._write_letter()
+        self._write_letter(contact_info)
 
         logger.info(" GENERATING APPLICATION TEXT...")
 
@@ -154,15 +155,15 @@ class GeneratorAgent:
 
         return user_prompt
 
-    def _write_letter(self):
+    def _write_letter(self, contact_info: Dict):
         doc = Document()
 
         p = doc.add_paragraph()
-        p.add_run(f"{CONTACT_INFORMATION.get("website")}\n")
-        p.add_run(f"{CONTACT_INFORMATION.get("linkedin")}\n")
-        p.add_run(f"{CONTACT_INFORMATION.get("github")}\n\n")
-        p.add_run(f"{CONTACT_INFORMATION.get("email")}\n")
-        p.add_run(f"{CONTACT_INFORMATION.get("phone")}\n\n")
+        p.add_run(f"{contact_info.get("website")}\n")
+        p.add_run(f"{contact_info.get("linkedin")}\n")
+        p.add_run(f"{contact_info.get("github")}\n\n")
+        p.add_run(f"{contact_info.get("email")}\n")
+        p.add_run(f"{contact_info.get("phone")}\n\n")
 
         # Turn the timestamp into a 'pretty date'
         dt = datetime.strptime(self.timestamp, "%Y%m%d_%H%M%S")
