@@ -7,6 +7,7 @@
 import os
 import logging
 import json
+from pathlib import Path
 from typing import List, Dict
 
 from utils.scrapers.duunitori import scrape_duunitori
@@ -28,7 +29,7 @@ class SearcherAgent:
     4. Store the job listings
     """
 
-    def __init__(self, job_boards: List[str], deep_mode: bool, jobs_raw_path: str):
+    def __init__(self, job_boards: List[str], deep_mode: bool, jobs_raw_path: Path):
         """
         Construct the SearcherAgent class.
 
@@ -96,11 +97,20 @@ class SearcherAgent:
 
         if not jobs:
             return
+
+        # Replace spaces and forward slashed with underscores
         safe_query = query.replace(" ", "_").replace("/", "_")
+
+        # Form the filename (<job_board><query>.json)
         filename = f"{board.lower()}_{safe_query}.json"
+
+        # Form the path where to save
         path = os.path.join(self.jobs_raw_path, filename)
+
+        # Save to the path
         with open(path, "w", encoding="utf-8") as f:
             json.dump(jobs, f, ensure_ascii=False, indent=2)
+
         logger.info(" Saved %d raw jobs to /%s\n", len(jobs), path)
 
     def _deduplicate_jobs(self, jobs: List[Dict]) -> List[Dict]:

@@ -9,6 +9,7 @@
 import os
 import logging
 import json
+from pathlib import Path
 from typing import List, Dict
 
 from utils.normalization import normalize_list
@@ -27,7 +28,7 @@ class ScorerAgent:
     2. Save the scored job listings
     """
 
-    def __init__(self, jobs_raw_path: str, jobs_scored_path: str):
+    def __init__(self, jobs_raw_path: Path, jobs_scored_path: Path):
         """
         Construct the ScorerAgent class.
 

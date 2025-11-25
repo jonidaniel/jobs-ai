@@ -4,8 +4,11 @@
 # _load_scored_jobs
 
 import os
+import datetime
 import logging
 import json
+from datetime import datetime
+from pathlib import Path
 from typing import List, Dict
 
 logger = logging.getLogger(__name__)
@@ -20,7 +23,7 @@ class ReporterAgent:
     2. Write a report/an analysis of the scored job listings
     """
 
-    def __init__(self, jobs_scored_path: str, reports_path: str):
+    def __init__(self, jobs_scored_path: Path, reports_path: Path):
         """
         Construct the ReporterAgent class.
 
@@ -79,16 +82,20 @@ class ReporterAgent:
 
         report_text = "\n".join(report_lines)
 
-        # Save report to file
-        filename = f"job_report.txt"
+        # Form a dated filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{timestamp}_job_report.txt"
+
+        # Join the report path and the dated filename
         path = os.path.join(self.reports_path, filename)
+
         try:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(report_text)
 
             logger.info(f" JOB LISTINGS REPORT WRITTEN: Report saved to /{path}\n")
         except Exception as e:
-            logger.info(f" WRITING JOB LISTINGS REPORT FAILED: {e}\n")
+            logger.error(f" WRITING JOB LISTINGS REPORT FAILED: {e}\n")
 
         return report_text
 
