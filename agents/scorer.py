@@ -28,7 +28,7 @@ class ScorerAgent:
     2. Save the scored job listings
     """
 
-    def __init__(self, jobs_raw_path: Path, jobs_scored_path: Path):
+    def __init__(self, jobs_raw_path: Path, jobs_scored_path: Path, timestamp: str):
         """
         Construct the ScorerAgent class.
 
@@ -39,6 +39,7 @@ class ScorerAgent:
 
         self.jobs_raw_path = jobs_raw_path
         self.jobs_scored_path = jobs_scored_path
+        self.timestamp = timestamp
 
     # ------------------------------
     # Public interface
@@ -68,7 +69,7 @@ class ScorerAgent:
         self._save_scored_jobs(scored_jobs)
 
         logger.info(
-            f" SCORING JOBS COMPLETED: Scored {len(scored_jobs)} jobs and saved them to /{self.jobs_scored_path}/\n"
+            f" SCORING JOBS COMPLETED: Scored {len(scored_jobs)} jobs and saved them to /{self.jobs_scored_path}/{self.timestamp}_scored_jobs.json\n"
         )
 
     # ------------------------------
@@ -193,7 +194,7 @@ class ScorerAgent:
 
         if not scored_jobs:
             return
-        filename = f"scored_jobs.json"
+        filename = f"{self.timestamp}_scored_jobs.json"
         path = os.path.join(self.jobs_scored_path, filename)
         try:
             with open(path, "w", encoding="utf-8") as f:
