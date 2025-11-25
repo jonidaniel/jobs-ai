@@ -6,7 +6,7 @@ JOB_BOARDS = ["Duunitori"]  # Choose from "Duunitori" and "Jobly"
 # If True, the listings are opened individually, i.e., each one is crawled for full job description
 DEEP_MODE = True  # Choose from True or False
 # The size of the job report
-REPORT_SIZE = 10
+REPORT_SIZE = 1
 # The style or tone of the cover letters
 LETTER_STYLE = "professional"  # Choose from "professional", "friendly", or "confident"
 
