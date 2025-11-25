@@ -2,9 +2,9 @@
 
 # score_jobs
 # _load_job_listings
+# _job_identity
 # _compute_job_score
 # _save_scored_jobs
-# _job_identity
 
 import os
 import logging
@@ -104,6 +104,35 @@ class ScorerAgent:
                 seen.add(fingerprint)
         return unique_jobs
 
+    @staticmethod
+    def _job_identity(job: Dict) -> str:
+        """
+        Build a repeatable identifier for a job.
+
+        Prefer URL, otherwise a hashable combo of fields that tends to be stable across scrapes.
+
+        Args:
+            job:
+
+        Returns:
+            url:
+            "":
+            f"{title}|{query}|{snippet_prefix}":
+        """
+
+        url = (job.get("url") or "").strip()
+        if url:
+            return url
+
+        title = (job.get("title") or "").strip().lower()
+        query = (job.get("query_used") or "").strip().lower()
+        snippet = (job.get("description_snippet") or "").strip().lower()
+        if not title and not query and not snippet:
+            return ""
+        # Limit snippet length to keep keys short while remaining distinctive.
+        snippet_prefix = snippet[:80]
+        return f"{title}|{query}|{snippet_prefix}"
+
     def _compute_job_score(self, job: Dict, skill_profile: SkillProfile) -> Dict:
         """
         Compute a simple matching score for the job based on the skill profile.
@@ -170,32 +199,3 @@ class ScorerAgent:
                 json.dump(scored_jobs, f, ensure_ascii=False, indent=2)
         except Exception as e:
             logger.error(f" Failed to save scored jobs: {e}")
-
-    @staticmethod
-    def _job_identity(job: Dict) -> str:
-        """
-        Build a repeatable identifier for a job.
-
-        Prefer URL, otherwise a hashable combo of fields that tends to be stable across scrapes.
-
-        Args:
-            job:
-
-        Returns:
-            url:
-            "":
-            f"{title}|{query}|{snippet_prefix}":
-        """
-
-        url = (job.get("url") or "").strip()
-        if url:
-            return url
-
-        title = (job.get("title") or "").strip().lower()
-        query = (job.get("query_used") or "").strip().lower()
-        snippet = (job.get("description_snippet") or "").strip().lower()
-        if not title and not query and not snippet:
-            return ""
-        # Limit snippet length to keep keys short while remaining distinctive.
-        snippet_prefix = snippet[:80]
-        return f"{title}|{query}|{snippet_prefix}"

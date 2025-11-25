@@ -10,8 +10,7 @@ import json
 from typing import List, Dict
 
 from utils.scrapers.duunitori import scrape_duunitori
-
-# from utils.scrapers.jobly import scrape_jobly
+from utils.scrapers.jobly import scrape_jobly
 
 from utils.queries import build_queries
 
