@@ -4,10 +4,8 @@
 # _load_scored_jobs
 
 import os
-import datetime
 import logging
 import json
-from datetime import datetime
 from pathlib import Path
 from typing import List, Dict
 
@@ -23,7 +21,7 @@ class ReporterAgent:
     2. Write a report/an analysis of the scored job listings
     """
 
-    def __init__(self, jobs_scored_path: Path, reports_path: Path):
+    def __init__(self, jobs_scored_path: Path, reports_path: Path, timestamp: str):
         """
         Construct the ReporterAgent class.
 
@@ -34,6 +32,7 @@ class ReporterAgent:
 
         self.jobs_scored_path = jobs_scored_path
         self.reports_path = reports_path
+        self.timestamp = timestamp
 
     # ------------------------------
     # Public interface
@@ -83,8 +82,7 @@ class ReporterAgent:
         report_text = "\n".join(report_lines)
 
         # Form a dated filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{timestamp}_job_report.txt"
+        filename = f"{self.timestamp}_job_report.txt"
 
         # Join the report path and the dated filename
         path = os.path.join(self.reports_path, filename)
@@ -111,7 +109,7 @@ class ReporterAgent:
             data:
         """
 
-        path = os.path.join(self.jobs_scored_path, "scored_jobs.json")
+        path = os.path.join(self.jobs_scored_path, f"{self.timestamp}_scored_jobs.json")
         if not os.path.exists(path):
             return []
 
