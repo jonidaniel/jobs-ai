@@ -9,6 +9,9 @@ import json
 from pathlib import Path
 from typing import List, Dict
 
+from config.schemas import SkillProfile
+from utils.llms import call_llm
+
 logger = logging.getLogger(__name__)
 
 
@@ -37,7 +40,7 @@ class ReporterAgent:
     # ------------------------------
     # Public interface
     # ------------------------------
-    def generate_report(self, top_n: int = 10) -> str:
+    def generate_report(self, skill_profile: SkillProfile, top_n: int = 10) -> str:
         """
         Load scored jobs, generate a summary report (text),
         save it to REPORTS_DIR, and return the report text.
@@ -62,6 +65,46 @@ class ReporterAgent:
         report_lines = ["Job Report", "=" * 40, f"Top {top_n} Jobs:\n"]
 
         for job in scored_jobs[:top_n]:
+            #
+
+            full_description = job.get("full_description")
+
+            system_prompt = """
+            You are an expert on planning cover letters to be attached to job applications.
+            You base your plans on job descriptions and candidates' skill profiles."
+            """
+
+            user_prompt = f"""
+            Here is a job description:
+            \"\"\"
+            {full_description}
+            \"\"\"
+
+            And here is a candidate's skill profile:
+            \"\"\"
+            {skill_profile}
+            \"\"\"
+
+            Your job is to give instructions on what kind of a cover letter should be written to get the job.
+            Note that an LLM writes the cover letter, and the instructions are intended as 'user prompt' for an LLM.
+            Do not include a 'system prompt'.
+            The instructions should be ready to be given to an LLM 'as is', without any modifications.
+            A human will not read the instructions.
+
+            The instructions should contain only the actual instructions.
+            The instructions should focus on the actual cover letter contents/text paragraphs.
+            The instructions should be based on the job description and the candidate's skill profile.
+            The instructions should be tailored for the specific candidate.
+            The instructions should emphasize matches between the candidate's skills and the job's skill requirements.
+            The instructions should not include any fluff or meta information.
+            The instructions should not include any suggestions on how to format the letter.
+
+            Write the instructions.
+            """
+
+            # Generate instructions to write a cover letter
+            instructions = call_llm(system_prompt, user_prompt)
+
             title = job.get("title") or "N/A"
             company = job.get("company") or "N/A"
             location = job.get("location") or "N/A"
@@ -77,6 +120,7 @@ class ReporterAgent:
             report_lines.append(f"Matched Skills: {matched}")
             report_lines.append(f"Missing Skills: {missing}")
             report_lines.append(f"URL: {url}")
+            report_lines.append(f"Instructions: {instructions}")
             report_lines.append("-" * 40)
 
         report_text = "\n".join(report_lines)
