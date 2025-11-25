@@ -5,8 +5,10 @@
 # _load_profile
 # _save_profile
 
+import os
 import logging
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -107,6 +109,7 @@ class ProfilerAgent:
         # Load existing skill profile from /memory/vector_db/skill_profile.json
         existing = self._load_profile()
 
+        # If running for the first time
         if not existing:
             self._save_profile(new_profile)
             return new_profile
@@ -155,17 +158,27 @@ class ProfilerAgent:
             None: if skill_profile.json is corrupt
         """
 
+        # TURHA?
         if not self.profile_path.exists():
             return None
 
-        # Open memory/vector_db/skill_profile.json
-        with open(self.profile_path, "r", encoding="utf-8") as f:
-            try:
-                # Read the JSON file and turn it into a dictionary
-                data = json.load(f)
-                return SkillProfile(**data)
-            except:
-                return None
+        # Get the latest skill profile from /memory/vector_db/
+        skill_profiles = sorted(os.listdir(self.profile_path))
+        latest_skill_profile = skill_profiles[-1] if skill_profiles else None
+
+        # If not running for the first time
+        if latest_skill_profile:
+            path = os.path.join(self.profile_path, latest_skill_profile)
+
+            with open(path, "r", encoding="utf-8") as f:
+                try:
+                    # Read the JSON file and turn it into a dictionary
+                    data = json.load(f)
+                    return SkillProfile(**data)
+                except:
+                    return None
+
+        return None
 
     def _save_profile(self, profile: SkillProfile):
         """
@@ -175,12 +188,22 @@ class ProfilerAgent:
             profile: the merged skill profile
         """
 
-        # Write JSON to /memory/vector_db/skill_profile.json
-        # Convert a JSON-formatted string into a Python object (dict, list, etc.).
         out = json.loads(profile.model_dump_json(by_alias=True))
 
-        # Open /memory/vector_db/skill_profile.json
-        with open(self.profile_path, "w", encoding="utf-8") as f:
-            json.dump(out, f, ensure_ascii=False, indent=2)
+        # Form a dated filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{timestamp}_skill_profile.json"
 
-        logger.info(" SKILL PROFILE CREATED: Saved to %s\n", self.profile_path)
+        # Join the skill profile path and the dated filename
+        path = os.path.join(self.profile_path, filename)
+
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(out, f, ensure_ascii=False, indent=2)
+
+            logger.info(
+                " SKILL PROFILE CREATED: Saved to %s\n",
+                self.profile_path,
+            )
+        except Exception as e:
+            logger.error(f" SKILL PROFILE CREATION FAILED: {e}\n")
