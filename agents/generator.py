@@ -2,13 +2,13 @@
 
 # generate_letters
 # _build_system_prompt
-# _build_system_prompt
+# _build_user_prompt
 # _write_letter
 
 import os
 import logging
+from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from docx import Document
 
@@ -16,6 +16,7 @@ from utils.llms import call_llm
 from utils.normalization import normalize_text
 
 from config.schemas import SkillProfile
+from config.settings import CONTACT_INFORMATION
 
 logger = logging.getLogger(__name__)
 
@@ -50,11 +51,9 @@ class GeneratorAgent:
         the candidate's skills and the job report.
 
         Args:
-            skill_profile:
-            job_report:
-            employer:
-            job_title:
-            style:
+            skill_profile: the skill profile
+            job_report: the job report
+            letter_style: the intended style/tone of the cover letter
 
         Returns:
             output: the generated text
@@ -159,13 +158,17 @@ class GeneratorAgent:
         doc = Document()
 
         p = doc.add_paragraph()
-        p.add_run("jonimakinen.com\n")
-        p.add_run("linkedin.com/in/joni-daniel-makinen\n")
-        p.add_run("github.com/jonidaniel\n\n")
-        p.add_run("joni-makinen@live.fi\n")
-        p.add_run("+358405882001\n\n")
+        p.add_run(f"{CONTACT_INFORMATION.get("website")}\n")
+        p.add_run(f"{CONTACT_INFORMATION.get("linkedin")}\n")
+        p.add_run(f"{CONTACT_INFORMATION.get("github")}\n\n")
+        p.add_run(f"{CONTACT_INFORMATION.get("email")}\n")
+        p.add_run(f"{CONTACT_INFORMATION.get("phone")}\n\n")
 
-        doc.add_paragraph("November 24, 2025\n")
+        # Turn the timestamp into a 'pretty date'
+        dt = datetime.strptime(self.timestamp, "%Y%m%d_%H%M%S")
+        pretty_date = dt.strftime("%B %d, %Y")
+
+        doc.add_paragraph(f"{pretty_date}\n")
 
         doc.add_paragraph("Hiring Team")
         doc.add_paragraph("Vuono Group\n\n")
@@ -180,5 +183,5 @@ class GeneratorAgent:
 
         path = os.path.join(self.letters_path, filename)
 
-        # Save the cover letter
+        # Save the cover letter to /data/cover_letters/
         doc.save(path)
