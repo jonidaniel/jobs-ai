@@ -27,32 +27,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const nextArrow = category.querySelectorAll(".next-btn");
 
     // On click listener for upper left arrow
-    prevArrow[0].addEventListener("click", (event) => {
-      event.preventDefault();
+    prevArrow[0].addEventListener("click", () => {
       currentIndex = index === 0 ? experienceCategories.length - 1 : index - 1;
       // Go change to previous category
       showCategory(currentIndex);
     });
 
     // On click listener for upper right arrow
-    nextArrow[0].addEventListener("click", (event) => {
-      event.preventDefault();
+    nextArrow[0].addEventListener("click", () => {
       currentIndex = (index + 1) % experienceCategories.length;
       // Go change to next category
       showCategory(currentIndex);
     });
 
     // On click listener for lower left arrow
-    prevArrow[1].addEventListener("click", (event) => {
-      event.preventDefault();
+    prevArrow[1].addEventListener("click", () => {
       currentIndex = index === 0 ? experienceCategories.length - 1 : index - 1;
       // Go change to previous category
       showCategory(currentIndex);
     });
 
     // On click listener for lower right arrow
-    nextArrow[1].addEventListener("click", (event) => {
-      event.preventDefault();
+    nextArrow[1].addEventListener("click", () => {
       currentIndex = (index + 1) % experienceCategories.length;
       // Go change to next category
       showCategory(currentIndex);
