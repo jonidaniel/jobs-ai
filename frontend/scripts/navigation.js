@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   );
   let currentIndex = 0;
 
-  // Toggle a section's (an experience category's) state
+  // Toggle an experience category's state
   function showSection(index) {
     experienceCategories.forEach((category, i) => {
       category.classList.toggle("active", i === index);
