@@ -29,11 +29,11 @@ function createSliderRow(key) {
 // Create input text row
 function createInputTextRow(key) {
   return `
-    <div class="input-field flex justify-between items-center">
+    <div class="flex justify-between items-center">
       <span>${key}</span>
       <input
         type="text"
-        class="w-2/3 border border-gray-300 rounded px-2 py-1"
+        class="input-field w-2/3 border border-gray-300 rounded px-2 py-1"
         data-key=${key}
       />
     </div>
