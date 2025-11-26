@@ -2,7 +2,7 @@
 // under experience-category-container div to an array
 document.addEventListener("DOMContentLoaded", () => {
   const experienceCategories = Array.from(
-    document.querySelectorAll("#experience-categories-container section")
+    document.querySelectorAll("#experience-categories-wrapper section")
   );
 
   let currentIndex = 0;
