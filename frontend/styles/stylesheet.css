@@ -65,18 +65,18 @@ section {
   padding-left: 15px;
 }
 
-#experience-categories-container {
+#experience-categories-wrapper {
   margin-left: auto;
   margin-right: auto;
 }
-#experience-categories-container section {
+#experience-categories-wrapper section {
   display: none;
 }
-#experience-categories-container section.active {
+#experience-categories-wrapper section.active {
   display: block;
 }
 
-.lower-arrows {
+.bottom-arrows {
   padding-top: 75px;
 }
 
