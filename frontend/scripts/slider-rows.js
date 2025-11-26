@@ -26,9 +26,21 @@ function createSliderRow(key) {
   `;
 }
 
-// Inject HTML into containers
+// Create input text row
+function createInputTextRow(key) {
+  return `
+    <div class="input-field flex justify-between items-center">
+      <span>${key}</span>
+      <input
+        type="text"
+        class="w-2/3 border border-gray-300 rounded px-2 py-1"
+        data-key=${key}
+      />
+    </div>
+  `;
+}
 
-// Programming, scripting, and markup languages
+// Inject HTML into 'Programming, scripting, and markup languages' category slider containers
 document.getElementById("javascript").innerHTML = createSliderRow("JavaScript");
 document.getElementById("html-css").innerHTML = createSliderRow("HTML/CSS");
 document.getElementById("sql").innerHTML = createSliderRow("SQL");
@@ -74,8 +86,10 @@ document.getElementById("ocaml").innerHTML = createSliderRow("OCaml");
 document.getElementById("prolog").innerHTML = createSliderRow("Prolog");
 document.getElementById("cobol").innerHTML = createSliderRow("COBOL");
 document.getElementById("mojo").innerHTML = createSliderRow("Mojo");
+// Inject HTML into 'Programming, scripting, and markup languages' category text input container
+document.getElementById("other1").innerHTML = createInputTextRow("Other1");
 
-// Databases
+// Inject HTML into 'Databases' category slider containers
 document.getElementById("postgresql").innerHTML = createSliderRow("PostgreSQL");
 document.getElementById("mysql").innerHTML = createSliderRow("MySQL");
 document.getElementById("sqlite").innerHTML = createSliderRow("SQLite");
@@ -115,8 +129,10 @@ document.getElementById("cockroachdb").innerHTML =
   createSliderRow("Cockroachdb");
 document.getElementById("pocketbase").innerHTML = createSliderRow("Pocketbase");
 document.getElementById("datomic").innerHTML = createSliderRow("Datomic");
+// Inject HTML into 'Databases' category text input container
+document.getElementById("other2").innerHTML = createInputTextRow("Other2");
 
-// Cloud development
+// Inject HTML into 'Cloud development' category slider containers
 document.getElementById("docker").innerHTML = createSliderRow("Docker");
 document.getElementById("npm").innerHTML = createSliderRow("npm");
 document.getElementById("amazon-web-services-aws").innerHTML = createSliderRow(
@@ -166,8 +182,10 @@ document.getElementById("railway").innerHTML = createSliderRow("Railway");
 document.getElementById("ibm-cloud").innerHTML = createSliderRow("IBM Cloud");
 document.getElementById("yandex-cloud").innerHTML =
   createSliderRow("Yandex Cloud");
+// Inject HTML into 'Cloud development' category text input container
+document.getElementById("other3").innerHTML = createInputTextRow("Other3");
 
-// Web frameworks and technologies
+// Inject HTML into 'Web frameworks and technologies' category slider containers
 document.getElementById("nodejs").innerHTML = createSliderRow("Node.js");
 document.getElementById("react").innerHTML = createSliderRow("React");
 document.getElementById("jquery").innerHTML = createSliderRow("jQuery");
@@ -199,8 +217,10 @@ document.getElementById("fastify").innerHTML = createSliderRow("Fastify");
 document.getElementById("axum").innerHTML = createSliderRow("Axum");
 document.getElementById("phoenix").innerHTML = createSliderRow("Phoenix");
 document.getElementById("drupal").innerHTML = createSliderRow("Drupal");
+// Inject HTML into 'Web frameworks and technologies' category text input container
+document.getElementById("other4").innerHTML = createInputTextRow("Other4");
 
-// Dev IDEs
+// Inject HTML into 'Dev IDEs' category slider containers
 document.getElementById("visual-studio-code").innerHTML =
   createSliderRow("Visual Studio Code");
 document.getElementById("visual-studio").innerHTML =
@@ -239,8 +259,10 @@ document.getElementById("cline-and-or-roo").innerHTML =
   createSliderRow("Cline and/or Roo");
 document.getElementById("aider").innerHTML = createSliderRow("Aider");
 document.getElementById("trae").innerHTML = createSliderRow("Trae");
+// Inject HTML into 'Dev IDEs' category text input container
+document.getElementById("other5").innerHTML = createInputTextRow("Other5");
 
-// Large language models
+// Inject HTML into 'Large language models' category slider containers
 document.getElementById("openai-gpt").innerHTML = createSliderRow("OpenAI GPT");
 document.getElementById("claude-sonnet").innerHTML =
   createSliderRow("Claude Sonnet");
@@ -273,8 +295,10 @@ document.getElementById("cohere-command-a").innerHTML =
   createSliderRow("Cohere: Command A");
 document.getElementById("reka-flash3-or-other-reka-models").innerHTML =
   createSliderRow("Reka (Flash 3 or other Reka models)");
+// Inject HTML into 'Large language models' category text input container
+document.getElementById("other6").innerHTML = createInputTextRow("Other6");
 
-// Code documentation and collaboration tools
+// Inject HTML into 'Code documentation and collaboration tools' category slider containers
 document.getElementById("github").innerHTML = createSliderRow("GitHub");
 document.getElementById("jira").innerHTML = createSliderRow("Jira");
 document.getElementById("gitlab").innerHTML = createSliderRow("GitLab");
@@ -309,8 +333,10 @@ document.getElementById("stack-overflow-for-teams").innerHTML = createSliderRow(
 document.getElementById("microsoft-planner").innerHTML =
   createSliderRow("Microsoft Planner");
 document.getElementById("coda").innerHTML = createSliderRow("Coda");
+// Inject HTML into 'Code documentation and collaboration tools' category text input container
+document.getElementById("other7").innerHTML = createInputTextRow("Other7");
 
-// Computer operating systems
+// Inject HTML into 'Computer operating systems' category slider containers
 document.getElementById("windows").innerHTML = createSliderRow("Windows");
 document.getElementById("macos").innerHTML = createSliderRow("MacOS");
 document.getElementById("android").innerHTML = createSliderRow("Android");
@@ -328,3 +354,5 @@ document.getElementById("red-hat").innerHTML = createSliderRow("Red Hat");
 document.getElementById("nixos").innerHTML = createSliderRow("NixOS");
 document.getElementById("pop-os").innerHTML = createSliderRow("Pop!_OS");
 document.getElementById("chromeos").innerHTML = createSliderRow("ChromeOS");
+// Inject HTML into 'Computer operating systems' category text input container
+document.getElementById("other8").innerHTML = createInputTextRow("Other8");
