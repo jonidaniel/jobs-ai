@@ -254,13 +254,13 @@ document.getElementById("gemini-reasoning").innerHTML =
 document.getElementById("deepseek-reasoning").innerHTML =
   createSliderRow("DeepSeek Reasoning");
 document.getElementById("meta-llama").innerHTML = createSliderRow("Meta Llama");
-document.getElementById("deepseed-general").innerHTML =
+document.getElementById("deepseek-general").innerHTML =
   createSliderRow("DeepSeek General");
 document.getElementById("x-grok").innerHTML = createSliderRow("X Grok");
 document.getElementById("mistral").innerHTML = createSliderRow("Mistral");
 document.getElementById("perplexity-sonar").innerHTML =
   createSliderRow("Perplexity Sonar");
-document.getElementById("alibab-qwen").innerHTML =
+document.getElementById("alibaba-qwen").innerHTML =
   createSliderRow("Alibaba Qwen");
 document.getElementById("microsoft-phi-4-models").innerHTML = createSliderRow(
   "Microsoft Phi-4 models"
