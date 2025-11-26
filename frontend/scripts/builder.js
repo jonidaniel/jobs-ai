@@ -10,7 +10,7 @@ const jsonStrings = [
   '{"windows":"Windows","macos":"MacOS","android":"Android","ubuntu":"Ubuntu","ios":"iOS","linux-non-wsl":"Linux (non-WSL)","windows-subsystem-for-linux-wsl":"Windows Subsystem for Linux (WSL)","debian":"Debian","arch":"Arch","ipados":"iPadOS","fedora":"Fedora","red-hat":"Red Hat","nixos":"NixOS","pop-os":"Pop!_OS","chromeos":"ChromeOS"}',
 ];
 
-// Set HTML markup to slider containers
+// Set HTML markup to slider container divs
 let parsed = JSON.parse(jsonStrings[0]);
 for (i in parsed) {
   document.getElementById(i).innerHTML = createSlider(i, parsed[i]);
@@ -44,7 +44,7 @@ for (i in parsed) {
   document.getElementById(i).innerHTML = createSlider(i, parsed[i]);
 }
 
-// Set HTML markup to text input containers
+// Set HTML markup to text input container divs
 document.getElementById("other1").innerHTML = createTextField(
   "other1",
   "Other"
