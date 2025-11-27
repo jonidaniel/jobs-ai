@@ -79,6 +79,8 @@ def main():
         skill_profile, job_report, LETTER_STYLE, CONTACT_INFORMATION
     )
 
+    return {"status": "completed"}
+
 
 # For running as standalone with 'uv run src/jobsai/main.py'
 if __name__ == "__main__":
