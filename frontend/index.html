@@ -40,16 +40,28 @@ Author: Joni Mäkinen
     <section id="search">
       <h2>Search</h2>
 
-      <!-- Experience category wrapper:
-       1/8 'Programming, Scripting, and Markup Languages',
-       2/8 'Databases',
-       3/8 'Cloud Development',
-       4/8 'Web Frameworks and Technologies',
-       5/8 'Dev IDEs',
-       6/8 'Large Language Models',
-       7/8 'Code Documentation and Collaboration',
-       8/8 'Computer Operating Systems' -->
-      <div id="experience-categories-wrapper" class="relative">
+      <!--
+      Question set wrapper
+
+       There are 8 question sets in total:
+          1/8 'Programming, Scripting, and Markup Languages',
+          2/8 'Databases',
+          3/8 'Cloud Development',
+          4/8 'Web Frameworks and Technologies',
+          5/8 'Dev IDEs',
+          6/8 'Large Language Models',
+          7/8 'Code Documentation and Collaboration',
+          8/8 'Computer Operating Systems'
+
+        A single question set consists of:
+          - Top left/right arrows
+          - The actual questions
+          - Bottom left/right arrows
+
+        Only one question set is shown on the webpage at a time.
+        Left/right arrows change the question set.
+      -->
+      <div id="question-set-wrapper" class="relative">
         <!-- TailwindCSS form -->
         <div
           class="bg-gray-800 p-10 rounded-2xl shadow-lg w-full max-w-2xl space-y-10"
@@ -60,7 +72,7 @@ Author: Joni Mäkinen
             jobs relevant to you
           </h1>
 
-          <!-- 1/8 'Programming, Scripting, and Markup Languages' experience category -->
+          <!-- Question set 1/8: 'Programming, Scripting, and Markup Languages' -->
           <section>
             <!-- Top left/right arrows -->
             <div class="flex justify-between items-center mb-6">
@@ -75,10 +87,9 @@ Author: Joni Mäkinen
               </button>
             </div>
 
+            <!-- Questions -->
             <div class="space-y-4">
-              <!-- Sliders -->
               <div id="sliders1"></div>
-              <!-- Text field -->
               <div id="text-field1"></div>
             </div>
 
@@ -96,7 +107,7 @@ Author: Joni Mäkinen
             </div>
           </section>
 
-          <!-- 2/8 'Databases' experience category -->
+          <!-- Question set 2/8: 'Databases' -->
           <section>
             <!-- Top left/right arrows -->
             <div class="flex justify-between items-center mb-6">
@@ -111,10 +122,9 @@ Author: Joni Mäkinen
               </button>
             </div>
 
+            <!-- Questions -->
             <div class="space-y-4">
-              <!-- Sliders -->
               <div id="sliders2"></div>
-              <!-- Text field -->
               <div id="text-field2"></div>
             </div>
 
@@ -132,7 +142,7 @@ Author: Joni Mäkinen
             </div>
           </section>
 
-          <!-- 3/8 'Cloud Development' experience category -->
+          <!-- Question set 3/8: 'Cloud Development' -->
           <section>
             <!-- Top left/right arrows -->
             <div class="flex justify-between items-center mb-6">
@@ -147,10 +157,9 @@ Author: Joni Mäkinen
               </button>
             </div>
 
+            <!-- Questions -->
             <div class="space-y-4">
-              <!-- Sliders -->
               <div id="sliders3"></div>
-              <!-- Text field -->
               <div id="text-field3"></div>
             </div>
 
@@ -168,7 +177,7 @@ Author: Joni Mäkinen
             </div>
           </section>
 
-          <!-- 4/8 'Web Frameworks and Technologies' experience category -->
+          <!-- Question set 4/8: 'Web Frameworks and Technologies' -->
           <section>
             <!-- Top left/right arrows -->
             <div class="flex justify-between items-center mb-6">
@@ -184,10 +193,9 @@ Author: Joni Mäkinen
             </div>
 
             <!-- REMEMBER TO ADD REACT NATIVE ??? -->
+            <!-- Questions -->
             <div class="space-y-4">
-              <!-- Sliders -->
               <div id="sliders4"></div>
-              <!-- Text field -->
               <div id="text-field4"></div>
             </div>
 
@@ -205,7 +213,7 @@ Author: Joni Mäkinen
             </div>
           </section>
 
-          <!-- 5/8 'Dev IDEs' experience category -->
+          <!-- Question set 5/8: 'Dev IDEs' -->
           <section>
             <!-- Top left/right arrows -->
             <div class="flex justify-between items-center mb-6">
@@ -220,10 +228,9 @@ Author: Joni Mäkinen
               </button>
             </div>
 
+            <!-- Questions -->
             <div class="space-y-4">
-              <!-- Sliders -->
               <div id="sliders5"></div>
-              <!-- Text field -->
               <div id="text-field5"></div>
             </div>
 
@@ -241,7 +248,7 @@ Author: Joni Mäkinen
             </div>
           </section>
 
-          <!-- 6/8 'Large Language Models' experience category -->
+          <!-- Question set 6/8: 'Large Language Models' -->
           <section>
             <!-- Top left/right arrows -->
             <div class="flex justify-between items-center mb-6">
@@ -256,10 +263,9 @@ Author: Joni Mäkinen
               </button>
             </div>
 
+            <!-- Questions -->
             <div class="space-y-4">
-              <!-- Sliders -->
               <div id="sliders6"></div>
-              <!-- Text field -->
               <div id="text-field6"></div>
             </div>
 
@@ -277,7 +283,7 @@ Author: Joni Mäkinen
             </div>
           </section>
 
-          <!-- 7/8 'Code Documentation and Collaboration' experience category -->
+          <!-- Question set 7/8: 'Code Documentation and Collaboration' -->
           <section>
             <!-- Top left/right arrows -->
             <div class="flex justify-between items-center mb-6">
@@ -292,10 +298,9 @@ Author: Joni Mäkinen
               </button>
             </div>
 
+            <!-- Questions -->
             <div class="space-y-4">
-              <!-- Sliders -->
               <div id="sliders7"></div>
-              <!-- Text field -->
               <div id="text-field7"></div>
             </div>
 
@@ -313,7 +318,7 @@ Author: Joni Mäkinen
             </div>
           </section>
 
-          <!-- 8/8 'Computer Operating Systems' experience category -->
+          <!-- Question set 8/8: 'Computer Operating Systems' -->
           <section>
             <!-- Top left/right arrows -->
             <div class="flex justify-between items-center mb-6">
@@ -328,10 +333,9 @@ Author: Joni Mäkinen
               </button>
             </div>
 
+            <!-- Questions -->
             <div class="space-y-4">
-              <!-- Sliders -->
               <div id="sliders8"></div>
-              <!-- Text field -->
               <div id="text-field8"></div>
             </div>
 
