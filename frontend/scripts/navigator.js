@@ -5,67 +5,68 @@
 */
 
 function main() {
-  // Gather all section tags (i.e. experience categories: languages, databases...)
-  // under experience-category-container div to an array
-  const experienceCategories = Array.from(
-    document.querySelectorAll("#experience-categories-wrapper section")
-  );
-
-  let currentIndex = 0;
-
-  // Toggle which experience category to show (index 0–7), only one at a time
-  // (affects also the arrows because they are inside the categories)
-  function showCategory(index, onRefresh = True) {
-    experienceCategories.forEach((category, i) => {
-      category.classList.toggle("active", i === index);
+  // Toggles which question set (1–8) is visible
+  function showQuestionSet(currentIndex, refreshing = True) {
+    // Iterate over all question sets
+    questionSets.forEach((questionSet, questionSetIndex) => {
+      // Make the question set visible if its index matches currentIndex
+      questionSet.classList.toggle("active", questionSetIndex === currentIndex);
     });
-    // If refreshing, not loading page for the first time
-    if (onRefresh) {
-      // Make arrow clicks scroll to top of category
-      experienceCategories[index].scrollIntoView({
+    // If coming from a page refresh (i.e. not loading the page for the first time)
+    if (refreshing) {
+      // Scroll browser view to top of question set
+      questionSets[currentIndex].scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
     }
   }
 
-  // Attach listeners to arrows inside each experience category
-  // (there are 2 arrows inside each category, 16 total)
-  experienceCategories.forEach((category, index) => {
-    const prevArrow = category.querySelectorAll(".prev-btn");
-    const nextArrow = category.querySelectorAll(".next-btn");
+  // Store all question sets in an array
+  const questionSets = Array.from(
+    document.querySelectorAll("#question-set-wrapper section")
+  );
 
-    // On click listener for upper left arrow
-    prevArrow[0].addEventListener("click", () => {
-      currentIndex = index === 0 ? experienceCategories.length - 1 : index - 1;
-      // Go change to previous category
-      showCategory(currentIndex, true); // true for not loading the page for first time but refreshing
-    });
+  // Makes question set 1/8 be the one that shows up on page load
+  let currentIndex = 0;
 
-    // On click listener for upper right arrow
-    nextArrow[0].addEventListener("click", () => {
-      currentIndex = (index + 1) % experienceCategories.length;
-      // Go change to next category
-      showCategory(currentIndex, true); // true for not loading the page for first time but refreshing
-    });
+  // Attach on click listeners to all 32 arrows
+  questionSets.forEach((questionSet, questionSetIndex) => {
+    // Grab both left arrows of a question set (top and bottom)
+    const leftArrows = questionSet.querySelectorAll(".prev-btn");
+    // Grab both right arrows of a question set (top and bottom)
+    const rightArrows = questionSet.querySelectorAll(".next-btn");
 
-    // On click listener for lower left arrow
-    prevArrow[1].addEventListener("click", () => {
-      currentIndex = index === 0 ? experienceCategories.length - 1 : index - 1;
-      // Go change to previous category
-      showCategory(currentIndex, true); // true for not loading the page for first time but refreshing
-    });
+    // Add listeners to both left arrows
+    for (arrow of leftArrows) {
+      // Left arrow is clicked
+      arrow.addEventListener("click", () => {
+        // If questionSetIndex is 0 (i.e. if currently showing question set 1/8),
+        // then set currentIndex as 7 (i.e. show set 8/8)
+        // If questionSetIndex is anything else,
+        // then subtract it by one (i.e. show previous set)
+        currentIndex =
+          questionSetIndex === 0
+            ? questionSets.length - 1
+            : questionSetIndex - 1;
+        // Go make previous question set visible
+        showQuestionSet(currentIndex, true); // // true indicates that the page is being refreshed
+      });
+    }
 
-    // On click listener for lower right arrow
-    nextArrow[1].addEventListener("click", () => {
-      currentIndex = (index + 1) % experienceCategories.length;
-      // Go change to next category
-      showCategory(currentIndex, true); // true for not loading the page for first time but refreshing
-    });
+    // Add listeners to both right arrows
+    for (arrow of rightArrows) {
+      // Right arrow is clicked
+      arrow.addEventListener("click", () => {
+        // Set currentIndex as ????????????????????????????????????????????????????
+        currentIndex = (questionSetIndex + 1) % questionSets.length;
+        // Go make next question set visible
+        showQuestionSet(currentIndex, true); // true indicates that the page is being refreshed
+      });
+    }
   });
 
-  // Show first section on load
-  showCategory(currentIndex, false); // false for not refreshing but loading page for the first time
+  showQuestionSet(currentIndex, false); // false indicates that the page is being loaded for the first time
 }
 
 document.addEventListener("DOMContentLoaded", main);

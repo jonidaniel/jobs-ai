@@ -5,32 +5,37 @@
 */
 
 function main() {
-  // Grab the submit button
   const submitBtn = document.getElementById("submit-btn");
 
-  // On submit button click
+  // Submit button is clicked
   submitBtn.addEventListener("click", () => {
+    // The result will be stored as key-value pairs in this object
+    // {
+    //   javascript: 3,
+    //   html-css: 2,
+    //   ...
+    //   text-field4: "React Native",
+    //   ...
+    // }
     const result = {};
 
-    // Gather all slider inputs
+    // Iterate over all slider questions
     document.querySelectorAll(".slider").forEach((slider) => {
-      // Get the slider's unique key (e.g. JavaScript)
+      // Grab the slider's unique key (e.g. "javascript")
       const key = slider.dataset.key;
-      // Save value under unique key
+      // Create a new key to the result object and store the slider's value (e.g. 3) under it
       result[key] = Number(slider.value);
     });
 
-    // Gather all text inputs
-    document.querySelectorAll(".input-field").forEach((input) => {
-      // Get the text input's unique key (e.g. Other1)
-      const key = input.dataset.key;
-      // Save value under unique key
-      result[key] = input.value.trim();
+    // Iterate over all text field questions
+    document.querySelectorAll(".text-field").forEach((textField) => {
+      // Grab the text field's unique key (e.g. "text-field1")
+      const key = textField.dataset.key;
+      // Create a new key to the result object and store the text field's value (e.g. "React Native") under it
+      result[key] = textField.value.trim();
     });
 
-    // { JavaScript: 1, HTML/CSS: 2, ... }
     console.log(result);
-    // console.log(result.JavaScript);
 
     // Send to backend
     // fetch("/api/submit", { method: "POST", body: JSON.stringify(result) });

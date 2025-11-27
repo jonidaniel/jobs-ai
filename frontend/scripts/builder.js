@@ -5,6 +5,48 @@
 */
 
 function main() {
+  // Creates HTML for slider questions
+  function createSlider(key, value) {
+    return `
+    <div class="flex flex-col w-full">
+      <label class="mb-1">${value}</label>
+      <input
+        class="slider accent-blue-500 w-full"
+        type="range"
+        min="0"
+        max="7"
+        value="0"
+        data-key=${key}
+      />
+      <!-- Notch labels -->
+      <div class="flex justify-between mt-1 text-gray-600 text-xs">
+        <span>0 yrs</span>
+        <span>< 0.5 yrs</span>
+        <span>< 1.0 yrs</span>
+        <span>< 1.5 yrs</span>
+        <span>< 2.0 yrs</span>
+        <span>< 2.5 yrs</span>
+        <span>< 3.0 yrs</span>
+        <span>> 3.0 yrs</span>
+      </div>
+    </div>
+  `;
+  }
+
+  // Creates HTML for text field questions
+  function createTextField(key, value) {
+    return `
+    <div class="flex items-center justify-between">
+      <span>${value}</span>
+      <input
+        class="text-field border border-gray-300 px-2 py-1 rounded w-2/3"
+        type="text"
+        data-key=${key}
+      />
+    </div>
+  `;
+  }
+
   // JSON strings that contain slider keys and values for each experience category
   const jsonStrings = [
     '{"javascript":"JavaScript","html-css":"HTML/CSS","sql":"SQL","python":"Python","bash-shell":"Bash/Shell","typescript":"TypeScript","csharp":"C#","java":"Java","powershell":"PowerShell","cplusplus":"C++","c":"C","php":"PHP","go":"Go","rust":"Rust","kotlin":"Kotlin","lua":"Lua","ruby":"Ruby","dart":"Dart","assembly":"Assembly","swift":"Swift","groovy":"Groovy","visual-basic-dotnet":"Visual Basic (.Net)","perl":"Perl","r":"R","vba":"VBA","gdscript":"GDScript","scala":"Scala","elixir":"Elixir","matlab":"MATLAB","delphi":"Delphi","lisp":"Lisp","zig":"Zig","micropython":"MicroPython","erlang":"Erlang","fsharp":"F#","ada":"Ada","gleam":"Gleam","fortran":"Fortran","ocaml":"OCaml","prolog":"Prolog","cobol":"COBOL","mojo":"Mojo"}',
@@ -41,48 +83,6 @@ function main() {
       `text-field${i}`,
       "Other"
     );
-  }
-
-  // Create slider
-  function createSlider(key, value) {
-    return `
-    <div class="flex flex-col w-full">
-      <label class="mb-1">${value}</label>
-      <input
-        class="slider accent-blue-500 w-full"
-        type="range"
-        min="0"
-        max="7"
-        value="0"
-        data-key=${key}
-      />
-      <!-- Notch labels -->
-      <div class="flex justify-between mt-1 text-gray-600 text-xs">
-        <span>0 yrs</span>
-        <span>< 0.5 yrs</span>
-        <span>< 1.0 yrs</span>
-        <span>< 1.5 yrs</span>
-        <span>< 2.0 yrs</span>
-        <span>< 2.5 yrs</span>
-        <span>< 3.0 yrs</span>
-        <span>> 3.0 yrs</span>
-      </div>
-    </div>
-  `;
-  }
-
-  // Create text field
-  function createTextField(key, value) {
-    return `
-    <div class="flex items-center justify-between">
-      <span>${value}</span>
-      <input
-        class="input-field border border-gray-300 px-2 py-1 rounded w-2/3"
-        type="text"
-        data-key=${key}
-      />
-    </div>
-  `;
   }
 }
 
