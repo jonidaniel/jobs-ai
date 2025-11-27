@@ -1,34 +1,35 @@
-# ---------- DUUNITORI SCRAPER ----------
+"""
+JobsAI/src/jobsai/utils/scrapers/duunitori.py
 
-# scrape_duunitori
-# _fetch_page
-# _parse_job_card
-# _fetch_full_job_description
+Functions for scraping the Duunitori job board.
 
-# --- DESCRIPTION ---
+    scrape_duunitori
+    _fetch_page                 (internal use only)
+    _parse_job_card             (internal use only)
+    _fetch_full_job_description (internal use only)
 
-# 1. When given a query, fetches the job detail page and extracts the full description for each listing (deep mode)
-# 2. Pagination limit default is 10 pages
-# 3. Returns a list of normalized job dicts (doesn't persist to disk)
+DESCRIPTION:
+    1. When given a query, fetches the job detail page and extracts the full description for each listing (deep mode)
+    2. Pagination limit default is 10 pages
+    3. Returns a list of normalized job dicts (doesn't persist to disk)
 
-# --- URL SCHEME ---
+URL SCHEME:
+    Template:         https://duunitori.fi/tyopaikat/haku/<QUERY>?sivu=<PAGE>
+    Example:          https://duunitori.fi/tyopaikat/haku/python-developer?sivu=2
 
-# Template:         https://duunitori.fi/tyopaikat/haku/<QUERY>?sivu=<PAGE>
-# Example:          https://duunitori.fi/tyopaikat/haku/python-developer?sivu=2
+HTML PARSING STRATEGY:
+    Title:            <h3 class="job-box__title">
+    Company:          <a class="job-box__hover gtm-search-result">
+    Location:         <span class="job-box__job-location">
+    URL:              <a class="job-box__hover gtm-search-result">
+    Published date:   <span class="job-box__job-posted">
 
-# --- HTML PARSING STRATEGY ---
-
-# Title:            <h3 class="job-box__title">
-# Company:          <a class="job-box__hover gtm-search-result">
-# Location:         <span class="job-box__job-location">
-# URL:              <a class="job-box__hover gtm-search-result">
-# Published date:   <span class="job-box__job-posted">
-
-# Duunitori’s HTML may change; the parser uses several fallback selectors
-# If you see missed fields, inspect live HTML and tweak selectors
-# Select between light and deep mode
-# Light mode scrapes only
-# You can easily switch to light mode by setting DEEP_MODE=False in /config/settings.py
+Duunitori's HTML may change; the parser uses several fallback selectors
+If you see missed fields, inspect live HTML and tweak selectors
+Select between light and deep mode
+Light mode scrapes only
+You can easily switch to light mode by setting DEEP_MODE=False in /config/settings.py
+"""
 
 import time
 import logging

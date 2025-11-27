@@ -1,7 +1,10 @@
-# ---------- JOBLY SCRAPER ----------
+"""
+JobsAI/src/jobsai/utils/scrapers/jobly.py
 
-# scrape_jobly
+Functions for scraping the Jobly job board.
 
+    scrape_jobly
+"""
 
 def scrape_jobly():
     return
