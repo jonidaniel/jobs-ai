@@ -73,3 +73,9 @@
 - Refined reporter agent, now it builds honed cover letter writing instructions for generator agent
 - Made a massive refactor, now the project structure looks really good
 - Built the project UI up until the point where a clean result object is retrieved after submit button click
+
+### 2025/11/27
+
+- Made the frontend concise and intuitive
+- Implemented a FastAPI HTTP server
+- Integrated frontend to backend server, now when frontend submit button is clicked, request travels to FastAPI server, server initiates backend agent logic, then response is sent back to frontend
