@@ -17,8 +17,9 @@ import json
 from pathlib import Path
 from typing import List, Dict
 
-from config.schemas import SkillProfile
-from utils.llms import call_llm
+from jobsai.config.schemas import SkillProfile
+
+from jobsai.utils.llms import call_llm
 
 logger = logging.getLogger(__name__)
 
