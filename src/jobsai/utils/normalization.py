@@ -12,7 +12,7 @@ Normalization functions.
 import re
 from typing import List, Dict, Any
 
-from config.schemas import SKILL_ALIAS_MAP
+from jobsai.config.schemas import SKILL_ALIAS_MAP
 
 # ------------------------------
 # Public interfaces
