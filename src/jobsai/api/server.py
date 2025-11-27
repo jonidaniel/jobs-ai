@@ -35,24 +35,25 @@ class FrontendPayload(BaseModel):
 
 # ------------- API Route -------------
 @app.post("/api/endpoint")
-async def trigger_pipeline(payload: FrontendPayload):
+async def run_agent_pipeline(payload: FrontendPayload):
     """
-    Endpoint called from the frontend.
+    Endpoint for requests from frontend.
 
     The request body is the JSON collected from slider and text field questions.
     """
 
     data = payload.model_dump()
 
-    logging.info(f"Received API request with {len(data)} fields.")
+    logging.info(f"Received an API request with {len(data)} fields.")
 
-    jobsai.main(data)
+    # Initiate agent pipeline with the frontend payload
+    response = jobsai.main(data)
 
-    return {"status": "completed"}
+    # Response to frontend
+    return response
 
 
-# ------------- Run Standalone -------------
-
+# For running as standalone with 'python src/jobsai/api/server.py'
 if __name__ == "__main__":
     import uvicorn
 
