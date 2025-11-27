@@ -40,8 +40,8 @@ from urllib.parse import urljoin, quote_plus
 
 from bs4 import BeautifulSoup
 
-from config.headers import HEADERS_DUUNITORI
-from config.paths import (
+from jobsai.config.headers import HEADERS_DUUNITORI
+from jobsai.config.paths import (
     HOST_URL_DUUNITORI,
     SEARCH_URL_BASE_DUUNITORI,
     HOST_URL_JOBLY,
