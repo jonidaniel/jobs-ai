@@ -11,6 +11,7 @@ import logging
 
 from pydantic import BaseModel, ConfigDict
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 import jobsai.main as jobsai
 
@@ -22,6 +23,20 @@ app = FastAPI(
     title="JobsAI Backend",
     description="API that triggers full JobsAI pipeline.",
     version="1.0",
+)
+
+origins = [
+    "http://localhost:3000",  # your frontend URL (if using a dev server)
+    "http://127.0.0.1:3000",  # optional
+    "*",  # allow all origins (only for development)
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # or ["*"] to allow any origin
+    allow_credentials=True,
+    allow_methods=["*"],  # GET, POST, PUT, DELETE, etc.
+    allow_headers=["*"],  # allow all headers
 )
 
 
