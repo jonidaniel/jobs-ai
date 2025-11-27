@@ -21,10 +21,10 @@ from typing import Dict
 
 from docx import Document
 
+from jobsai.config.schemas import SkillProfile
+
 from jobsai.utils.llms import call_llm
 from jobsai.utils.normalization import normalize_text
-
-from jobsai.config.schemas import SkillProfile
 
 logger = logging.getLogger(__name__)
 
