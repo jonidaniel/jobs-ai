@@ -43,7 +43,7 @@ logging.basicConfig(level=logging.INFO)
 # logging.basicConfig(level=logging.DEBUG)
 
 
-def main():
+def main(req):
     """
     Launch JobsAI.
     """
