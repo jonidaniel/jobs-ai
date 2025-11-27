@@ -18,10 +18,9 @@ import json
 from pathlib import Path
 from typing import List, Dict
 
-from utils.scrapers.duunitori import scrape_duunitori
-from utils.scrapers.jobly import scrape_jobly
-
-from utils.queries import build_queries
+from jobsai.utils.scrapers.duunitori import scrape_duunitori
+from jobsai.utils.scrapers.jobly import scrape_jobly
+from jobsai.utils.queries import build_queries
 
 logger = logging.getLogger(__name__)
 
