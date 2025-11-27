@@ -1,6 +1,6 @@
 # ---------- PROMPTS ----------
 
-from config.schemas import OUTPUT_SCHEMA
+from jobsai.config.schemas import OUTPUT_SCHEMA
 
 SYSTEM_PROMPT = """
 You are the Skill Assessment Agent for an agentic AI system that automates job searching.
