@@ -1,11 +1,10 @@
-# ---------- QUERY BUILDER ----------
+"""
+JobsAI/src/jobsai/utils/queries.py
 
-# build_queries
+Query builder. Deterministic keyword generator.
 
-# --- DESCRIPTION ---
-
-# A deterministic keyword generator
-
+    build_queries
+"""
 
 def build_queries(skill_profile: dict) -> list[str]:
     """

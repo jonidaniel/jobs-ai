@@ -1,9 +1,13 @@
-# ---------- NORMALIZATION FUNCTIONS ----------
+"""
+JobsAI/src/jobsai/utils/normalization.py
 
-# normalize_parsed
-# normalize_list
-# normalize_text
-# _normalize_token
+Normalization functions.
+
+    normalize_parsed
+    normalize_list
+    normalize_text
+    _normalize_token    (internal use only)
+"""
 
 import re
 from typing import List, Dict, Any

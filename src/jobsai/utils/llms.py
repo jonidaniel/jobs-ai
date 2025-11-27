@@ -1,7 +1,11 @@
-# --------- LLM FUNCTIONS ----------
+"""
+JobsAI/src/jobsai/utils/llms.py
 
-# call_llm
-# extract_json
+Functions related to LLM use.
+
+    call_llm
+    extract_json
+"""
 
 import os
 import logging
