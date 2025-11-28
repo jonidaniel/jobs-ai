@@ -15,10 +15,9 @@ FUNCTIONS (in order of workflow):
 import os
 import logging
 import json
-from pathlib import Path
 from typing import List, Dict
 
-from jobsai.config.paths import JOB_LISTINGS_RAW_PATH
+from jobsai.config.paths import RAW_JOB_LISTING_PATH
 
 from jobsai.utils.scrapers.duunitori import scrape_duunitori
 from jobsai.utils.scrapers.jobly import scrape_jobly
@@ -114,7 +113,7 @@ class SearcherAgent:
         filename = f"{self.timestamp}_{board.lower()}_{safe_query}.json"
 
         # Form the path where to save
-        path = os.path.join(JOB_LISTINGS_RAW_PATH, filename)
+        path = os.path.join(RAW_JOB_LISTING_PATH, filename)
 
         # Save to the path
         with open(path, "w", encoding="utf-8") as f:

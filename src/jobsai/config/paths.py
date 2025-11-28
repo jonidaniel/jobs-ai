@@ -4,17 +4,17 @@ from pathlib import Path
 
 # ----- LOCAL PATHS -----
 
-SKILL_PROFILES_PATH = Path("src/jobsai/memory/vector_db/")
-JOB_LISTINGS_RAW_PATH = Path("src/jobsai/data/job_listings/raw/")
-JOB_LISTINGS_SCORED_PATH = Path("src/jobsai/data/job_listings/scored/")
-REPORTS_PATH = Path("src/jobsai/data/reports/")
-LETTERS_PATH = Path("src/jobsai/data/cover_letters/")
+SKILL_PROFILE_PATH = Path("src/jobsai/memory/vector_db/")
+RAW_JOB_LISTING_PATH = Path("src/jobsai/data/job_listings/raw/")
+SCORED_JOB_LISTING_PATH = Path("src/jobsai/data/job_listings/scored/")
+JOB_REPORT_PATH = Path("src/jobsai/data/reports/")
+COVER_LETTER_PATH = Path("src/jobsai/data/cover_letters/")
 
-SKILL_PROFILES_PATH.mkdir(parents=True, exist_ok=True)
-JOB_LISTINGS_RAW_PATH.mkdir(parents=True, exist_ok=True)
-JOB_LISTINGS_SCORED_PATH.mkdir(parents=True, exist_ok=True)
-REPORTS_PATH.mkdir(parents=True, exist_ok=True)
-LETTERS_PATH.mkdir(parents=True, exist_ok=True)
+SKILL_PROFILE_PATH.mkdir(parents=True, exist_ok=True)
+RAW_JOB_LISTING_PATH.mkdir(parents=True, exist_ok=True)
+SCORED_JOB_LISTING_PATH.mkdir(parents=True, exist_ok=True)
+JOB_REPORT_PATH.mkdir(parents=True, exist_ok=True)
+COVER_LETTER_PATH.mkdir(parents=True, exist_ok=True)
 
 # ----- URLS -----
 

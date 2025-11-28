@@ -17,17 +17,16 @@ FUNCTIONS (in order of workflow):
 import os
 import logging
 import json
-from pathlib import Path
 from typing import Dict, Optional
 
 from pydantic import ValidationError
 
-from jobsai.config.paths import SKILL_PROFILES_PATH
+from jobsai.config.paths import SKILL_PROFILE_PATH
 from jobsai.config.prompts import (
     PROFILER_SYSTEM_PROMPT as SYSTEM_PROMPT,
     PROFILER_USER_PROMPT as USER_PROMPT,
 )
-from jobsai.config.schemas import SkillProfile, OUTPUT_SCHEMA, SUBMITS_MAP
+from jobsai.config.schemas import SkillProfile, OUTPUT_SCHEMA, SUBMIT_ALIAS_MAP
 
 from jobsai.utils.llms import call_llm, extract_json
 from jobsai.utils.normalization import normalize_parsed
@@ -121,7 +120,7 @@ class ProfilerAgent:
         # Iterate over the frontend payload
         for key, value in submits.items():
             # Map key to proper term (e.g. "javascript to "JavaScript")
-            for item, mapped in SUBMITS_MAP.items():
+            for item, mapped in SUBMIT_ALIAS_MAP.items():
                 if item == key:
                     key = mapped
             # Convert frontend's index-like values (1–7) into actual years
@@ -215,16 +214,16 @@ class ProfilerAgent:
         """
 
         # TURHA?
-        if not SKILL_PROFILES_PATH.exists():
+        if not SKILL_PROFILE_PATH.exists():
             return None
 
         # Get the latest skill profile from /memory/vector_db/
-        skill_profiles = sorted(os.listdir(SKILL_PROFILES_PATH))
+        skill_profiles = sorted(os.listdir(SKILL_PROFILE_PATH))
         latest_skill_profile = skill_profiles[-1] if skill_profiles else None
 
         # If not running for the first time
         if latest_skill_profile:
-            path = os.path.join(SKILL_PROFILES_PATH, latest_skill_profile)
+            path = os.path.join(SKILL_PROFILE_PATH, latest_skill_profile)
 
             with open(path, "r", encoding="utf-8") as f:
                 try:
@@ -250,7 +249,7 @@ class ProfilerAgent:
 
         # Form a dated filename and make a path
         filename = f"{self.timestamp}_skill_profile.json"
-        path = os.path.join(SKILL_PROFILES_PATH, filename)
+        path = os.path.join(SKILL_PROFILE_PATH, filename)
 
         try:
             with open(path, "w", encoding="utf-8") as f:
@@ -258,7 +257,7 @@ class ProfilerAgent:
 
             logger.info(
                 f" SKILL PROFILE SAVED: /%s/{filename}\n",
-                SKILL_PROFILES_PATH,
+                SKILL_PROFILE_PATH,
             )
         except Exception as e:
             logger.error(f" SKILL PROFILE CREATION FAILED: {e}\n")

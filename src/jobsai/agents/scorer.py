@@ -17,10 +17,9 @@ FUNCTIONS (in order of workflow):
 import os
 import logging
 import json
-from pathlib import Path
 from typing import List, Dict
 
-from jobsai.config.paths import JOB_LISTINGS_RAW_PATH, JOB_LISTINGS_SCORED_PATH
+from jobsai.config.paths import RAW_JOB_LISTING_PATH, SCORED_JOB_LISTING_PATH
 from jobsai.config.schemas import SkillProfile
 
 from jobsai.utils.normalization import normalize_list
@@ -69,7 +68,7 @@ class ScorerAgent:
         self._save_scored_jobs(scored_jobs)
 
         logger.info(
-            f" SCORING JOBS COMPLETED: Scored {len(scored_jobs)} jobs and saved them to /{JOB_LISTINGS_SCORED_PATH}/{self.timestamp}_scored_jobs.json\n"
+            f" SCORING JOBS COMPLETED: Scored {len(scored_jobs)} jobs and saved them to /{SCORED_JOB_LISTING_PATH}/{self.timestamp}_scored_jobs.json\n"
         )
 
     # ------------------------------
@@ -84,10 +83,10 @@ class ScorerAgent:
         """
 
         jobs = []
-        for f in os.listdir(JOB_LISTINGS_RAW_PATH):
+        for f in os.listdir(RAW_JOB_LISTING_PATH):
             if not f.endswith(".json"):
                 continue
-            path = os.path.join(JOB_LISTINGS_RAW_PATH, f)
+            path = os.path.join(RAW_JOB_LISTING_PATH, f)
             try:
                 with open(path, "r", encoding="utf-8") as file:
                     data = json.load(file)
@@ -189,7 +188,7 @@ class ScorerAgent:
         if not scored_jobs:
             return
         filename = f"{self.timestamp}_scored_jobs.json"
-        path = os.path.join(JOB_LISTINGS_SCORED_PATH, filename)
+        path = os.path.join(SCORED_JOB_LISTING_PATH, filename)
         try:
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(scored_jobs, f, ensure_ascii=False, indent=2)

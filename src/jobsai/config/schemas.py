@@ -21,7 +21,7 @@ SKILL_ALIAS_MAP = {
 }
 
 # For mapping frontend payload keys to proper terms
-SUBMITS_MAP = {
+SUBMIT_ALIAS_MAP = {
     "javascript": "JavaScript",
     "html-css": "HTML/CSS",
     "sql": "SQL",

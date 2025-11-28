@@ -14,12 +14,11 @@ FUNCTIONS (in order of workflow):
 import os
 import logging
 from datetime import datetime
-from pathlib import Path
 from typing import Dict
 
 from docx import Document
 
-from jobsai.config.paths import LETTERS_PATH
+from jobsai.config.paths import COVER_LETTER_PATH
 from jobsai.config.prompts import (
     GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT,
     GENERATOR_USER_PROMPT as USER_PROMPT,
@@ -165,6 +164,6 @@ class GeneratorAgent:
 
         filename = f"{self.timestamp}_cover_letter.docx"
         # Save the cover letter to /src/jobsai/data/cover_letters/
-        cover_letter.save(os.path.join(LETTERS_PATH, filename))
+        cover_letter.save(os.path.join(COVER_LETTER_PATH, filename))
 
         return cover_letter
