@@ -113,6 +113,17 @@ class ProfilerAgent:
     # ------------------------------
 
     def _build_prompt(user_input: str, submits: Dict) -> str:
+        """
+        Build the final prompt for LLM.
+
+        Args:
+            user_input: the user input from frontend payload
+            submits: the question submits from frontend payload
+
+        Returns:
+            user_prompt: the final user prompt
+        """
+
         # Build prompt
         for key, value in submits.items():
             # Map key to proper term (e.g. "javascript to "JavaScript")
