@@ -22,6 +22,7 @@ from typing import Dict, Optional
 
 from pydantic import ValidationError
 
+from jobsai.config.paths import SKILL_PROFILES_PATH
 from jobsai.config.prompts import (
     PROFILER_SYSTEM_PROMPT as SYSTEM_PROMPT,
     PROFILER_USER_PROMPT as USER_PROMPT,
@@ -44,12 +45,10 @@ class ProfilerAgent:
     4. Save the profile
 
     Args:
-        profile_path (Path): The path to the candidate's skill profile.
         timestamp (str): The backend-wide timestamp of the moment when the main function was started.
     """
 
-    def __init__(self, profile_path: Path, timestamp: str):
-        self.profile_path = profile_path
+    def __init__(self, timestamp: str):
         self.timestamp = timestamp
 
     # ------------------------------
@@ -216,16 +215,16 @@ class ProfilerAgent:
         """
 
         # TURHA?
-        if not self.profile_path.exists():
+        if not SKILL_PROFILES_PATH.exists():
             return None
 
         # Get the latest skill profile from /memory/vector_db/
-        skill_profiles = sorted(os.listdir(self.profile_path))
+        skill_profiles = sorted(os.listdir(SKILL_PROFILES_PATH))
         latest_skill_profile = skill_profiles[-1] if skill_profiles else None
 
         # If not running for the first time
         if latest_skill_profile:
-            path = os.path.join(self.profile_path, latest_skill_profile)
+            path = os.path.join(SKILL_PROFILES_PATH, latest_skill_profile)
 
             with open(path, "r", encoding="utf-8") as f:
                 try:
@@ -251,7 +250,7 @@ class ProfilerAgent:
 
         # Form a dated filename and make a path
         filename = f"{self.timestamp}_skill_profile.json"
-        path = os.path.join(self.profile_path, filename)
+        path = os.path.join(SKILL_PROFILES_PATH, filename)
 
         try:
             with open(path, "w", encoding="utf-8") as f:
@@ -259,7 +258,7 @@ class ProfilerAgent:
 
             logger.info(
                 f" SKILL PROFILE SAVED: /%s/{filename}\n",
-                self.profile_path,
+                SKILL_PROFILES_PATH,
             )
         except Exception as e:
             logger.error(f" SKILL PROFILE CREATION FAILED: {e}\n")
