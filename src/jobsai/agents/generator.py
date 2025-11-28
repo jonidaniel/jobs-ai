@@ -118,8 +118,6 @@ class GeneratorAgent:
         self,
         skill_profile: SkillProfile,
         job_report: str,
-        # employer: Optional[str],
-        # job_title: Optional[str],
     ) -> str:
         """
         Build the user prompt.
