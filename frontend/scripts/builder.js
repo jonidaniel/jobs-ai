@@ -47,7 +47,7 @@ function main() {
   `;
   }
 
-  // JSON strings that contain slider keys and values for each experience category
+  // JSON strings that contain slider keys and values for each question set
   const jsonStrings = [
     '{"javascript":"JavaScript","html-css":"HTML/CSS","sql":"SQL","python":"Python","bash-shell":"Bash/Shell","typescript":"TypeScript","csharp":"C#","java":"Java","powershell":"PowerShell","cplusplus":"C++","c":"C","php":"PHP","go":"Go","rust":"Rust","kotlin":"Kotlin","lua":"Lua","ruby":"Ruby","dart":"Dart","assembly":"Assembly","swift":"Swift","groovy":"Groovy","visual-basic-dotnet":"Visual Basic (.Net)","perl":"Perl","r":"R","vba":"VBA","gdscript":"GDScript","scala":"Scala","elixir":"Elixir","matlab":"MATLAB","delphi":"Delphi","lisp":"Lisp","zig":"Zig","micropython":"MicroPython","erlang":"Erlang","fsharp":"F#","ada":"Ada","gleam":"Gleam","fortran":"Fortran","ocaml":"OCaml","prolog":"Prolog","cobol":"COBOL","mojo":"Mojo"}',
     '{"postgresql":"PostgreSQL","mysql":"MySQL","sqlite":"SQLite","microsoft-sql-server":"Microsoft SQL Server","redis":"Redis","mongodb":"MongoDB","mariadb":"MariaDB","elasticsearch":"Elasticsearch","dynamodb":"Dynamodb","oracle":"Oracle","bigquery":"BigQuery","supabase1":"Supabase","cloud-firestore":"Cloud Firestore","h2":"H2","cosmos-db":"Cosmos DB","firebase-realtime-database":"Firebase Realtime Database","snowflake":"Snowflake","microsoft-access":"Microsoft Access","influxdb":"InfluxDB","duckdb":"DuckDB","databricks-sql":"Databricks SQL","cassandra":"Cassandra","neo4j":"Neo4J","clickhouse":"Clickhouse","valkey":"Valkey","amazon-redshift":"Amazon Redshift","ibm-db2":"IBM DB2","cockroachdb":"Cockroachdb","pocketbase":"Pocketbase","datomic":"Datomic"}',
@@ -60,9 +60,9 @@ function main() {
   ];
 
   // Set HTML markup to slider container divs
-  // Iterate 8 times over (one for every experience category: 'Programming, Scripting, and Markup Languages', 'Databases' ...)
+  // Iterate 8 times over (one for every question set: 'Programming, Scripting, and Markup Languages', 'Databases' ...)
   for (let j = 0; j < 8; j++) {
-    // Holds HTML of all sliders in an experience category
+    // Holds HTML of all sliders in a question set
     let div = document.createElement("div");
     // From jsonStrings array, grab one JSON string at a time
     let parsed = JSON.parse(jsonStrings[j]);
@@ -71,7 +71,7 @@ function main() {
       // Pass key (i, e.g. "javascript") and value (parsed[i], e.g. "JavaScript") to a function that creates the sliders
       div.append(createSlider(i, parsed[i]));
     }
-    // div.innerText now holds all sliders of an experience category
+    // div.innerText now holds all sliders of a question set
     // Pass them all at once to the DOM
     document.getElementById(`sliders${j + 1}`).innerHTML = div.innerText;
   }
