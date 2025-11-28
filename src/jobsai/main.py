@@ -81,11 +81,11 @@ def main(submits):
     job_report = reporter.generate_report(skill_profile, REPORT_SIZE)
 
     # 5. Generate cover letters for each job
-    generator.generate_letters(
+    response = generator.generate_letters(
         skill_profile, job_report, LETTER_STYLE, CONTACT_INFORMATION
     )
 
-    return {"status": "completed"}
+    return response
 
 
 # For running as standalone with 'uv run src/jobsai/main.py'
