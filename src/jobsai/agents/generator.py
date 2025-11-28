@@ -19,6 +19,7 @@ from typing import Dict
 
 from docx import Document
 
+from jobsai.config.paths import LETTERS_PATH
 from jobsai.config.prompts import (
     GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT,
     GENERATOR_USER_PROMPT as USER_PROMPT,
@@ -35,12 +36,10 @@ class GeneratorAgent:
     """Generates cover letters.
 
     Args:
-        letters_path (Path): The path to cover letters.
         timestamp (str): The backend-wide timestamp of the moment when the main function was started.
     """
 
-    def __init__(self, letters_path: Path, timestamp: str):
-        self.letters_path = letters_path
+    def __init__(self, timestamp: str):
         self.timestamp = timestamp
 
     # ------------------------------
@@ -166,6 +165,6 @@ class GeneratorAgent:
 
         filename = f"{self.timestamp}_cover_letter.docx"
         # Save the cover letter to /src/jobsai/data/cover_letters/
-        cover_letter.save(os.path.join(self.letters_path, filename))
+        cover_letter.save(os.path.join(LETTERS_PATH, filename))
 
         return cover_letter
