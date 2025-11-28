@@ -49,11 +49,6 @@ def main(submit):
     Launch JobsAI.
     """
 
-    # Gather every answer into a dictionary (omit empty submits)
-    submits = {
-        key: value for key, value in submit.items() if value != 0 and value != ""
-    }
-
     # A constant timestamp for the whole workflow
     TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 
