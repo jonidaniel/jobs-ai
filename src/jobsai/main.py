@@ -28,9 +28,9 @@ from jobsai.agents import (
 from jobsai.config.settings import (
     job_boards,
     deep_mode,
-    REPORT_SIZE,
-    LETTER_STYLE,
-    CONTACT_INFORMATION,
+    report_size,
+    letter_style,
+    contact_information,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -75,11 +75,11 @@ def main(submits: Dict) -> Document:
     scorer.score_jobs(skill_profile=skill_profile)
 
     # 4. Write a report/an analysis on the findings and save it to /data/reports/job_report.txt
-    job_report = reporter.generate_report(skill_profile, REPORT_SIZE)
+    job_report = reporter.generate_report(skill_profile, report_size)
 
     # 5. Generate cover letters for each job
     document = generator.generate_letters(
-        skill_profile, job_report, LETTER_STYLE, CONTACT_INFORMATION
+        skill_profile, job_report, letter_style, contact_information
     )
 
     return {
