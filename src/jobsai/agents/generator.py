@@ -19,6 +19,10 @@ from typing import Dict
 
 from docx import Document
 
+from jobsai.config.prompts import (
+    GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT,
+    GENERATOR_USER_PROMPT as USER_PROMPT,
+)
 from jobsai.config.schemas import SkillProfile
 
 from jobsai.utils.llms import call_llm
@@ -84,7 +88,6 @@ class GeneratorAgent:
         Returns:
             str: The system prompt that is used to write the cover letter.
         """
-        print(self._build_system_prompt.__doc__)
 
         tone_instructions = {
             "professional": (
@@ -99,12 +102,7 @@ class GeneratorAgent:
 
         base_style = tone_instructions.get(style, tone_instructions["professional"])
 
-        system_prompt = f"""You are a professional cover letter writer.
-        Your goal is to produce polished text suitable for real-world job applications.
-        Follow this style:
-        {base_style}"""
-
-        return system_prompt
+        return SYSTEM_PROMPT.format(base_style=base_style)
 
     def _build_user_prompt(
         self,
@@ -121,23 +119,10 @@ class GeneratorAgent:
             str: The user prompt that is used to write the cover letter.
         """
 
-        user_prompt = f"""
-        Generate a tailored job-application message.
+        # KS:DJNÖJKSD
+        json_profile = skill_profile.model_dump_json(indent=2)
 
-        Candidate Skill Profile (JSON):
-        {skill_profile.model_dump_json(indent=2)}
-
-        Job Match Analysis:
-        {job_report}
-
-        Instructions:
-        - Produce a compelling but concise job-application message.
-        - Highlight the candidate's relevant skills based on the report.
-        - If employer or job title are given, tailor the message to them.
-        - Keep it truthful, specific, and readable.
-        """
-
-        return user_prompt
+        return USER_PROMPT.format(json_profile=json_profile, job_report=job_report)
 
     def _write_letter(
         self, system_prompt: str, user_prompt: str, contact_info: Dict
@@ -158,7 +143,7 @@ class GeneratorAgent:
         # Contact information at the top
         p = cover_letter.add_paragraph()
         p.add_run(f'{contact_info.get("website")}\n')
-        p.add_run(f'{contact_info.get("linkedin'")}\n')
+        p.add_run(f'{contact_info.get("linkedin")}\n')
         p.add_run(f'{contact_info.get("github")}\n\n')
         p.add_run(f'{contact_info.get("email")}\n')
         p.add_run(f'{contact_info.get("phone")}\n\n')

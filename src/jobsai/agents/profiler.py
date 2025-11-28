@@ -22,7 +22,7 @@ from typing import Dict, Optional
 
 from pydantic import ValidationError
 
-from jobsai.config.prompts import USER_PROMPT_BASE
+from jobsai.config.prompts import PROFILER_USER_PROMPT as USER_PROMPT
 from jobsai.config.schemas import SkillProfile, OUTPUT_SCHEMA, SUBMITS_MAP
 
 from jobsai.utils.llms import call_llm, extract_json
@@ -143,9 +143,9 @@ class ProfilerAgent:
             experience = f"\nI have {value} of experience with {key}."
             user_input = user_input + experience
 
-        # Insert user input and output schema into the user prompt base to create final user prompt
-        final_user_prompt = USER_PROMPT_BASE.format(
-            user_input_placeholder=user_input, output_schema=OUTPUT_SCHEMA
+        # Insert user input and output schema into the user prompt to create final user prompt
+        final_user_prompt = USER_PROMPT.format(
+            user_input=user_input, output_schema=OUTPUT_SCHEMA
         )
 
         return final_user_prompt
