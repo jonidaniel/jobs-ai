@@ -28,14 +28,15 @@ function main() {
         result[key] = Number(slider.value);
       }
     });
-    console.log(result);
 
     // Iterate over all text field questions
     document.querySelectorAll(".text-field").forEach((textField) => {
-      // Grab the text field's unique key (e.g. "text-field1")
-      const key = textField.dataset.key;
-      // Create a new key to the result object and store the text field's value (e.g. "React Native") under it
-      result[key] = textField.value.trim();
+      if (textField.value != "") {
+        // Grab the text field's unique key (e.g. "text-field1")
+        const key = textField.dataset.key;
+        // Create a new key to the result object and store the text field's value (e.g. "React Native") under it
+        result[key] = textField.value.trim();
+      }
     });
 
     async function myFunc(answers) {
