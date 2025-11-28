@@ -8,9 +8,10 @@ To run:
 """
 
 import logging
+from io import BytesIO
 
 from pydantic import BaseModel, ConfigDict
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 import jobsai.main as jobsai
@@ -62,10 +63,21 @@ async def run_agent_pipeline(payload: FrontendPayload):
     logging.info(f"Received an API request with {len(data)} fields.")
 
     # Initiate agent pipeline with the frontend payload
-    response = jobsai.main(data)
+    result = jobsai.main(data)
+    document = result["document"]
+    filename = result["filename"]
 
-    # Response to frontend
-    return response
+    # Convert Document to BytesIO
+    buffer = BytesIO()
+    document.save(buffer)
+    buffer.seek(0)
+
+    # Return file as response
+    return Response(
+        content=buffer.read(),
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
 
 
 # For running as standalone with 'python src/jobsai/api/server.py'
