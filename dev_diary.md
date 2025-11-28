@@ -79,3 +79,10 @@
 - Made the frontend concise and intuitive
 - Implemented a FastAPI HTTP server
 - Integrated frontend to backend server, now when frontend submit button is clicked, request travels to FastAPI server, server initiates backend agent logic, then response is sent back to frontend
+
+### 2025/11/28
+
+- Converted old plain HTML frontend to identical React frontend
+- Refined the UI so that a more higher quality and more appropriate JSON string is sent to the backend
+- Made the backend pipeline return a real Document object (.docx) back to Fast API server
+- Made the server endpoint respond to frontend with a Response object (.docx), now everything starting from doing selections and clicking 'submit' in the UI and ending to the browser receiving a pre-written and downloadable Word document cover letter works fast and pretty accurately
