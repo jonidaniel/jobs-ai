@@ -6,7 +6,7 @@
 
 function main() {
   // Toggles which question set (1–8) is visible
-  function showQuestionSet(currentIndex, refreshing = True) {
+  function showQuestionSet(currentIndex, refreshing = true) {
     // Iterate over all question sets
     questionSets.forEach((questionSet, questionSetIndex) => {
       // Make the question set visible if its index matches currentIndex
