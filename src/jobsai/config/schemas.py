@@ -20,7 +20,8 @@ SKILL_ALIAS_MAP = {
     "sql": "SQL",
 }
 
-SKILL_ALIAS_MAP2 = {
+# For mapping frontend payload keys to proper terms
+SUBMITS_MAP = {
     "javascript": "JavaScript",
     "html-css": "HTML/CSS",
     "sql": "SQL",
@@ -251,34 +252,23 @@ SKILL_ALIAS_MAP2 = {
 
 # ----- PROMPTING -----
 
-OUTPUT_SCHEMA = """
-The output must be valid JSON matching this schema exactly:
-
-{
-  "name": "",
-  "core_languages": [],
-  "frameworks_and_libraries": [],
-  "tools_and_platforms": [],
-  "agentic_ai_experience": [],
-  "ai_ml_experience": [],
-  "soft_skills": [],
-  "projects_mentioned": [],
+OUTPUT_SCHEMA = """{
+  "name": STRING VALUE,
+  "core_languages": [STRING VALUE(S)],
+  "frameworks_and_libraries": [STRING VALUE(S)],
+  "tools_and_platforms": [STRING VALUE(S)],
+  "agentic_ai_experience": [STRING VALUE(S)],
+  "ai_ml_experience": [STRING VALUE(S)],
+  "soft_skills": [STRING VALUE(S)],
+  "projects_mentioned": [STRING VALUE(S)],
   "experience_level": {
-      "Python": 0,
-      "JavaScript": 0,
-      "Agentic AI": 0,
-      "AI/ML": 0
+      "Python": INTEGER VALUE,
+      "JavaScript": INTEGER VALUE,
+      "Agentic AI": INTEGER VALUE,
+      "AI/ML": INTEGER VALUE
   },
-  "job_search_keywords": []
-}
-
-Notes:
-- Include fields even if empty.
-- "experience_level" MUST contain at least: Python, JavaScript, Agentic AI, AI/ML.
-- "projects_mentioned" should be short slugs or titles (no full descriptions).
-- job_search_keywords should be realistic search terms.
-- Values must be normalized, deduplicated, and concise.
-"""
+  "job_search_keywords": [STRING VALUE(S)]
+}"""
 
 # ----- PYDANTIC -----
 
