@@ -17,6 +17,7 @@ import json
 from pathlib import Path
 from typing import List, Dict
 
+from jobsai.config.paths import JOB_LISTINGS_SCORED_PATH
 from jobsai.config.prompts import (
     REPORTER_SYSTEM_PROMPT as SYSTEM_PROMPT,
     REPORTER_USER_PROMPT as USER_PROMPT,
@@ -36,13 +37,11 @@ class ReporterAgent:
     2. Write a report/an analysis of the scored job listings
 
     Args:
-        jobs_scored_path (Path): The path to the scored jobs.
         reports_path (Path): The path to the job reports.
         timestamp (str): The backend-wide timestamp of the moment when the main function was started.
     """
 
-    def __init__(self, jobs_scored_path: Path, reports_path: Path, timestamp: str):
-        self.jobs_scored_path = jobs_scored_path
+    def __init__(self, reports_path: Path, timestamp: str):
         self.reports_path = reports_path
         self.timestamp = timestamp
 
@@ -131,7 +130,9 @@ class ReporterAgent:
             List[Dict]: The
         """
 
-        path = os.path.join(self.jobs_scored_path, f"{self.timestamp}_scored_jobs.json")
+        path = os.path.join(
+            JOB_LISTINGS_SCORED_PATH, f"{self.timestamp}_scored_jobs.json"
+        )
         if not os.path.exists(path):
             return []
 

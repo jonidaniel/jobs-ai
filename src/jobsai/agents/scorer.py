@@ -20,7 +20,7 @@ import json
 from pathlib import Path
 from typing import List, Dict
 
-from jobsai.config.paths import JOB_LISTINGS_RAW_PATH
+from jobsai.config.paths import JOB_LISTINGS_RAW_PATH, JOB_LISTINGS_SCORED_PATH
 from jobsai.config.schemas import SkillProfile
 
 from jobsai.utils.normalization import normalize_list
@@ -36,12 +36,10 @@ class ScorerAgent:
     2. Save the scored job listings
 
     Args:
-        jobs_scored_path: The path to the scored job listings.
         timestamp (str): The backend-wide timestamp of the moment when the main function was started.
     """
 
-    def __init__(self, jobs_scored_path: Path, timestamp: str):
-        self.jobs_scored_path = jobs_scored_path
+    def __init__(self, timestamp: str):
         self.timestamp = timestamp
 
     # ------------------------------
@@ -71,7 +69,7 @@ class ScorerAgent:
         self._save_scored_jobs(scored_jobs)
 
         logger.info(
-            f" SCORING JOBS COMPLETED: Scored {len(scored_jobs)} jobs and saved them to /{self.jobs_scored_path}/{self.timestamp}_scored_jobs.json\n"
+            f" SCORING JOBS COMPLETED: Scored {len(scored_jobs)} jobs and saved them to /{JOB_LISTINGS_SCORED_PATH}/{self.timestamp}_scored_jobs.json\n"
         )
 
     # ------------------------------
@@ -191,7 +189,7 @@ class ScorerAgent:
         if not scored_jobs:
             return
         filename = f"{self.timestamp}_scored_jobs.json"
-        path = os.path.join(self.jobs_scored_path, filename)
+        path = os.path.join(JOB_LISTINGS_SCORED_PATH, filename)
         try:
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(scored_jobs, f, ensure_ascii=False, indent=2)
