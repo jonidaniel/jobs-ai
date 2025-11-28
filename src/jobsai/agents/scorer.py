@@ -20,6 +20,7 @@ import json
 from pathlib import Path
 from typing import List, Dict
 
+from jobsai.config.paths import JOB_LISTINGS_RAW_PATH
 from jobsai.config.schemas import SkillProfile
 
 from jobsai.utils.normalization import normalize_list
@@ -35,13 +36,11 @@ class ScorerAgent:
     2. Save the scored job listings
 
     Args:
-        jobs_raw_path: The path to the raw job listings.
         jobs_scored_path: The path to the scored job listings.
         timestamp (str): The backend-wide timestamp of the moment when the main function was started.
     """
 
-    def __init__(self, jobs_raw_path: Path, jobs_scored_path: Path, timestamp: str):
-        self.jobs_raw_path = jobs_raw_path
+    def __init__(self, jobs_scored_path: Path, timestamp: str):
         self.jobs_scored_path = jobs_scored_path
         self.timestamp = timestamp
 
@@ -87,10 +86,10 @@ class ScorerAgent:
         """
 
         jobs = []
-        for f in os.listdir(self.jobs_raw_path):
+        for f in os.listdir(JOB_LISTINGS_RAW_PATH):
             if not f.endswith(".json"):
                 continue
-            path = os.path.join(self.jobs_raw_path, f)
+            path = os.path.join(JOB_LISTINGS_RAW_PATH, f)
             try:
                 with open(path, "r", encoding="utf-8") as file:
                     data = json.load(file)

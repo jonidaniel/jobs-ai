@@ -18,6 +18,8 @@ import json
 from pathlib import Path
 from typing import List, Dict
 
+from jobsai.config.paths import JOB_LISTINGS_RAW_PATH
+
 from jobsai.utils.scrapers.duunitori import scrape_duunitori
 from jobsai.utils.scrapers.jobly import scrape_jobly
 from jobsai.utils.queries import build_queries
@@ -37,7 +39,6 @@ class SearcherAgent:
     Args:
         job_boards (List[str]):
         deep_mode (bool):
-        jobs_raw_path (Path):
         timestamp (str): The backend-wide timestamp of the moment when the main function was started.
     """
 
@@ -45,12 +46,10 @@ class SearcherAgent:
         self,
         job_boards: List[str],
         deep_mode: bool,
-        jobs_raw_path: Path,
         timestamp: str,
     ):
         self.job_boards = job_boards
         self.deep_mode = deep_mode
-        self.jobs_raw_path = jobs_raw_path
         self.timestamp = timestamp
 
     # ------------------------------
@@ -115,7 +114,7 @@ class SearcherAgent:
         filename = f"{self.timestamp}_{board.lower()}_{safe_query}.json"
 
         # Form the path where to save
-        path = os.path.join(self.jobs_raw_path, filename)
+        path = os.path.join(JOB_LISTINGS_RAW_PATH, filename)
 
         # Save to the path
         with open(path, "w", encoding="utf-8") as f:
