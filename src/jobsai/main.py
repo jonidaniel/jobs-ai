@@ -32,7 +32,6 @@ from jobsai.config.paths import (
     REPORTS_PATH,
     LETTERS_PATH,
 )
-from jobsai.config.prompts import PROFILER_SYSTEM_PROMPT as SYSTEM_PROMPT
 from jobsai.config.settings import (
     JOB_BOARDS,
     DEEP_MODE,
@@ -70,7 +69,7 @@ def main(submits: Dict) -> Document:
                 I have very good soft skills."
 
     # 1. Assess a candidate and return a skill profile of them
-    skill_profile = profiler.create_profile(SYSTEM_PROMPT, user_input, submits)
+    skill_profile = profiler.create_profile(user_input, submits)
 
     # 2. Build search queries based on the skill profile
     # Then scrape job boards for job listings
