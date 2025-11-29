@@ -78,4 +78,17 @@ export default function builder() {
       "Other"
     );
   }
+
+  // Set HTML markup to 'General Questions' section
+  document.getElementById("text-field0").innerHTML = `
+    <div class="flex items-center justify-between">
+      <span>General</span>
+      <input
+        class="text-field border border-gray-300 px-2 py-1 rounded w-2/3"
+        type="text"
+        data-key="general"
+        value="My name is Joni Potala. I have developed software since 2020. I have built and published multiple full-stack apps (frontend, backend, database, desktop, mobile). I have built multi-agent orchestrations with OpenAI Agents SDK for half a year. I have very good soft skills."
+      />
+    </div>
+    `;
 }
