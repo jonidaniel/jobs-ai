@@ -6,6 +6,17 @@ from pydantic import BaseModel, Field
 
 # ----- MAPPING -----
 
+# For mapping experience strings to numeric values (frontend payload has numeric values)
+EXPERIENCE_ALIAS_MAP = {
+    1: "less than half a year",
+    2: "less than a year",
+    3: "less than 1.5 years",
+    4: "less than 2 years",
+    5: "less than 2.5 years",
+    6: "less than 3 years",
+    7: "over 3 years",
+}
+
 SKILL_ALIAS_MAP = {
     "py": "Python",
     "python3": "Python",
