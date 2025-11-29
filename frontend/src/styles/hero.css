@@ -1,6 +1,7 @@
 /* Hero section styles */
 
 #hero {
+  padding: 280px 10%;
   text-align: center;
 }
 #hero h1 {
