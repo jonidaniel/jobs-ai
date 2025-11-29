@@ -3,7 +3,7 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  /* padding: 2rem; */
   text-align: center;
 }
 * {
@@ -21,11 +21,11 @@ body {
 }
 
 /* Section layout */
-section {
+/* section {
   min-height: 100vh;
-  padding: 80px 10%;
+  padding: 280px 10%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
+} */
