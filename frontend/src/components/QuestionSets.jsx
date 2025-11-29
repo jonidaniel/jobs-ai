@@ -26,19 +26,19 @@ export default function QuestionSets() {
      *
      *   Only one question set is shown on the webpage at a time
      */
-    <div id="question-set-wrapper" className="relative">
+    <div id="question-set-wrapper" className="relative" class="flex">
+      <p>LEFT</p>
       {/* TailwindCSS form */}
-      <div className="bg-gray-800 p-10 rounded-2xl shadow-lg space-y-10">
+      <div className="bg-gray-800 p-10 rounded-2xl shadow-lg">
         {/* General question set */}
         <section>
+          <h3 class="text-3xl">1/8</h3>
+          <h3 class="text-3xl">General Questions</h3>
           {/* Top left/right arrows */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center">
             <button className="prev-btn text-white text-2xl px-3 py-1">
               &larr;
             </button>
-            <h3 className="text-xl font-semibold text-white mb-4">
-              General Questions 0/8
-            </h3>
             <button className="next-btn text-white text-2xl px-3 py-1">
               &rarr;
             </button>
@@ -50,13 +50,10 @@ export default function QuestionSets() {
           </div>
 
           {/* Bottom left/right arrows */}
-          <div className="bottom-arrows flex justify-between items-center mb-6">
+          <div className="bottom-arrows flex justify-between items-center">
             <button className="prev-btn text-white text-2xl px-3 py-1">
               &larr;
             </button>
-            <h3 className="text-xl font-semibold text-white mb-4">
-              General Questions 0/8
-            </h3>
             <button className="next-btn text-white text-2xl px-3 py-1">
               &rarr;
             </button>
@@ -75,14 +72,13 @@ export default function QuestionSets() {
            * Left/right arrows change the question set
            */
           <section key={i}>
+            <h3 class="text-3xl">{i + 2}/9</h3>
+            <h3 class="text-3xl">{getTitle(i)}</h3>
             {/* Top left/right arrows */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center">
               <button className="prev-btn text-white text-2xl px-3 py-1">
                 &larr;
               </button>
-              <h3 className="text-xl font-semibold text-white mb-4">
-                {getTitle(i)} ({i + 1}/8)
-              </h3>
               <button className="next-btn text-white text-2xl px-3 py-1">
                 &rarr;
               </button>
@@ -95,13 +91,10 @@ export default function QuestionSets() {
             </div>
 
             {/* Bottom left/right arrows */}
-            <div className="bottom-arrows flex justify-between items-center mb-6">
+            <div className="bottom-arrows flex justify-between items-center">
               <button className="prev-btn text-white text-2xl px-3 py-1">
                 &larr;
               </button>
-              {/* <h3 className="text-xl font-semibold text-white mb-4">
-                {getTitle(i)} ({i + 1}/8)
-              </h3> */}
               <button className="next-btn text-white text-2xl px-3 py-1">
                 &rarr;
               </button>
@@ -109,19 +102,20 @@ export default function QuestionSets() {
           </section>
         ))}
       </div>
+      <p>RIGHT</p>
     </div>
   );
 }
 
 function getTitle(i) {
   return [
-    "Programming, Scripting, and Markup Languages Experience in Years",
-    "Databases Experience in Years",
-    "Cloud Development Experience in Years",
-    "Web Frameworks and Technologies Experience in Years",
-    "Dev IDEs Experience in Years",
-    "Large Language Models Experience in Years",
-    "Code Documentation and Collaboration Experience in Years",
-    "Computer Operating Systems Experience in Years",
+    "Programming, Scripting, and Markup Languages Experience",
+    "Databases Experience",
+    "Cloud Development Experience",
+    "Web Frameworks and Technologies Experience",
+    "Dev IDEs Experience",
+    "Large Language Models Experience",
+    "Code Documentation and Collaboration Experience",
+    "Computer Operating Systems Experience",
   ][i];
 }
