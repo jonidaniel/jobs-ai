@@ -3,7 +3,7 @@ import Hero from "./components/Hero";
 import Search from "./components/Search";
 import Contact from "./components/Contact";
 
-import "./stylesheet.css";
+import "./styles/App.css";
 
 export default function App() {
   return (
