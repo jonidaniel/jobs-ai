@@ -90,13 +90,13 @@ class ProfilerAgent:
         parsed = normalize_parsed(parsed)
         # Validate with Pydantic
         try:
-            profile = SkillProfile(**parsed)
+            skill_profile = SkillProfile(**parsed)
         except ValidationError as e:
             logger.error(" Validation error: %s", e)
             raise
 
         # Merge the profile with an existing profile
-        merged_profile = self._merge_profiles(profile)
+        merged_profile = self._merge_profiles(skill_profile)
 
         # return the merged profile
         return merged_profile
@@ -104,8 +104,7 @@ class ProfilerAgent:
     # ------------------------------
     # Internal functions
     # ------------------------------
-    # KATOHAN VÄHÄN TOTO USER_PROMPPUA
-    # niin juu täähän saattaa kadotat tästä kun saa frontista pian noi
+
     def _build_prompt(self, user_input: str, submits: Dict) -> str:
         """Build the final user prompt for an LLM.
 
@@ -159,7 +158,7 @@ class ProfilerAgent:
         Returns:
             SkillProfile: The skill profile unmodified if there is not an existing skill profile, a merged skill profile if there was an existing skill profile.
         """
-        # Load existing skill profile from /memory/vector_db/skill_profile.json
+        # Load existing skill profile from /src/jobsai/memory/vector_db/
         existing = self._load_profile()
 
         # If running for the first time
@@ -201,7 +200,7 @@ class ProfilerAgent:
         merged["name"] = skill_profile.name or existing.name
         merged_profile = SkillProfile(**merged)
 
-        # Save merged skill profile to src/jobsai/memory/vector_db/
+        # Save merged skill profile to /src/jobsai/memory/vector_db/
         self._save_profile(merged_profile)
 
         return merged_profile
@@ -217,7 +216,7 @@ class ProfilerAgent:
         if not SKILL_PROFILE_PATH.exists():
             return None
 
-        # Get the latest skill profile from /memory/vector_db/
+        # Get the latest skill profile from /src/jobsai/memory/vector_db/
         skill_profiles = sorted(os.listdir(SKILL_PROFILE_PATH))
         latest_skill_profile = skill_profiles[-1] if skill_profiles else None
 

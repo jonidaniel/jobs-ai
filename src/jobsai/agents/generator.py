@@ -14,9 +14,11 @@ FUNCTIONS (in order of workflow):
 import os
 import logging
 from datetime import datetime
+from tkinter import RIGHT
 from typing import Dict
 
 from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 from jobsai.config.paths import COVER_LETTER_PATH
 from jobsai.config.prompts import (
@@ -138,8 +140,9 @@ class GeneratorAgent:
 
         cover_letter = Document()
 
-        # Contact information at the top
+        # Contact information at the top right
         p = cover_letter.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         p.add_run(f'{contact_info.get("website")}\n')
         p.add_run(f'{contact_info.get("linkedin")}\n')
         p.add_run(f'{contact_info.get("github")}\n\n')
@@ -149,18 +152,28 @@ class GeneratorAgent:
         # Turn the timestamp into a 'pretty date'
         dt = datetime.strptime(self.timestamp, "%Y%m%d_%H%M%S")
         pretty_date = dt.strftime("%B %d, %Y")
-        # Add the date
-        cover_letter.add_paragraph(f"{pretty_date}\n")
+        # Add the date (align right)
+        cover_letter.add_paragraph(f"{pretty_date}\n").alignment = (
+            WD_ALIGN_PARAGRAPH.RIGHT
+        )
 
-        # Add the recipient
-        cover_letter.add_paragraph("ADD RECRUITER/HIRING TEAM")
-        cover_letter.add_paragraph("ADD HIRING COMPANY/GROUP\n\n")
+        # Add the recipient (align right)
+        cover_letter.add_paragraph("ADD RECRUITER/HIRING TEAM").alignment = (
+            WD_ALIGN_PARAGRAPH.RIGHT
+        )
+        cover_letter.add_paragraph("ADD HIRING COMPANY/GROUP\n\n").alignment = (
+            WD_ALIGN_PARAGRAPH.RIGHT
+        )
 
-        # Get the actual body/content of the cover letter
+        # Get the actual body/content of the cover letter and normalize it
         raw = call_llm(system_prompt, user_prompt)
         normalized = normalize_text(raw)
         # Insert the body to the document
         cover_letter.add_paragraph(normalized)
+
+        # Add signature
+        cover_letter.add_paragraph("Best regards,").alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        cover_letter.add_paragraph("ADD YOUR NAME").alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
         filename = f"{self.timestamp}_cover_letter.docx"
         # Save the cover letter to /src/jobsai/data/cover_letters/

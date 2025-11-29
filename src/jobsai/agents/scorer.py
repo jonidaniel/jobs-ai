@@ -47,18 +47,18 @@ class ScorerAgent:
     def score_jobs(self, skill_profile: SkillProfile):
         """Score the raw job listings based on the candidate's skill profile.
 
-        Save the scored jobs to src/jobsai/data/job_listings/scored/.
+        Saves the scored jobs to src/jobsai/data/job_listings/scored/.
 
         Args:
             skill_profile (SkillProfile): The candidate's skill profile.
         """
 
-        logger.info(" SCORING JOBS STARTING...")
-
         job_listings = self._load_job_listings()
         if not job_listings:
             logger.warning(" No job listings found to score.")
             return
+
+        logger.info(" SCORING JOBS ...")
 
         scored_jobs = [
             self._compute_job_score(job, skill_profile) for job in job_listings
@@ -68,7 +68,7 @@ class ScorerAgent:
         self._save_scored_jobs(scored_jobs)
 
         logger.info(
-            f" SCORING JOBS COMPLETED: Scored {len(scored_jobs)} jobs and saved them to /{SCORED_JOB_LISTING_PATH}/{self.timestamp}_scored_jobs.json\n"
+            f" SCORED {len(scored_jobs)} JOBS AND SAVED THEM TO /{SCORED_JOB_LISTING_PATH}/{self.timestamp}_scored_jobs.json\n"
         )
 
     # ------------------------------
@@ -126,7 +126,7 @@ class ScorerAgent:
         snippet = (job.get("description_snippet") or "").strip().lower()
         if not title and not query and not snippet:
             return ""
-        # Limit snippet length to keep keys short while remaining distinctive.
+        # Limit snippet length to keep keys short while remaining distinctive
         snippet_prefix = snippet[:80]
         return f"{title}|{query}|{snippet_prefix}"
 
@@ -179,7 +179,7 @@ class ScorerAgent:
         return job_copy
 
     def _save_scored_jobs(self, scored_jobs: List[Dict]):
-        """Save the scored jobs to src/jobsai/data/job_listings/scored/ as a JSON file.
+        """Save the scored jobs to /src/jobsai/data/job_listings/scored/ as a JSON file.
 
         Args:
             scored_jobs (List[Dict]): The scored job listings.

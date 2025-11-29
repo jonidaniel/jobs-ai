@@ -45,12 +45,10 @@ class ReporterAgent:
     # ------------------------------
     # Public interface
     # ------------------------------
-    def generate_report(
-        self, skill_profile: SkillProfile, report_size: int = 10
-    ) -> str:
+    def generate_report(self, skill_profile: SkillProfile, report_size: int) -> str:
         """Generate a summary report on the most-scored jobs.
 
-        Saves it to src/jobsai/data/reports/ and also returns the job report.
+        Saves it to src/jobsai/data/job_reports/ and also returns the job report.
 
         Args:
             report_size (int): The desired number of top jobs to include in the report.
@@ -79,7 +77,8 @@ class ReporterAgent:
             instructions = call_llm(
                 SYSTEM_PROMPT,
                 USER_PROMPT.format(
-                    full_description=full_description, skill_profile=skill_profile
+                    full_description=full_description,
+                    skill_profile=skill_profile,
                 ),
             )
 
