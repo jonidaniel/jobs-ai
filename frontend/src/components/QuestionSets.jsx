@@ -35,6 +35,40 @@ export default function QuestionSets() {
           jobs relevant to you
         </h1>
 
+        {/* General question set */}
+        <section>
+          {/* Top left/right arrows */}
+          <div className="flex justify-between items-center mb-6">
+            <button className="prev-btn text-white text-2xl px-3 py-1">
+              &larr;
+            </button>
+            <h3 className="text-xl font-semibold text-white mb-4">
+              General Questions 0/8
+            </h3>
+            <button className="next-btn text-white text-2xl px-3 py-1">
+              &rarr;
+            </button>
+          </div>
+
+          {/* Questions */}
+          <div className="space-y-4">
+            <div id="text-field0"></div>
+          </div>
+
+          {/* Bottom left/right arrows */}
+          <div className="bottom-arrows flex justify-between items-center mb-6">
+            <button className="prev-btn text-white text-2xl px-3 py-1">
+              &larr;
+            </button>
+            <h3 className="text-xl font-semibold text-white mb-4">
+              General Questions 0/8
+            </h3>
+            <button className="next-btn text-white text-2xl px-3 py-1">
+              &rarr;
+            </button>
+          </div>
+        </section>
+
         {/* Create an array of 8 question sets */}
         {Array.from({ length: 8 }).map((_, i) => (
           /* Question set
@@ -80,7 +114,6 @@ export default function QuestionSets() {
             </div>
           </section>
         ))}
-
         {/* Submit button */}
         <div className="flex justify-center">
           <button
