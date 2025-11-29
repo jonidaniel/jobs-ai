@@ -7,7 +7,7 @@ from pathlib import Path
 SKILL_PROFILE_PATH = Path("src/jobsai/memory/vector_db/")
 RAW_JOB_LISTING_PATH = Path("src/jobsai/data/job_listings/raw/")
 SCORED_JOB_LISTING_PATH = Path("src/jobsai/data/job_listings/scored/")
-JOB_REPORT_PATH = Path("src/jobsai/data/reports/")
+JOB_REPORT_PATH = Path("src/jobsai/data/job_reports/")
 COVER_LETTER_PATH = Path("src/jobsai/data/cover_letters/")
 
 SKILL_PROFILE_PATH.mkdir(parents=True, exist_ok=True)
