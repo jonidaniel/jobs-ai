@@ -99,24 +99,15 @@ export default function QuestionSets() {
               <button className="prev-btn text-white text-2xl px-3 py-1">
                 &larr;
               </button>
-              <h3 className="text-xl font-semibold text-white mb-4">
+              {/* <h3 className="text-xl font-semibold text-white mb-4">
                 {getTitle(i)} ({i + 1}/8)
-              </h3>
+              </h3> */}
               <button className="next-btn text-white text-2xl px-3 py-1">
                 &rarr;
               </button>
             </div>
           </section>
         ))}
-        {/* Submit button */}
-        <div className="flex justify-center">
-          <button
-            id="submit-btn"
-            className="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow"
-          >
-            Submit
-          </button>
-        </div>
       </div>
     </div>
   );
@@ -124,13 +115,13 @@ export default function QuestionSets() {
 
 function getTitle(i) {
   return [
-    "Programming, Scripting, and Markup Languages",
-    "Databases",
-    "Cloud Development",
-    "Web Frameworks and Technologies",
-    "Dev IDEs",
-    "Large Language Models",
-    "Code Documentation and Collaboration",
-    "Computer Operating Systems",
+    "Programming, Scripting, and Markup Languages Experience in Years",
+    "Databases Experience in Years",
+    "Cloud Development Experience in Years",
+    "Web Frameworks and Technologies Experience in Years",
+    "Dev IDEs Experience in Years",
+    "Large Language Models Experience in Years",
+    "Code Documentation and Collaboration Experience in Years",
+    "Computer Operating Systems Experience in Years",
   ][i];
 }
