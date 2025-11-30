@@ -22,5 +22,7 @@ HOST_URL_DUUNITORI = "https://duunitori.fi"
 SEARCH_URL_BASE_DUUNITORI = (
     "https://duunitori.fi/tyopaikat/haku/{query_slug}?sivu={page}"
 )
-HOST_URL_JOBLY = "https://jobly.fi"
-SEARCH_URL_BASE_JOBLY = "https://duunitori.fi/tyopaikat/search/{query_slug}?page={page}"
+HOST_URL_JOBLY = "https://www.jobly.fi"
+SEARCH_URL_BASE_JOBLY = (
+    "https://www.jobly.fi/en/jobs?search={query_encoded}&page={page}"
+)
