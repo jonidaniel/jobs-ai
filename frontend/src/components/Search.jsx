@@ -26,6 +26,19 @@ export default function Search() {
       }
     });
 
+    // Iterate over all checkbox questions (multiple choice)
+    document.querySelectorAll(".checkbox-field").forEach((checkbox) => {
+      if (checkbox.checked) {
+        const key = checkbox.dataset.key;
+        const value = checkbox.dataset.value;
+        // Store as array if multiple selections, or as single value
+        if (!result[key]) {
+          result[key] = [];
+        }
+        result[key].push(value);
+      }
+    });
+
     // Iterate over all text field questions
     document.querySelectorAll(".text-field").forEach((textField) => {
       if (textField.value != "") {
