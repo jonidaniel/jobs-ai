@@ -2,6 +2,8 @@
 
 Acts as the GENERATOR AGENT.
 
+python -m uvicorn jobsai.api.server:app --reload --app-dir src
+
 CLASSES:
     GeneratorAgent
 
