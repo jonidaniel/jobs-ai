@@ -16,7 +16,6 @@ FUNCTIONS (in order of workflow):
 import os
 import logging
 from datetime import datetime
-from tkinter import RIGHT
 from typing import Dict
 
 from docx import Document
