@@ -2,79 +2,45 @@
 
 ## Description
 
-### An agentic AI system for end-to-end automated job searching and job application document generation: enter your skills and preferences to the system once and get job recommendations and cover letters continuously. Checks input resources consistently and updates search queries autonomously.
+### An agentic AI system for end-to-end automated job finding and cover letter generation: enter your skills and preferences to the system once and get job recommendations and cover letters continuously. Checks input resources consistently and updates search queries autonomously.
 
-## Operating Logic / Workflow
+## Agent Architecture
 
-- ### 1. Assesses a candidate's skills and saves them as a _skill profile_
+### Entails 7 agents arranged in a _prompt chaining architecture_, each agent with predefined purposes and responsibilities:
 
-- ### 2. Forms job search keywords based on the profile
+1. Profiler Agent `JobsAI/src/jobsai/agents/skill_assessor.py`
 
-- ### 2. Finds relevant job listings by doing web searches
+   - Assesses a candidate's skillset and forms a skill profile for them
 
-- ### 3. Prioritizes the listings based on relevancy
+2. Searcher Agent `JobsAI/src/jobsai/agents/searcher.py`
 
-- ### 4. Writes a report on the findings, with explanations and justifications
+   - Searches relevant jobs from various job boards
 
-- ### 5. Generates résumé and cover letter suggestions based on your skill profile and job requirements
+3. Scorer Agent `JobsAI/src/jobsai/agents/scorer.py`
 
-## Project Structure
+   - Scores the found jobs based on relevancy
 
-`/agents/` This is where agents are located
+4. Reporter Agent `JobsAI/src/jobsai/agents/reporter.py`
 
-`/data/` This is where outputted data, like job listings and cover letter recommendations, are stored
+   - Writes analysis reports on the highest-scored jobs
 
-`/memory/vector_db/` This is where the candidate's skill profile is stored
+5. Generator Agent `JobsAI/src/jobsai/agents/generator.py`
 
-`/tests/` This is where tests, like HTML files simulating job listing sites, are located
+   - Generates cover letters the jobs
 
-`/utils/` This is where utilities, like normalization functions and scraper scripts, are stored
+6. Notifier agent `JobsAI/src/jobsai/agents/notifier.py`
+
+   - Notifies the candidate of new cover letters
 
 ## Technologies
 
-JobsAI is built using [Python](), [LangChain]()
+JobsAI is built using [Python]()
 
 JobsAI requires minimum Python3.12 for it to work.
 
 ## Setup
 
 JobAI was developed with `uv` package manager and we strongly recommend using it for running the system
-
-Download `uv` and go to the project's root directory and run `uv sync` to install dependencies
-
-Then run `uv run main.py` to run JobAI
-
-## Agent Architecture
-
-### Entails 7 agents arranged in a _prompt chaining architecture_, each agent with predefined purposes and responsibilities:
-
-1. Skill Assessment agent `/agents/skill_assessor.py`
-
-   - Assesses a candidate's skillset
-
-2. Searcher agent `/agents/searcher.py`
-
-   - Searches relevant job listing based on the assessment
-
-3. Scorer agent `/agents/scorer.py`
-
-   - Scorer the job listings based on relevancy
-
-4. Planner agent `/agents/planner.py`
-
-   - Plans...
-
-5. Reporter agent `/agents/reporter.py`
-
-   - Writes a report...
-
-6. Generator agent `/agents/generator.py`
-
-   - Generates suggestions for résumés and cover letters
-
-7. Notifier agent `/agents/notifier.py`
-
-   - Notifies the candidate of new job opportunities
 
 ## Author
 
