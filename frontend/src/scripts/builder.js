@@ -28,7 +28,7 @@ export default function builder() {
   }
 
   // Creates HTML for text field questions
-  function createTextField(key, value) {
+  function createTextField(key, value, defaultValue = "") {
     return `
     <div class="flex flex-col w-full">
       <label class="mb-1">${value}</label>
@@ -36,6 +36,7 @@ export default function builder() {
         class="text-field border border-gray-300 px-2 py-1 rounded w-full"
         type="text"
         data-key=${key}
+        value="${defaultValue}"
       />
     </div>
   `;
@@ -53,42 +54,58 @@ export default function builder() {
     '{"windows":"Windows","macos":"MacOS","android":"Android","ubuntu":"Ubuntu","ios":"iOS","linux-non-wsl":"Linux (non-WSL)","windows-subsystem-for-linux-wsl":"Windows Subsystem for Linux (WSL)","debian":"Debian","arch":"Arch","ipados":"iPadOS","fedora":"Fedora","red-hat":"Red Hat","nixos":"NixOS","pop-os":"Pop!_OS","chromeos":"ChromeOS"}',
   ];
 
+  // Set HTML markup to 'General Questions' section (index 0) - 10 text fields
+  const generalQuestionLabels = [
+    "Name",
+    "Years of Experience",
+    "Background Summary",
+    "Key Skills",
+    "Previous Projects",
+    "Education",
+    "Certifications",
+    "Languages",
+    "Location",
+    "Additional Information",
+  ];
+
+  for (let i = 0; i < 10; i++) {
+    const defaultValue =
+      i === 2
+        ? "My name is Joni Potala. I have developed software since 2020. I have built and published multiple full-stack apps (frontend, backend, database, desktop, mobile). I have built multi-agent orchestrations with OpenAI Agents SDK for half a year. I have very good soft skills."
+        : "";
+
+    document.getElementById(`text-field-general-${i}`).innerHTML =
+      createTextField(
+        `text-field-general-${i}`,
+        generalQuestionLabels[i],
+        defaultValue
+      );
+  }
+
   // Set HTML markup to slider container divs
   // Iterate 8 times over (one for every question set: 'Programming, Scripting, and Markup Languages', 'Databases' ...)
+  // Note: These are question sets 1-8 (indices 1-8 in the array, but use slider indices 1-8)
   for (let j = 0; j < 8; j++) {
     // Holds HTML of all sliders in a question set
-    let div = document.createElement("div");
+    let sliderHTML = "";
     // From jsonStrings array, grab one JSON string at a time
     let parsed = JSON.parse(jsonStrings[j]);
     // For every key (e.g. "javascript") in parsed JSON
     for (let i in parsed) {
       // Pass key (i, e.g. "javascript") and value (parsed[i], e.g. "JavaScript") to a function that creates the sliders
-      div.append(createSlider(i, parsed[i]));
+      sliderHTML += createSlider(i, parsed[i]);
     }
-    // div.innerText now holds all sliders of a question set
-    // Pass them all at once to the DOM
-    document.getElementById(`sliders${j + 1}`).innerHTML = div.innerText;
+    // Pass all sliders at once to the DOM
+    // Use j+1 because question sets 1-8 use slider indices 1-8
+    document.getElementById(`sliders${j + 1}`).innerHTML = sliderHTML;
   }
 
-  // Set HTML markup to text field container divs
-  // Iterate 8 times over (there are 8 text fields)
+  // Set HTML markup to text field container divs for question sets 1-8
+  // Iterate 8 times over (there are 8 text fields for the 8 question sets)
   for (let i = 1; i < 9; i++) {
     document.getElementById(`text-field${i}`).innerHTML = createTextField(
       `text-field${i}`,
       "Other"
     );
   }
-
-  // Set HTML markup to 'General Questions' section
-  document.getElementById("text-field0").innerHTML = `
-    <div class="flex flex-col w-full">
-      <label class="mb-1">General</label>
-      <input
-        class="text-field border border-gray-300 px-2 py-1 rounded w-full"
-        type="text"
-        data-key="general"
-        value="My name is Joni Potala. I have developed software since 2020. I have built and published multiple full-stack apps (frontend, backend, database, desktop, mobile). I have built multi-agent orchestrations with OpenAI Agents SDK for half a year. I have very good soft skills."
-      />
-    </div>
-    `;
 }
