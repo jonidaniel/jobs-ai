@@ -75,9 +75,6 @@ function MultipleChoice({ keyName, label, options }) {
 }
 
 function QuestionSet({ index, isActive, sectionRef }) {
-  // Parse slider data
-  const sliderData = SLIDER_DATA.map((jsonStr) => JSON.parse(jsonStr));
-
   return (
     <section ref={sectionRef} style={{ display: isActive ? "block" : "none" }}>
       <h3 className="text-3xl">{index + 1}/9</h3>
@@ -113,7 +110,7 @@ function QuestionSet({ index, isActive, sectionRef }) {
           // Other question sets (1-8)
           <>
             {/* Sliders */}
-            {Object.entries(sliderData[index - 1]).map(([key, label]) => (
+            {Object.entries(SLIDER_DATA[index - 1]).map(([key, label]) => (
               <Slider key={key} keyName={key} label={label} />
             ))}
             {/* Text field */}
