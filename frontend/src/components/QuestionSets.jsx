@@ -3,6 +3,7 @@ import { SLIDER_DATA } from "../config/sliderData";
 import {
   GENERAL_QUESTION_LABELS,
   GENERAL_QUESTION_DEFAULTS,
+  GENERAL_QUESTION_KEYS,
   NAME_OPTIONS,
   JOB_BOARD_OPTIONS,
   DEEP_MODE_OPTIONS,
@@ -157,6 +158,56 @@ function MultipleChoice({ keyName, label, options, value, onChange }) {
 }
 
 /**
+ * SingleChoice Component
+ *
+ * Renders a group of radio buttons allowing only one selection.
+ * Used for questions that require a single answer.
+ *
+ * @param {string} keyName - Unique identifier for the radio button group
+ * @param {string} label - Display label for the question
+ * @param {string[]} options - Array of option strings to display as radio buttons
+ * @param {string} value - Currently selected option (single value, not array)
+ * @param {function} onChange - Callback function called when radio button state changes
+ *                              Receives (keyName, selectedValue) as parameters
+ */
+function SingleChoice({ keyName, label, options, value, onChange }) {
+  /**
+   * Handles radio button change events
+   * Sets the selected value directly (only one can be selected)
+   */
+  const handleRadioChange = (option) => {
+    onChange(keyName, option);
+  };
+
+  return (
+    <div className="flex flex-col w-full">
+      <label className="mb-1">{label}</label>
+      {options.map((option) => {
+        const optionKey = option.toLowerCase().replace(/\s+/g, "-");
+        const isChecked = value === option;
+        return (
+          <div key={option} className="flex items-center mb-2">
+            <input
+              className="radio-field accent-blue-500"
+              type="radio"
+              name={keyName}
+              checked={isChecked}
+              onChange={() => handleRadioChange(option)}
+              data-key={keyName}
+              data-value={option}
+              id={`${keyName}-${optionKey}`}
+            />
+            <label htmlFor={`${keyName}-${optionKey}`} className="ml-2">
+              {option}
+            </label>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
  * QuestionSet Component
  *
  * Renders a single question set (one of 9 total sets).
@@ -185,9 +236,9 @@ function QuestionSet({ index, isActive, sectionRef, formData, onFormChange }) {
       {/* Questions */}
       <div className="space-y-4">
         {index === GENERAL_QUESTIONS_INDEX ? (
-          // General Questions (index 0): 10 questions, first, second, third, fourth, and fifth are multiple choice
+          // General Questions (index 0): 5 questions, all are multiple choice
           Array.from({ length: GENERAL_QUESTIONS_COUNT }).map((_, j) => {
-            const keyName = `text-field-general-${j}`;
+            const keyName = GENERAL_QUESTION_KEYS[j];
             if (j === 0) {
               // First question (Job level) is a multiple choice with checkboxes
               // Options: Intern, Entry, Intermediate, Expert
@@ -202,54 +253,62 @@ function QuestionSet({ index, isActive, sectionRef, formData, onFormChange }) {
                 />
               );
             } else if (j === 1) {
-              // Second question (Job boards) is a multiple choice with checkboxes
-              // Options: Duunitori, Jobly
+              // Insert paragraph between questions 1 and 2
               return (
-                <MultipleChoice
-                  key={j}
-                  keyName={keyName}
-                  label={GENERAL_QUESTION_LABELS[j]}
-                  options={JOB_BOARD_OPTIONS}
-                  value={formData[keyName] || []}
-                  onChange={onFormChange}
-                />
+                <div key={`info-${j}`}>
+                  <h3>We'll search popular job listing sites for you...</h3>
+                  <br />
+                  <MultipleChoice
+                    key={j}
+                    keyName={keyName}
+                    label={GENERAL_QUESTION_LABELS[j]}
+                    options={JOB_BOARD_OPTIONS}
+                    value={formData[keyName] || []}
+                    onChange={onFormChange}
+                  />
+                </div>
               );
             } else if (j === 2) {
-              // Third question (Deep mode) is a multiple choice with checkboxes
+              // Third question (Deep mode) is a single choice with radio buttons
               // Options: Yes, No
               return (
-                <MultipleChoice
+                <SingleChoice
                   key={j}
                   keyName={keyName}
                   label={GENERAL_QUESTION_LABELS[j]}
                   options={DEEP_MODE_OPTIONS}
-                  value={formData[keyName] || []}
+                  value={formData[keyName] || ""}
                   onChange={onFormChange}
                 />
               );
             } else if (j === 3) {
-              // Fourth question (Cover letter style) is a multiple choice with checkboxes
+              // Insert paragraph between questions 3 and 4
+              // Fourth question (Job count) is a single choice with radio buttons
+              // Options: 1, 2, 3, 4, 5, 10
+              return (
+                <div key={`info-${j}`}>
+                  <h3>...and then write cover letters for the top jobs</h3>
+                  <br />
+                  <SingleChoice
+                    key={j}
+                    keyName={keyName}
+                    label={GENERAL_QUESTION_LABELS[j]}
+                    options={JOB_COUNT_OPTIONS}
+                    value={formData[keyName] || ""}
+                    onChange={onFormChange}
+                  />
+                </div>
+              );
+            } else if (j === 4) {
+              // Fifth question (Cover letter style) is a single choice with radio buttons
               // Options: Professional, Friendly, Confident
               return (
-                <MultipleChoice
+                <SingleChoice
                   key={j}
                   keyName={keyName}
                   label={GENERAL_QUESTION_LABELS[j]}
                   options={COVER_LETTER_STYLE_OPTIONS}
-                  value={formData[keyName] || []}
-                  onChange={onFormChange}
-                />
-              );
-            } else if (j === 4) {
-              // Fifth question (Job count) is a multiple choice with checkboxes
-              // Options: 1, 2, 3, 4, 5, 10
-              return (
-                <MultipleChoice
-                  key={j}
-                  keyName={keyName}
-                  label={GENERAL_QUESTION_LABELS[j]}
-                  options={JOB_COUNT_OPTIONS}
-                  value={formData[keyName] || []}
+                  value={formData[keyName] || ""}
                   onChange={onFormChange}
                 />
               );
@@ -324,10 +383,13 @@ export default function QuestionSets({ onFormDataChange }) {
 
     // Set default values for general questions (question set 0)
     for (let j = 0; j < GENERAL_QUESTIONS_COUNT; j++) {
-      const keyName = `text-field-general-${j}`;
-      if (j === 0 || j === 1 || j === 2 || j === 3 || j === 4) {
-        // First, second, third, fourth, and fifth questions are multiple choice - start with empty array
+      const keyName = GENERAL_QUESTION_KEYS[j];
+      if (j === 0 || j === 1) {
+        // First and second questions are multiple choice - start with empty array
         initial[keyName] = [];
+      } else if (j === 2 || j === 3 || j === 4) {
+        // Third, fourth, and fifth questions are single choice - start with empty string
+        initial[keyName] = "";
       } else {
         // Other general questions use default values from config
         initial[keyName] = GENERAL_QUESTION_DEFAULTS[j] || "";
@@ -415,7 +477,7 @@ export default function QuestionSets({ onFormDataChange }) {
       {/* Left arrow */}
       <div className="prev-btn-container sticky top-1/2 -translate-y-1/2 self-start h-0 flex items-center z-10">
         <button
-          className="prev-btn text-white text-2xl px-3 py-1 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
+          className="prev-btn text-white text-2xl px-3 py-1 rounded-lg transition-colors"
           onClick={handlePrevious}
           aria-label="Previous question set"
           aria-controls="question-set-wrapper"
@@ -445,7 +507,7 @@ export default function QuestionSets({ onFormDataChange }) {
       {/* Right arrow */}
       <div className="next-btn-container sticky top-1/2 -translate-y-1/2 self-start h-0 flex items-center z-10 ml-auto">
         <button
-          className="next-btn text-white text-2xl px-3 py-1 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
+          className="next-btn text-white text-2xl px-3 py-1 rounded-lg transition-colors"
           onClick={handleNext}
           aria-label="Next question set"
           aria-controls="question-set-wrapper"

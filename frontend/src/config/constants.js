@@ -5,7 +5,7 @@
  * These values define the structure and configuration of the questionnaire.
  *
  * Question Set Structure:
- * - 1 General Questions set (index 0): 10 text fields (first is multiple choice)
+ * - 1 General Questions set (index 0): 5 multiple choice questions
  * - 8 Slider Question sets (indices 1-8): Multiple sliders + 1 "Other" text field each
  *
  * Total: 9 question sets
@@ -15,7 +15,7 @@
 export const TOTAL_QUESTION_SETS = 9;
 
 /** Number of questions in the General Questions set (index 0) */
-export const GENERAL_QUESTIONS_COUNT = 10;
+export const GENERAL_QUESTIONS_COUNT = 5;
 
 /** Number of slider-based question sets (indices 1-8) */
 export const SLIDER_QUESTION_SETS_COUNT = 8;
@@ -45,3 +45,30 @@ export const SLIDER_DEFAULT = 0;
 export const GENERAL_QUESTIONS_INDEX = 0;
 export const FIRST_SLIDER_INDEX = 1;
 export const LAST_SLIDER_INDEX = 8;
+
+/**
+ * Question Set Names
+ *
+ * Kebab-case names for each question set, used when grouping form data.
+ * Index mapping:
+ * 0: "general"
+ * 1: "languages"
+ * 2: "databases"
+ * 3: "cloud-development"
+ * 4: "web-frameworks"
+ * 5: "dev-ides"
+ * 6: "llms"
+ * 7: "doc-and-collab"
+ * 8: "operating-systems"
+ */
+export const QUESTION_SET_NAMES = [
+  "general",
+  "languages",
+  "databases",
+  "cloud-development",
+  "web-frameworks",
+  "dev-ides",
+  "llms",
+  "doc-and-collab",
+  "operating-systems",
+];

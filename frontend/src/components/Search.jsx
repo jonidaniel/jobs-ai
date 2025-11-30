@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import QuestionSets from "./QuestionSets";
 import { API_ENDPOINTS } from "../config/api";
+import {
+  QUESTION_SET_NAMES,
+  GENERAL_QUESTIONS_INDEX,
+} from "../config/constants";
+import { GENERAL_QUESTION_KEYS } from "../config/generalQuestions";
+import { SLIDER_DATA } from "../config/sliderData";
 import "../styles/search.css";
 
 /**
@@ -86,16 +92,58 @@ export default function Search() {
      * - Numbers: Include if value is not 0 (sliders default to 0)
      * - Arrays: Include if array has at least one element (checkboxes)
      */
-    const result = {};
+    const filtered = {};
     Object.entries(formData).forEach(([key, value]) => {
       if (typeof value === "string" && value.trim() !== "") {
-        result[key] = value.trim();
+        filtered[key] = value.trim();
       } else if (typeof value === "number" && value !== 0) {
-        result[key] = value;
+        filtered[key] = value;
       } else if (Array.isArray(value) && value.length > 0) {
-        result[key] = value;
+        filtered[key] = value;
       }
     });
+
+    /**
+     * Group filtered data by question set
+     * Structure: { "general-questions": [{key: value}, ...], "languages": [...], ... }
+     */
+    const result = {};
+
+    // Group general questions (index 0)
+    const generalQuestions = [];
+    GENERAL_QUESTION_KEYS.forEach((key) => {
+      if (filtered[key] !== undefined) {
+        generalQuestions.push({ [key]: filtered[key] });
+      }
+    });
+    if (generalQuestions.length > 0) {
+      result[QUESTION_SET_NAMES[GENERAL_QUESTIONS_INDEX]] = generalQuestions;
+    }
+
+    // Group slider question sets (indices 1-8)
+    for (let i = 1; i < QUESTION_SET_NAMES.length; i++) {
+      const questionSetData = [];
+      const sliderKeys = Object.keys(SLIDER_DATA[i - 1]);
+      const textFieldKey = `text-field${i}`;
+
+      // Add slider values
+      sliderKeys.forEach((key) => {
+        if (filtered[key] !== undefined) {
+          questionSetData.push({ [key]: filtered[key] });
+        }
+      });
+
+      // Add text field value if present
+      if (filtered[textFieldKey] !== undefined) {
+        questionSetData.push({ [textFieldKey]: filtered[textFieldKey] });
+      }
+
+      if (questionSetData.length > 0) {
+        result[QUESTION_SET_NAMES[i]] = questionSetData;
+      }
+    }
+
+    console.log(result);
 
     // Send to backend and download document
     try {
