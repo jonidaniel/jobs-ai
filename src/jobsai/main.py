@@ -35,6 +35,8 @@ logging.basicConfig(level=logging.INFO)
 # For debug logging
 # logging.basicConfig(level=logging.DEBUG)
 
+logger = logging.getLogger(__name__)
+
 
 def main(submits: Dict) -> Dict:
     """
@@ -64,41 +66,83 @@ def main(submits: Dict) -> Dict:
     # Used for consistent file naming across all agents
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # Initialize all agents with the shared timestamp
-    # Each agent uses the timestamp to create consistently named output files
-    profiler = ProfilerAgent(timestamp)
-    searcher = SearcherAgent(job_boards, deep_mode, timestamp)
-    scorer = ScorerAgent(timestamp)
-    reporter = ReporterAgent(timestamp)
-    generator = GeneratorAgent(timestamp)
+    try:
+        # Initialize all agents with the shared timestamp
+        # Each agent uses the timestamp to create consistently named output files
+        logger.info("Initializing agents...")
+        profiler = ProfilerAgent(timestamp)
+        searcher = SearcherAgent(job_boards, deep_mode, timestamp)
+        scorer = ScorerAgent(timestamp)
+        reporter = ReporterAgent(timestamp)
+        generator = GeneratorAgent(timestamp)
+    except Exception as e:
+        error_msg = f"Failed to initialize agents: {str(e)}"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg) from e
 
     # Step 1: Assess candidate and create/update skill profile
     # Uses LLM to extract structured skill information from form submissions
-    skill_profile = profiler.create_profile(submits)
+    try:
+        logger.info("Step 1/5: Creating skill profile...")
+        skill_profile = profiler.create_profile(submits)
+        logger.info("Step 1/5: Skill profile created successfully")
+    except Exception as e:
+        error_msg = f"Step 1/5 (Profile Creation) failed: {str(e)}"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg) from e
 
     # Step 2: Build search queries from skill profile and scrape job boards
     # Queries are generated deterministically from profile keywords
     # Raw job listings are saved to /data/job_listings/raw/{timestamp}_{job_board}_{query}.json
-    searcher.search_jobs(skill_profile.model_dump())
+    try:
+        logger.info("Step 2/5: Searching job boards...")
+        searcher.search_jobs(skill_profile.model_dump())
+        logger.info("Step 2/5: Job search completed successfully")
+    except Exception as e:
+        error_msg = f"Step 2/5 (Job Search) failed: {str(e)}"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg) from e
 
     # Step 3: Score job listings based on relevancy to candidate's skill profile
     # Compares job descriptions with profile keywords to compute match scores
     # Scored listings are saved to /data/job_listings/scored/{timestamp}_scored_jobs.json
-    scorer.score_jobs(skill_profile=skill_profile)
+    try:
+        logger.info("Step 3/5: Scoring job listings...")
+        scorer.score_jobs(skill_profile=skill_profile)
+        logger.info("Step 3/5: Job scoring completed successfully")
+    except Exception as e:
+        error_msg = f"Step 3/5 (Job Scoring) failed: {str(e)}"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg) from e
 
     # Step 4: Generate analysis report on top-scoring jobs
     # Uses LLM to create personalized cover letter instructions for each job (used by GeneratorAgent)
     # Report is saved to /data/reports/job_report.txt
-    job_report = reporter.generate_report(skill_profile, report_size)
+    try:
+        logger.info("Step 4/5: Generating job report...")
+        job_report = reporter.generate_report(skill_profile, report_size)
+        logger.info("Step 4/5: Job report generated successfully")
+    except Exception as e:
+        error_msg = f"Step 4/5 (Report Generation) failed: {str(e)}"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg) from e
 
     # Step 5: Generate cover letter document
     # Uses LLM to write cover letter based on skill profile and job report
     # Document is saved to /data/cover_letters/{timestamp}_cover_letter.docx and returned
-    document = generator.generate_letters(
-        skill_profile, job_report, letter_style, contact_information
-    )
+    try:
+        logger.info("Step 5/5: Generating cover letter...")
+        document = generator.generate_letters(
+            skill_profile, job_report, letter_style, contact_information
+        )
+        logger.info("Step 5/5: Cover letter generated successfully")
+    except Exception as e:
+        error_msg = f"Step 5/5 (Cover Letter Generation) failed: {str(e)}"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg) from e
 
     # Return document and metadata for API response
+    logger.info("Pipeline completed successfully")
     return {
         "document": document,
         "timestamp": timestamp,
