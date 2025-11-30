@@ -25,10 +25,9 @@
   text-align: center;
 }
 #contact a {
-  display: block;
+  display: inline-block;
   font-size: 1.4rem;
   opacity: 0.85;
   color: lightblue;
   text-decoration: underline;
-  text-align: center;
 }
