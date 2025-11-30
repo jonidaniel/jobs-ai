@@ -1,4 +1,4 @@
-# JobsAI (0.1.0)
+# JobsAI (0.9.0)
 
 ## Description
 
