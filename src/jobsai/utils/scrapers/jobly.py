@@ -73,6 +73,8 @@ def scrape_jobly(
         results: list of normalized job dictionaries
     """
 
+    query = "it"
+
     if session is None:
         # Create HTTP session
         session = requests.Session()
@@ -112,10 +114,20 @@ def scrape_jobly(
         soup = BeautifulSoup(response.text, "html.parser")
 
         # Select all job cards
-        # Common selectors for job listing cards on Jobly
-        job_cards = soup.select(
-            "article.job-card, .job-card, .job-listing, [data-job-id], .job-item"
-        )
+        job_cards = soup.select("view-content")
+        print("VIEW CONTENT")
+        print("VIEW CONTENT")
+        print("VIEW CONTENT")
+        print(job_cards)
+        print("VIEW CONTENT")
+        print("VIEW CONTENT")
+        print("VIEW CONTENT")
+
+        # TÄSSÄ KAIKKI
+        # view-content
+        # TÄSSÄ YKSI
+        # views-row views-row-2 views-row-even
+        # views-row views-row-2 views-row-odd
 
         # If no results on current page
         if not job_cards:
@@ -128,6 +140,7 @@ def scrape_jobly(
 
         # Iterate over job cards
         for job_card in job_cards:
+            print("KJHÖHHJHJHJ")
             job = _parse_job_card(job_card)
 
             # If in deep mode, and we have a URL
@@ -233,31 +246,20 @@ def _parse_job_card(job_card: BeautifulSoup) -> Dict:
         card: the job card BeautifulSoup element
 
     Returns:
-        {
-          "title": title,
-          "company": company,
-          "location": location,
-          "url": full_url,
-          "description_snippet": snippet,
-          "published_date": published,
-          "source": "jobly"
-        }
+        Dict: dict with job information
     """
 
     # Parse title from job card
-    # Try multiple selectors for title
-    title_tag = (
-        job_card.select_one("h2 a, h3 a, .job-title a, a.job-title, h2, h3")
-        or job_card.select_one("a[href*='/jobs/']")
-        or job_card.find("a", href=re.compile(r"/jobs/|/job/"))
-    )
+    title_tag = job_card.select_one(".node__title")
     title = title_tag.get_text(strip=True) if title_tag else ""
 
+    print(title_tag)
+    print(title)
+
     # Parse company from job card
-    # Try multiple selectors for company
     company_tag = job_card.select_one(
         ".company-name, .company, [data-company], .employer"
-    ) or job_card.find(string=re.compile(r"Company|Employer", re.I))
+    )
     company = (
         company_tag.get_text(strip=True)
         if company_tag
@@ -269,7 +271,6 @@ def _parse_job_card(job_card: BeautifulSoup) -> Dict:
     )
 
     # Parse location from job card
-    # Try multiple selectors for location
     location_tag = job_card.select_one(
         ".location, .job-location, [data-location], .city, .region"
     )

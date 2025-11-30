@@ -44,8 +44,6 @@ from jobsai.config.headers import HEADERS_DUUNITORI
 from jobsai.config.paths import (
     HOST_URL_DUUNITORI,
     SEARCH_URL_BASE_DUUNITORI,
-    HOST_URL_JOBLY,
-    SEARCH_URL_BASE_JOBLY,
 )
 
 logger = logging.getLogger(__name__)
@@ -117,6 +115,13 @@ def scrape_duunitori(
         job_cards = soup.select(
             ".grid-sandbox.grid-sandbox--tight-bottom.grid-sandbox--tight-top .grid.grid--middle.job-box.job-box--lg"
         )
+        print("VIEW CONTENT")
+        print("VIEW CONTENT")
+        print("VIEW CONTENT")
+        print(job_cards)
+        print("VIEW CONTENT")
+        print("VIEW CONTENT")
+        print("VIEW CONTENT")
 
         # EHKÄ TURHA KOSKA VÄHÄN MYÖHEMMIN ON?
         #  if len(job_cards) < 20:
@@ -238,15 +243,7 @@ def _parse_job_card(job_card: BeautifulSoup) -> Dict:
         card: the job card
 
     Returns:
-        {
-          "title": title,
-          "company": company,
-          "location": location,
-          "url": full_url,
-          "description_snippet": snippet,
-          "published_date": published,
-          "source": "duunitori"
-        }:
+        Dict: dict with job information
     """
 
     # Parse title from job card
