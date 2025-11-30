@@ -1,3 +1,11 @@
+// Search Component
+
+// Is responsibly for the search section of the page
+// It contains the question sets and the submit button
+// It also contains the logic for the submit button
+// It also contains the logic for the question sets
+// It also contains the logic for the submit button
+
 import QuestionSets from "./QuestionSets";
 
 import "../styles/search.css";

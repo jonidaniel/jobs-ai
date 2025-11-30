@@ -1,3 +1,10 @@
+// Builder
+
+// Is responsible for the builder section of the page
+// It contains the logic for the builder section of the page
+// It also contains the logic for the builder section of the page
+// It also contains the logic for the builder section of the page
+
 export default function builder() {
   // Creates HTML for slider questions
   function createSlider(key, value) {

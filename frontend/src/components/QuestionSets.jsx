@@ -1,3 +1,11 @@
+// Question sets
+
+// Is responsible for the question sets section of the page
+// It contains the question sets and the submit button
+// It also contains the logic for the submit button
+// It also contains the logic for the question sets
+// It also contains the logic for the submit button
+
 import { useEffect, useRef } from "react";
 import builder from "../scripts/builder";
 

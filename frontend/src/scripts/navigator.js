@@ -1,3 +1,10 @@
+// Navigator
+
+// Is responsible for the navigator section of the page
+// It contains the logic for the navigator section of the page
+// It also contains the logic for the navigator section of the page
+// It also contains the logic for the navigator section of the page
+
 export default function navigator() {
   // Toggles which question set (1–9) is visible
   function showQuestionSet(currentIndex, refreshing = true) {

@@ -1,3 +1,10 @@
+// Submitter
+
+// Is responsible for the submitter section of the page
+// It contains the logic for the submitter section of the page
+// It also contains the logic for the submitter section of the page
+// It also contains the logic for the submitter section of the page
+
 export default function submitter() {
   const submitBtn = document.getElementById("submit-btn");
 
