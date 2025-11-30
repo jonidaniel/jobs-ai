@@ -1,7 +1,6 @@
 // Slider question data for question sets 1-8
-// Each string is a JSON object mapping keys to display labels
-
-export const SLIDER_DATA = [
+// Raw JSON strings (for reference/backup)
+const SLIDER_DATA_RAW = [
   '{"javascript":"JavaScript","html-css":"HTML/CSS","sql":"SQL","python":"Python","bash-shell":"Bash/Shell","typescript":"TypeScript","csharp":"C#","java":"Java","powershell":"PowerShell","cplusplus":"C++","c":"C","php":"PHP","go":"Go","rust":"Rust","kotlin":"Kotlin","lua":"Lua","ruby":"Ruby","dart":"Dart","assembly":"Assembly","swift":"Swift","groovy":"Groovy","visual-basic-dotnet":"Visual Basic (.Net)","perl":"Perl","r":"R","vba":"VBA","gdscript":"GDScript","scala":"Scala","elixir":"Elixir","matlab":"MATLAB","delphi":"Delphi","lisp":"Lisp","zig":"Zig","micropython":"MicroPython","erlang":"Erlang","fsharp":"F#","ada":"Ada","gleam":"Gleam","fortran":"Fortran","ocaml":"OCaml","prolog":"Prolog","cobol":"COBOL","mojo":"Mojo"}',
   '{"postgresql":"PostgreSQL","mysql":"MySQL","sqlite":"SQLite","microsoft-sql-server":"Microsoft SQL Server","redis":"Redis","mongodb":"MongoDB","mariadb":"MariaDB","elasticsearch":"Elasticsearch","dynamodb":"Dynamodb","oracle":"Oracle","bigquery":"BigQuery","supabase1":"Supabase","cloud-firestore":"Cloud Firestore","h2":"H2","cosmos-db":"Cosmos DB","firebase-realtime-database":"Firebase Realtime Database","snowflake":"Snowflake","microsoft-access":"Microsoft Access","influxdb":"InfluxDB","duckdb":"DuckDB","databricks-sql":"Databricks SQL","cassandra":"Cassandra","neo4j":"Neo4J","clickhouse":"Clickhouse","valkey":"Valkey","amazon-redshift":"Amazon Redshift","ibm-db2":"IBM DB2","cockroachdb":"Cockroachdb","pocketbase":"Pocketbase","datomic":"Datomic"}',
   '{"docker":"Docker","npm":"npm","amazon-web-services-aws":"Amazon Web Services (AWS)","pip":"Pip","kubernetes":"Kubernetes","microsoft-azure":"Microsoft Azure","vite":"Vite","homebrew":"Homebrew","google-cloud":"Google Cloud","yarn":"Yarn","make":"Make","nuget":"NuGet","webpack":"Webpack","cloudflare":"Cloudflare","terraform":"Terraform","apt":"APT","maven-build-tool":"Maven (build tool)","gradle":"Gradle","pnpm":"pnpm","cargo":"Cargo","firebase":"Firebase","prometheus":"Prometheus","msbuild":"MSBuild","composer":"Composer","ansible":"Ansible","digital-ocean":"Digital Ocean","podman":"Podman","chocolatey":"Chocolatey","vercel":"Vercel","datadog":"Datadog","poetry":"Poetry","pacman":"Pacman","netlify":"Netlify","heroku":"Heroku","bun":"Bun","supabase2":"Supabase","ninja":"Ninja","splunk":"Splunk","new-relic":"New Relic","railway":"Railway","ibm-cloud":"IBM Cloud","yandex-cloud":"Yandex Cloud"}',
@@ -11,3 +10,9 @@ export const SLIDER_DATA = [
   '{"github":"GitHub","jira":"Jira","gitlab":"GitLab","confluence":"Confluence","markdown-file":"Markdown File","azure-devops":"Azure Devops","notion":"Notion","obsidian":"Obsidian","miro":"Miro","google-workspace":"Google Workspace","trello":"Trello","wikis":"Wikis","lucid-includes-lucidchart":"Lucid (includes Lucidchart)","google-colab":"Google Colab","asana":"Asana","doxygen":"Doxygen","clickup":"Clickup","linear":"Linear","redmine":"Redmine","mondaydotcom":"Monday.com","youtrack":"YouTrack","airtable":"Airtable","stack-overflow-for-teams":"Stack Overflow for Teams","microsoft-planner":"Microsoft Planner","coda":"Coda"}',
   '{"windows":"Windows","macos":"MacOS","android":"Android","ubuntu":"Ubuntu","ios":"iOS","linux-non-wsl":"Linux (non-WSL)","windows-subsystem-for-linux-wsl":"Windows Subsystem for Linux (WSL)","debian":"Debian","arch":"Arch","ipados":"iPadOS","fedora":"Fedora","red-hat":"Red Hat","nixos":"NixOS","pop-os":"Pop!_OS","chromeos":"ChromeOS"}',
 ];
+
+// Parse JSON strings once at module load time
+// This is more efficient than parsing on every component render
+export const SLIDER_DATA = SLIDER_DATA_RAW.map((jsonStr) =>
+  JSON.parse(jsonStr)
+);
