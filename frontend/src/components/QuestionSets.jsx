@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 
 import QuestionSet from "./QuestionSet";
 
-import { TOTAL_QUESTION_SETS } from "../config/constants";
+import { TOTAL_QUESTION_SETS } from "../config/questionSet";
 import { GENERAL_QUESTION_KEYS } from "../config/generalQuestions";
 
 /**

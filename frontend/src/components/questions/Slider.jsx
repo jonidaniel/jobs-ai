@@ -1,4 +1,4 @@
-import { SLIDER_MIN, SLIDER_MAX } from "../../config/sliderData";
+import { SLIDER_MIN, SLIDER_MAX } from "../../config/sliders";
 
 /**
  * Slider Component

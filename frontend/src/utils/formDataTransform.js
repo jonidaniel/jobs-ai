@@ -1,9 +1,9 @@
-import { QUESTION_SET_NAMES } from "../config/constants";
+import { QUESTION_SET_NAMES } from "../config/questionSet";
 import {
   GENERAL_QUESTION_KEYS,
   GENERAL_QUESTIONS_INDEX,
 } from "../config/generalQuestions";
-import { SLIDER_DATA } from "../config/sliderData";
+import { SLIDER_DATA } from "../config/sliders";
 
 /**
  * Transforms flat form data into grouped structure for backend API

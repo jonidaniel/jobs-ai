@@ -3,7 +3,10 @@ import TextField from "./questions/TextField";
 import MultipleChoice from "./questions/MultipleChoice";
 import SingleChoice from "./questions/SingleChoice";
 
-import { TOTAL_QUESTION_SETS, QUESTION_SET_TITLES } from "../config/constants";
+import {
+  TOTAL_QUESTION_SETS,
+  QUESTION_SET_TITLES,
+} from "../config/questionSet";
 import {
   GENERAL_QUESTION_LABELS,
   GENERAL_QUESTION_KEYS,
@@ -15,7 +18,7 @@ import {
   COVER_LETTER_STYLE_OPTIONS,
   JOB_COUNT_OPTIONS,
 } from "../config/generalQuestions";
-import { SLIDER_DATA, SLIDER_DEFAULT } from "../config/sliderData";
+import { SLIDER_DATA, SLIDER_DEFAULT } from "../config/sliders";
 
 /**
  * QuestionSet Component
