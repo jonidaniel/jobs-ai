@@ -18,7 +18,7 @@ import {
   COVER_LETTER_STYLE_OPTIONS,
   JOB_COUNT_OPTIONS,
 } from "../config/generalQuestions";
-import { QUESTION_SET_TITLES } from "../config/questionSetTitles";
+import { QUESTION_SET_TITLES } from "../config/constants";
 import { SLIDER_DATA } from "../config/sliderData";
 
 /**
