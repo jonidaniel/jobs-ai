@@ -1,6 +1,4 @@
 """
-JobsAI/src/jobsai/utils/scrapers/duunitori.py
-
 Functions for scraping the Duunitori job board.
 
     scrape_duunitori
@@ -10,24 +8,23 @@ Functions for scraping the Duunitori job board.
 
 DESCRIPTION:
     1. When given a query, fetches the job detail page and extracts the full description for each listing (deep mode)
-    2. Pagination limit default is 10 pages
-    3. Returns a list of normalized job dicts (doesn't persist to disk)
+    2. Returns a list of normalized job dicts (doesn't persist to disk)
 
 URL SCHEME:
-    Template:         https://duunitori.fi/tyopaikat/haku/<QUERY>?sivu=<PAGE>
+    Template:         https://duunitori.fi/tyopaikat/haku/{query_slug}?sivu={page}
     Example:          https://duunitori.fi/tyopaikat/haku/python-developer?sivu=2
 
 HTML PARSING STRATEGY:
-    Title:            <h3 class="job-box__title">
-    Company:          <a class="job-box__hover gtm-search-result">
-    Location:         <span class="job-box__job-location">
-    URL:              <a class="job-box__hover gtm-search-result">
-    Published date:   <span class="job-box__job-posted">
+    Title:            .job-box__title
+    Company:          .job-box__hover.gtm-search-result
+    Location:         .job-box__job-location
+    URL:              .job-box__hover.gtm-search-result
+    Published date:   .job-box__job-posted
 
 Duunitori's HTML may change; the parser uses several fallback selectors
 If you see missed fields, inspect live HTML and tweak selectors
 Select between light and deep mode
-Light mode scrapes only
+Light mode scrapes only listing cards, deep mode scrapes the job detail page
 You can easily switch to light mode by setting DEEP_MODE=False in /config/settings.py
 """
 
@@ -60,17 +57,17 @@ def scrape_duunitori(
     per_page_limit: Optional[int] = None,
 ) -> List[Dict]:
     """
-    Fetch job listings from Duunitori for the given query.
+    Fetch job listings from Duunitori.
 
     Args:
-        query: search query string, e.g. "python developer"
-        num_pages: number of pages to crawl
-        deep_mode: if True, fetch each job's detail page to extract the full description
-        session: requests.Session to reuse connections (recommended)
-        per_page_limit: optional cap on total listings (stops when reached)
+        query: The search query string, e.g. "python developer".
+        num_pages: The number of pages to crawl.
+        deep_mode: If True, fetch each job's detail page to extract the full description.
+        session: The requests.Session to reuse connections (recommended).
+        per_page_limit: The optional cap on total listings (stops when reached).
 
     Returns:
-        results: list of normalized job dictionaries
+        List[Dict]: The list of normalized job dictionaries.
     """
 
     if session is None:
@@ -79,17 +76,19 @@ def scrape_duunitori(
     # Update default headers
     session.headers.update(HEADERS_DUUNITORI)
 
-    # Slugify query (i.e. make it URL compliant)
+    # Slugify query (URL-compliant)
     # Replace whitespace with hyphens and remove unsafe chars
     slugified_query = re.sub(r"\s+", "-", query.strip().lower())
+    # URL-encode the slugified query
     query_slug = quote_plus(slugified_query, safe="-")
 
     results = []
+    # Total number of fetched jobs
     total_fetched = 0
 
     # Iterate over a number of webpages (10 by default)
     for page in range(1, num_pages + 1):
-        # Inject URL with slugified query and page number
+        # Build search URL with slugified query and page number
         search_url = SEARCH_URL_BASE_DUUNITORI.format(query_slug=query_slug, page=page)
 
         logger.info(" Fetching Duunitori search page: %s", search_url)
@@ -111,22 +110,16 @@ def scrape_duunitori(
         # Parse the HTML text with a HTML parser
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # Select all job cards (ignore cards in 'Duunitori suosittelee' section)
+        # Select all job cards on current page (ignore cards in 'Duunitori suosittelee' section)
         job_cards = soup.select(
             ".grid-sandbox.grid-sandbox--tight-bottom.grid-sandbox--tight-top .grid.grid--middle.job-box.job-box--lg"
         )
-        print("VIEW CONTENT")
-        print("VIEW CONTENT")
-        print("VIEW CONTENT")
-        print(job_cards)
-        print("VIEW CONTENT")
-        print("VIEW CONTENT")
-        print("VIEW CONTENT")
 
-        # EHKÄ TURHA KOSKA VÄHÄN MYÖHEMMIN ON?
-        #  if len(job_cards) < 20:
-        #    break
-        # If no results on current page
+        # Break if less than 20 job cards on page (there's no next page)
+        if len(job_cards) < 20:
+            break
+
+        # Break if no results on current page
         if not job_cards:
             logger.info(
                 " No job cards found on page %s for query '%s' — stopping pagination",
@@ -135,18 +128,17 @@ def scrape_duunitori(
             )
             break
 
-        # Iterate over job cards
+        # Iterate over job cards on current page
         for job_card in job_cards:
             job = _parse_job_card(job_card)
 
-            # If in deep mode, and we have a URL
+            # If in deep mode, and we have a URL, fetch the full job description
             if deep_mode and job.get("url"):
                 try:
-                    # Fetch full job description
+                    # Fetch the full job description
                     detail = _fetch_full_job_description(session, job["url"])
 
                     if detail:
-                        # Save the full job description under its own key
                         job["full_description"] = detail
                 except Exception as e:
                     logger.warning(
@@ -156,11 +148,12 @@ def scrape_duunitori(
             else:
                 job["full_description"] = ""
 
-            # Metadata enrichment
+            # Add metadata
             job["query_used"] = query
             results.append(job)
             total_fetched += 1
 
+            # Break if reached per_page_limit
             if per_page_limit and total_fetched >= per_page_limit:
                 logger.info(" Reached per_page_limit (%s). Stopping.", per_page_limit)
                 return results
@@ -191,18 +184,17 @@ def _fetch_page(
     timeout: float = 10.0,
 ) -> Optional[requests.Response]:
     """
-    asd
+    Fetch a page with retry logic and error handling.
 
     Args:
         session: current HTTP session
         url: search URL
         retries: number of search retries
-        backoff:
+        backoff: backoff multiplier for retries
         timeout: time to timeout
 
     Returns:
-        resp:
-        None:
+        Optional[requests.Response]: Response object if successful, None if all retries failed
     """
 
     # Iterate 3 times (by default)
@@ -235,15 +227,15 @@ def _fetch_page(
 
 def _parse_job_card(job_card: BeautifulSoup) -> Dict:
     """
-    Parse a search-result job card into a partial job dict
+    Parse a search-result job card into a partial job dictionary.
 
     Defensive parsing: returns empty strings for missing fields
 
     Args:
-        card: the job card
+        job_card (BeautifulSoup): The job card BeautifulSoup element.
 
     Returns:
-        Dict: dict with job information
+        Dict: The dictionary with job information.
     """
 
     # Parse title from job card
@@ -309,9 +301,7 @@ def _fetch_full_job_description(
         retries: number of retries to fetch full description
 
     Returns:
-        description: full job description
-        best_guess: best guess for full description div
-        "": empty string on failure
+        str: The full job description text, or an empty string if the description is not found.
     """
 
     # Get response safely
@@ -333,38 +323,3 @@ def _fetch_full_job_description(
     description = description_tag.get_text(strip=True) if description_tag else ""
     if description:
         return description
-
-    # --- FALLBACK SECTION ---
-
-    # # Look for the main description container by guessing class names
-    # # desc_candidates = soup.select(".job-body, .job__description, .job-description, .job-detail__content, .advert-content")
-    # desc_candidates = soup.select(".gtm-apply-clicks, .description, .description--jobentry, .job-body, .job__description, .job-description, .job-detail__content, .advert-content")
-
-    # # If no class was found, go to fallback
-    # if not desc_candidates:
-    #     # Get all divs
-    #     divs = soup.find_all("div")
-
-    #     best_guess = ""
-    #     longest = 0
-
-    #     # Iterate over all divs on webpage
-    #     for div in divs:
-    #         # Extract all text
-    #         txt = div.get_text(" ", strip=True) # If child nodes, use space as separator, also strip trailing whitespace
-    #         # Find longest textual div
-    #         if len(txt) > longest:
-    #             longest = len(txt)
-    #             best_guess = txt
-
-    #     # return best_guess or ""
-    #     return best_guess
-
-    # # Prefer the first candidate with enough text
-    # for cand in desc_candidates:
-    #     text = cand.get_text(" ", strip=True)
-    #     if len(text) > 50:
-    #         return text
-
-    # # Fallback to concatenation
-    # return " ".join(c.get_text(" ", strip=True) for c in desc_candidates)
