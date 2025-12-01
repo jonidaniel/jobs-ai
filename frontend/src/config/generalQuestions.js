@@ -43,18 +43,6 @@ export const GENERAL_QUESTION_KEYS = [
 ];
 
 /**
- * Default values for specific general questions
- *
- * Key is the question index (0-4)
- * Value is the default text to pre-fill in the input field
- *
- * Note: All questions in the general questions set are multiple choice
- * and don't use text defaults. This object is kept for consistency
- * but should remain empty.
- */
-export const GENERAL_QUESTION_DEFAULTS = {};
-
-/**
  * Multiple choice options for the first question (Job level)
  *
  * Users can select multiple options (checkboxes).
