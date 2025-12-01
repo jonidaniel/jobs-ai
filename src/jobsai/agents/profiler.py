@@ -1,17 +1,15 @@
 """
-JobsAI/src/jobsai/agents/profiler.py
-
-Acts as the PROFILER AGENT.
+Orchestrates candidate profiling.
 
 CLASSES:
     ProfilerAgent
 
 FUNCTIONS (in order of workflow):
-    1. ProfilerAgent.create_profile   (public use)
-    2. ProfilerAgent._build_prompt    (internal use)
-    3. ProfilerAgent._merge_profiles  (internal use)
-    4. ProfilerAgent._load_profile    (internal use)
-    5. ProfilerAgent._save_profile    (internal use)
+    1. create_profile   (public use)
+    2. _build_prompt    (internal use)
+    3. _merge_profiles  (internal use)
+    4. _load_profile    (internal use)
+    5. _save_profile    (internal use)
 """
 
 import os
@@ -49,7 +47,7 @@ class ProfilerAgent:
     4. Save the profile
 
     Args:
-        timestamp (str): The backend-wide timestamp of the moment when the main function was started.
+        timestamp (str): The backend-wide timestamp for consistent file naming.
     """
 
     def __init__(self, timestamp: str):
@@ -73,16 +71,13 @@ class ProfilerAgent:
             SkillProfile: The candidate's skill profile.
         """
 
-        print()
-        logger.info(" CREATING SKILL PROFILE ...")
-
-        # Build the final user prompt from base user prompt, actual user input, and output schema
+        # Build the final user prompt
         user_prompt = self._build_prompt(form_submissions)
 
-        # Retrieve raw LLM response that contains the skill profile
+        # Retrieve raw LLM response
         raw = call_llm(SYSTEM_PROMPT, user_prompt)
 
-        # Extract the JSON substring from the raw response
+        # Extract the JSON from the raw response
         json_text = extract_json(raw)
 
         if json_text is None:
@@ -91,6 +86,7 @@ class ProfilerAgent:
         parsed = json.loads(json_text)
         # Normalize lists and keys
         parsed = normalize_parsed(parsed)
+
         # Validate with Pydantic
         try:
             skill_profile = SkillProfile(**parsed)
@@ -98,10 +94,9 @@ class ProfilerAgent:
             logger.error(" Validation error: %s", e)
             raise
 
-        # Merge the profile with an existing profile
+        # Merge the profile with an existing one
         merged_profile = self._merge_profiles(skill_profile)
 
-        # return the merged profile
         return merged_profile
 
     # ------------------------------
@@ -125,20 +120,20 @@ class ProfilerAgent:
                 - Multiple choice arrays: Selected experience levels
 
         Returns:
-            str: The formatted user prompt ready to send to the LLM
+            str: The formatted user prompt.
         """
 
-        # Extract general text input (background summary, key skills, etc.)
-        user_input = form_submissions.get("general", "")
+        user_input = "My name is Joni Potala. I've developed software for 10 years. I'm an expert in AWS. I'm collaborative and I'm a quick learner."
         experience_lines = []
 
-        # Process each form field
+        # LOOPPI ODOTTAA FLÄTTIDATAA
+        # Process each form field (technology keys, slider values, multiple choice arrays)
         for key, value in form_submissions.items():
             # Skip "general" key as it's already handled above
             if key == "general":
                 continue
 
-            # Skip multiple choice arrays (handled separately if needed)
+            # Skip multiple choice arrays
             if isinstance(value, list):
                 continue
 
@@ -151,9 +146,8 @@ class ProfilerAgent:
             if value in EXPERIENCE_ALIAS_MAP:
                 experience_text = EXPERIENCE_ALIAS_MAP[value]
                 experience_lines.append(
-                    f"\nI have {experience_text} of experience with {mapped_key}."
+                    f"I have {experience_text} of experience with {mapped_key}.\n"
                 )
-
         # Combine general input with experience statements
         user_input = user_input + "".join(experience_lines)
 
@@ -163,9 +157,62 @@ class ProfilerAgent:
             user_input=user_input, output_schema=OUTPUT_SCHEMA
         )
 
-        print(final_user_prompt)
-
         return final_user_prompt
+
+    def _load_profile(self) -> Optional[SkillProfile]:
+        """Load the existing skill profile.
+
+        Returns:
+            SkillProfile or None:
+                - A new `SkillProfile` instance if skill_profile.json is valid.
+                - None if skill_profile.json is corrupt.
+        """
+
+        if not SKILL_PROFILE_PATH.exists():
+            return None
+
+        # Get the latest skill profile from the vector database
+        skill_profiles = sorted(os.listdir(SKILL_PROFILE_PATH))
+        latest_skill_profile = skill_profiles[-1] if skill_profiles else None
+
+        # If running for the first time, return None
+        if latest_skill_profile:
+            path = os.path.join(SKILL_PROFILE_PATH, latest_skill_profile)
+
+            with open(path, "r", encoding="utf-8") as f:
+                try:
+                    # Read the JSON file and turn it into a dictionary
+                    data = json.load(f)
+                    return SkillProfile(**data)
+                except:
+                    return None
+
+        return None
+
+    def _save_profile(self, skill_profile: SkillProfile):
+        """Save the candidate's skill profile to the vector database.
+
+        Args:
+            skill_profile (SkillProfile): The candidate's skill profile (merged or unmodified).
+        """
+
+        # ???
+        out = json.loads(skill_profile.model_dump_json(by_alias=True))
+
+        # Form a dated filename and make a path
+        filename = f"{self.timestamp}_skill_profile.json"
+        path = os.path.join(SKILL_PROFILE_PATH, filename)
+
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(out, f, ensure_ascii=False, indent=2)
+
+            logger.info(
+                f" Saved skill profile to /%s/{filename}\n",
+                SKILL_PROFILE_PATH,
+            )
+        except Exception as e:
+            logger.error(f" Skill profile failed: {e}\n")
 
     def _merge_profiles(self, skill_profile: SkillProfile) -> SkillProfile:
         """
@@ -244,57 +291,3 @@ class ProfilerAgent:
         self._save_profile(merged_profile)
 
         return merged_profile
-
-    def _load_profile(self) -> Optional[SkillProfile]:
-        """Load existing skill profile.
-
-        Returns:
-            SkillProfile or None: A new `SkillProfile`instance if skill_profile.json is intact, None if skill_profile is corrupt.
-        """
-
-        # TURHA?
-        if not SKILL_PROFILE_PATH.exists():
-            return None
-
-        # Get the latest skill profile from /src/jobsai/memory/vector_db/
-        skill_profiles = sorted(os.listdir(SKILL_PROFILE_PATH))
-        latest_skill_profile = skill_profiles[-1] if skill_profiles else None
-
-        # If not running for the first time
-        if latest_skill_profile:
-            path = os.path.join(SKILL_PROFILE_PATH, latest_skill_profile)
-
-            with open(path, "r", encoding="utf-8") as f:
-                try:
-                    # Read the JSON file and turn it into a dictionary
-                    data = json.load(f)
-                    return SkillProfile(**data)
-                except:
-                    return None
-
-        return None
-
-    def _save_profile(self, skill_profile: SkillProfile):
-        """Save the candidate's skill profile to the vector database.
-
-        Args:
-            skill_profile (SkillProfile): The candidate's skill profile (merged or unmodified).
-        """
-
-        # ???
-        out = json.loads(skill_profile.model_dump_json(by_alias=True))
-
-        # Form a dated filename and make a path
-        filename = f"{self.timestamp}_skill_profile.json"
-        path = os.path.join(SKILL_PROFILE_PATH, filename)
-
-        try:
-            with open(path, "w", encoding="utf-8") as f:
-                json.dump(out, f, ensure_ascii=False, indent=2)
-
-            logger.info(
-                f" SKILL PROFILE SAVED TO /%s/{filename}\n",
-                SKILL_PROFILE_PATH,
-            )
-        except Exception as e:
-            logger.error(f" SKILL PROFILE FAILED: {e}\n")
