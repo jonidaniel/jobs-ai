@@ -1,14 +1,12 @@
 """
-JobsAI/src/jobsai/agents/reporter.py
-
-Acts as the REPORTER AGENT.
+Orchestrates the reporting of the best-scored jobs.
 
 CLASSES:
     ReporterAgent
 
 FUNCTIONS (in order of workflow):
-    1. ReporterAgent.generate_report      (public use)
-    2. ReporterAgent._load_scored_jobs    (internal use)
+    1. generate_report      (public use)
+    2. _load_scored_jobs    (internal use)
 """
 
 import os
@@ -49,22 +47,20 @@ class ReporterAgent:
         """
         Generate a summary report on the most-scored jobs.
 
-        For each top-scoring job, this function:
-        1. Uses LLM to generate personalized cover letter instructions
-        2. Formats job details (title, company, location, score, etc.)
+        For each top-scoring job, the function:
+        1. Uses an LLM to generate personalized cover letter instructions
+        2. Formats the job details (title, company, location, score, etc.)
         3. Combines everything into a readable report
 
-        The report is saved to src/jobsai/data/job_reports/ and also returned.
+        The report is saved to /src/jobsai/data/job_reports/ and returned.
 
         Args:
-            skill_profile (SkillProfile): The candidate's skill profile
-            report_size (int): The desired number of top jobs to include in the report
+            skill_profile (SkillProfile): The skill profile.
+            report_size (int): The desired number of top jobs to include in the report.
 
         Returns:
-            str: The complete job report as a formatted text string
+            str: The complete job report as a formatted text string.
         """
-
-        logger.info(" WRITING JOB REPORT ...")
 
         # Load scored jobs from previous step
         scored_jobs = self._load_scored_jobs()
@@ -93,6 +89,7 @@ class ReporterAgent:
                 ),
             )
 
+            # Get the job details
             title = job.get("title") or "N/A"
             company = job.get("company") or "N/A"
             location = job.get("location") or "N/A"
@@ -101,6 +98,7 @@ class ReporterAgent:
             missing = ", ".join(job.get("missing_skills", []))
             url = job.get("url") or "N/A"
 
+            # Add the job details to the report
             report_lines.append(f"Title: {title}")
             report_lines.append(f"Company: {company}")
             report_lines.append(f"Location: {location}")
@@ -121,9 +119,9 @@ class ReporterAgent:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(report_text)
 
-            logger.info(f" JOB REPORT SAVED TO /{path}\n")
+            logger.info(f" Saved job report to /{path}")
         except Exception as e:
-            logger.error(f" JOB REPORT FAILED: {e}\n")
+            logger.error(f" Failed to save job report: {e}")
 
         return report_text
 
@@ -131,10 +129,12 @@ class ReporterAgent:
     # Internal function
     # ------------------------------
     def _load_scored_jobs(self) -> List[Dict]:
-        """Load the scored job listings from src/jobsai/data/job_listings/scored/.
+        """Load the scored job listings.
+
+        Loads the scored job listings from SCORED_JOB_LISTING_PATH.
 
         Returns:
-            List[Dict]: The
+            List[Dict]: The list of scored job listings.
         """
 
         path = os.path.join(
