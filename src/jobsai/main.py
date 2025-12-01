@@ -57,9 +57,13 @@ def main(form_submissions: Dict) -> Dict:
     job_level = form_submissions.get("general").get("job-level")
     job_boards = form_submissions.get("general").get("job-boards")
     deep_mode = form_submissions.get("general").get("deep-mode")
+    cover_letter_num = form_submissions.get("general").get("cover-letter-num")
+    cover_letter_style = form_submissions.get("general").get("cover-letter-style")
     print(job_level)
     print(job_boards)
     print(deep_mode)
+    print(cover_letter_num)
+    print(cover_letter_style)
 
     # Generate a constant timestamp for consistent file naming across pipeline
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
