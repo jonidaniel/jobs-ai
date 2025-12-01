@@ -19,10 +19,12 @@ import { SLIDER_DATA } from "../config/sliders";
  */
 export function transformFormData(formData) {
   /**
-   * Filter form data to only include non-empty values
+   * Filter form data to only include non-empty values for optional fields
    * - Strings: Include if trimmed value is not empty
    * - Numbers: Include if value is not 0 (sliders default to 0)
    * - Arrays: Include if array has at least one element (checkboxes)
+   *
+   * Note: Required fields (general questions and additional-info) are always included
    */
   const filtered = Object.fromEntries(
     Object.entries(formData)
@@ -45,12 +47,13 @@ export function transformFormData(formData) {
   const result = {};
 
   // Group general questions (index 0)
-  const generalQuestions = GENERAL_QUESTION_KEYS.filter(
-    (key) => filtered[key] !== undefined
-  ).map((key) => ({ [key]: filtered[key] }));
-  if (generalQuestions.length > 0) {
-    result[QUESTION_SET_NAMES[GENERAL_QUESTIONS_INDEX]] = generalQuestions;
-  }
+  // Always include all 5 general questions (required by backend)
+  // Use formData directly to ensure we have the values (validation ensures they're present)
+  const generalQuestions = GENERAL_QUESTION_KEYS.map((key) => ({
+    [key]: formData[key],
+  }));
+  // Backend requires exactly 5 items, so always include the array
+  result[QUESTION_SET_NAMES[GENERAL_QUESTIONS_INDEX]] = generalQuestions;
 
   // Group slider question sets (indices 1-8)
   for (let i = 1; i < QUESTION_SET_NAMES.length - 1; i++) {
@@ -69,11 +72,11 @@ export function transformFormData(formData) {
   }
 
   // Group text-only question set (index 9)
-  if (filtered["additional-info"] !== undefined) {
-    result[QUESTION_SET_NAMES[9]] = [
-      { "additional-info": filtered["additional-info"] },
-    ];
-  }
+  // Always include additional-info (required by backend)
+  // Use formData directly to ensure we have the value (validation ensures it's present)
+  result[QUESTION_SET_NAMES[9]] = [
+    { "additional-info": formData["additional-info"] || "" },
+  ];
 
   return result;
 }

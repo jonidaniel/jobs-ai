@@ -1,8 +1,9 @@
 # ---------- SCHEMAS ----------
 
-from typing import List
+from typing import List, Dict, Any, Union
+from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator, field_validator, ConfigDict
 
 # ----- MAPPING -----
 
@@ -358,3 +359,310 @@ class SkillProfile(BaseModel):
         """
 
         validate_by_name = True
+
+
+# ----- FRONTEND PAYLOAD VALIDATION -----
+
+# Valid question set names (kebab-case)
+VALID_QUESTION_SETS = {
+    "general",
+    "languages",
+    "databases",
+    "cloud-development",
+    "web-frameworks",
+    "dev-ides",
+    "llms",
+    "doc-and-collab",
+    "operating-systems",
+    "additional-info",
+}
+
+# Valid general question keys
+VALID_GENERAL_KEYS = {
+    "job-level",
+    "job-boards",
+    "deep-mode",
+    "cover-letter-num",
+    "cover-letter-style",
+}
+
+# Valid job level options
+VALID_JOB_LEVELS = {"Expert", "Intermediate", "Entry", "Intern"}
+
+# Valid job board options
+VALID_JOB_BOARDS = {"Duunitori", "Jobly"}
+
+# Valid deep mode options
+VALID_DEEP_MODE = {"Yes", "No"}
+
+# Valid cover letter count options
+VALID_COVER_LETTER_NUM = {"1", "2", "3", "4", "5", "10"}
+
+# Valid cover letter style options
+VALID_COVER_LETTER_STYLE = {"Professional", "Friendly", "Confident"}
+
+
+class GeneralQuestionItem(BaseModel):
+    """
+    Validates a single general question item (single-key dictionary).
+
+    Examples:
+        {"job-level": ["Expert", "Intermediate"]}
+        {"deep-mode": "Yes"}
+    """
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_single_key_dict(cls, data: Any) -> Dict[str, Any]:
+        """Ensure the item is a single-key dictionary."""
+        if not isinstance(data, dict):
+            raise ValueError("General question item must be a dictionary")
+        if len(data) != 1:
+            raise ValueError(
+                "General question item must contain exactly one key-value pair"
+            )
+        return data
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def validate_value_type(cls, v: Any, info) -> Any:
+        """Validate the value type based on the key."""
+        key = list(info.data.keys())[0] if isinstance(info.data, dict) else None
+
+        if key == "job-level":
+            if not isinstance(v, list) or len(v) == 0:
+                raise ValueError(
+                    "job-level must be a non-empty array with at least one option"
+                )
+            invalid = [x for x in v if x not in VALID_JOB_LEVELS]
+            if invalid:
+                raise ValueError(
+                    f"Invalid job-level options: {invalid}. Valid options: {VALID_JOB_LEVELS}"
+                )
+        elif key == "job-boards":
+            if not isinstance(v, list) or len(v) == 0:
+                raise ValueError(
+                    "job-boards must be a non-empty array with at least one option"
+                )
+            invalid = [x for x in v if x not in VALID_JOB_BOARDS]
+            if invalid:
+                raise ValueError(
+                    f"Invalid job-board options: {invalid}. Valid options: {VALID_JOB_BOARDS}"
+                )
+        elif key == "deep-mode":
+            if not isinstance(v, str) or v not in VALID_DEEP_MODE:
+                raise ValueError(f"deep-mode must be one of: {VALID_DEEP_MODE}")
+        elif key == "cover-letter-num":
+            if not isinstance(v, str) or v not in VALID_COVER_LETTER_NUM:
+                raise ValueError(
+                    f"cover-letter-num must be one of: {VALID_COVER_LETTER_NUM}"
+                )
+        elif key == "cover-letter-style":
+            if not isinstance(v, str) or v not in VALID_COVER_LETTER_STYLE:
+                raise ValueError(
+                    f"cover-letter-style must be one of: {VALID_COVER_LETTER_STYLE}"
+                )
+        else:
+            raise ValueError(
+                f"Invalid general question key: {key}. Valid keys: {VALID_GENERAL_KEYS}"
+            )
+
+        return v
+
+    model_config = ConfigDict(
+        extra="allow"
+    )  # Allow dynamic keys since we validate structure in model_validator
+
+
+class TechnologySetItem(BaseModel):
+    """
+    Validates a single technology set item (single-key dictionary).
+
+    Examples:
+        {"javascript": 5}  # Slider value (0-7)
+        {"text-field1": "Additional languages..."}  # Text field (string)
+    """
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_single_key_dict(cls, data: Any) -> Dict[str, Any]:
+        """Ensure the item is a single-key dictionary."""
+        if not isinstance(data, dict):
+            raise ValueError("Technology set item must be a dictionary")
+        if len(data) != 1:
+            raise ValueError(
+                "Technology set item must contain exactly one key-value pair"
+            )
+        return data
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def validate_value_type(cls, v: Any, info) -> Any:
+        """Validate the value type based on the key."""
+        key = list(info.data.keys())[0] if isinstance(info.data, dict) else None
+
+        if key and key.startswith("text-field"):
+            # Text field: must be a string (can be empty for optional fields)
+            if not isinstance(v, str):
+                raise ValueError(f"Text field '{key}' must be a string")
+        else:
+            # Slider value: must be an integer 0-7
+            if not isinstance(v, int) or v < 0 or v > 7:
+                raise ValueError(
+                    f"Slider value for '{key}' must be an integer between 0 and 7, got: {v}"
+                )
+
+        return v
+
+    model_config = ConfigDict(
+        extra="allow"
+    )  # Allow dynamic keys since we validate structure in model_validator
+
+
+class AdditionalInfoItem(BaseModel):
+    """
+    Validates the additional-info question set item.
+
+    Example:
+        {"additional-info": "Personal description..."}
+    """
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_single_key_dict(cls, data: Any) -> Dict[str, Any]:
+        """Ensure the item is a single-key dictionary with 'additional-info' key and non-empty value."""
+        if not isinstance(data, dict):
+            raise ValueError("Additional info item must be a dictionary")
+        if len(data) != 1:
+            raise ValueError(
+                "Additional info item must contain exactly one key-value pair"
+            )
+        if "additional-info" not in data:
+            raise ValueError("Additional info item must have key 'additional-info'")
+
+        # Validate the value is a non-empty string
+        value = data["additional-info"]
+        if not isinstance(value, str):
+            raise ValueError("additional-info must be a string")
+        if value.strip() == "":
+            raise ValueError("additional-info cannot be empty")
+
+        return data
+
+    model_config = ConfigDict(
+        extra="allow"
+    )  # Allow dynamic keys since we validate structure in model_validator
+
+
+class FrontendPayload(BaseModel):
+    """
+    Validates the complete frontend payload structure.
+
+    The payload is grouped by question set, where each question set contains
+    an array of single-key objects representing individual form fields.
+
+    Structure:
+        {
+            "general": [GeneralQuestionItem, ...],  # 5 required items
+            "languages": [TechnologySetItem, ...],  # Optional
+            "databases": [TechnologySetItem, ...],  # Optional
+            ...
+            "additional-info": [AdditionalInfoItem]  # 1 required item
+        }
+    """
+
+    general: List[GeneralQuestionItem] = Field(
+        ..., min_length=5, max_length=5, description="General questions (5 required)"
+    )
+    languages: List[TechnologySetItem] = Field(
+        default_factory=list, description="Programming languages experience"
+    )
+    databases: List[TechnologySetItem] = Field(
+        default_factory=list, description="Databases experience"
+    )
+    cloud_development: List[TechnologySetItem] = Field(
+        default_factory=list,
+        alias="cloud-development",
+        description="Cloud development experience",
+    )
+    web_frameworks: List[TechnologySetItem] = Field(
+        default_factory=list,
+        alias="web-frameworks",
+        description="Web frameworks experience",
+    )
+    dev_ides: List[TechnologySetItem] = Field(
+        default_factory=list,
+        alias="dev-ides",
+        description="Dev IDEs experience",
+    )
+    llms: List[TechnologySetItem] = Field(
+        default_factory=list, description="Large language models experience"
+    )
+    doc_and_collab: List[TechnologySetItem] = Field(
+        default_factory=list,
+        alias="doc-and-collab",
+        description="Documentation and collaboration experience",
+    )
+    operating_systems: List[TechnologySetItem] = Field(
+        default_factory=list,
+        alias="operating-systems",
+        description="Operating systems experience",
+    )
+    additional_info: List[AdditionalInfoItem] = Field(
+        ...,
+        min_length=1,
+        max_length=1,
+        alias="additional-info",
+        description="Personal description (required)",
+    )
+
+    @model_validator(mode="after")
+    def validate_general_questions(self) -> "FrontendPayload":
+        """Validate that all 5 general questions are present with correct keys."""
+        general_keys = set()
+        for item in self.general:
+            # Each item is a dict with one key
+            item_dict = item.model_dump()
+            key = list(item_dict.keys())[0]
+            general_keys.add(key)
+
+        required_keys = VALID_GENERAL_KEYS
+        missing = required_keys - general_keys
+        if missing:
+            raise ValueError(
+                f"Missing required general questions: {missing}. "
+                f"All 5 questions are required: {required_keys}"
+            )
+
+        # Check for duplicates
+        if len(general_keys) < len(self.general):
+            raise ValueError("Duplicate general question keys found")
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_additional_info(self) -> "FrontendPayload":
+        """Validate that additional-info is present and non-empty."""
+        if not self.additional_info or len(self.additional_info) == 0:
+            raise ValueError("additional-info is required and cannot be empty")
+
+        # Extract the value from the single-key dict
+        info_item = self.additional_info[0]
+        info_dict = info_item.model_dump()
+        if "additional-info" not in info_dict:
+            raise ValueError("additional-info item must have key 'additional-info'")
+
+        info_value = info_dict["additional-info"]
+        if (
+            not info_value
+            or not isinstance(info_value, str)
+            or info_value.strip() == ""
+        ):
+            raise ValueError("additional-info cannot be empty")
+
+        return self
+
+    model_config = ConfigDict(
+        extra="forbid",  # Reject unknown question sets
+        populate_by_name=True,  # Allow both kebab-case and snake_case
+    )

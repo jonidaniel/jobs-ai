@@ -1,6 +1,11 @@
 """
 FastAPI server that exposes the JobsAI backend entry point as an HTTP endpoint.
 
+The server is responsible for receiving the form data from the frontend,
+validating it, and then triggering the JobsAI pipeline.
+The pipeline is responsible for generating the cover letters.
+The server then returns the cover letters to the frontend.
+
 To run the server:
     python -m uvicorn jobsai.api.server:app --reload --app-dir src
 """
@@ -8,12 +13,16 @@ To run the server:
 import logging
 from io import BytesIO
 
-from pydantic import BaseModel, ConfigDict, ValidationError
-from fastapi import FastAPI, Response, HTTPException, status
+from pydantic import ValidationError
+from fastapi import FastAPI, Response, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
-# Import the backend module
 import jobsai.main as backend
+
+# Frontend payload validation
+from jobsai.config.schemas import FrontendPayload
 
 logger = logging.getLogger(__name__)
 
@@ -42,14 +51,31 @@ app.add_middleware(
 )
 
 
-# Define the frontend payload model
-class FrontendPayload(BaseModel):
-    """Accept arbitrary key-value pairs from the frontend.
+# Exception handler for Pydantic validation errors
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle Pydantic validation errors and return detailed error messages."""
+    errors = exc.errors()
+    error_details = []
+    for error in errors:
+        error_details.append(
+            {
+                "field": " -> ".join(str(loc) for loc in error["loc"]),
+                "message": error["msg"],
+                "type": error["type"],
+            }
+        )
 
-    Allows dynamic keys in the frontend payload.
-    """
+    logger.error("Validation error: %s", error_details)
+    logger.debug("Request body: %s", await request.body())
 
-    model_config = ConfigDict(extra="allow")  # allow dynamic keys
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            "detail": error_details,
+            "message": "Validation error: Please check your input data",
+        },
+    )
 
 
 # ------------- API Route -------------
@@ -93,13 +119,14 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
                 "llms": [...],
                 "doc-and-collab": [...],
                 "operating-systems": [...]
+                ...
             }
 
         Where:
             - "general": Array of single-key objects with configuration values
             - Technology sets (languages, databases, etc.): Array of single-key objects
               where keys are technology names (slider values 0-7) or "text-field{N}" (strings)
-
+            - "additional-info": Array of single-key objects with additional information
     Returns:
         Response: HTTP response with:
             - Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
@@ -111,12 +138,13 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
     """
 
     # Extract the form data from the frontend payload
-    form_data = payload.model_dump()
+    # Use by_alias=True to get kebab-case keys (e.g., "additional-info" instead of "additional_info")
+    answers = payload.model_dump(by_alias=True)
 
-    logger.info(f"Received an API request with {len(form_data)} fields.")
-    logger.debug(f"Form data keys: {list(form_data.keys())}")
+    logger.info(f"Received an API request with {len(answers)} fields.")
+    logger.debug(f"Form data keys: {list(answers.keys())}")
     # Debug: Print structure of first few keys
-    for key, value in list(form_data.items())[:3]:
+    for key, value in list(answers.items())[:3]:
         logger.debug(f"  {key}: {type(value)} - {str(value)[:200]}")
 
     try:
@@ -125,20 +153,20 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
         # - Number of job boards to scrape
         # - Deep mode (whether to fetch full job descriptions)
         # - Number of LLM calls required
-        pipeline_result = backend.main(form_data)
+        cover_letters = backend.main(answers)
 
         # Validate result structure
-        if not isinstance(pipeline_result, dict):
+        if not isinstance(cover_letters, dict):
             logger.error(
-                "Pipeline returned invalid result type: %s", type(pipeline_result)
+                "Pipeline returned invalid result type: %s", type(cover_letters)
             )
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Pipeline returned invalid result format.",
             )
 
-        document = pipeline_result.get("document")
-        filename = pipeline_result.get("filename")
+        document = cover_letters.get("document")
+        filename = cover_letters.get("filename")
 
         if document is None:
             logger.error("Pipeline did not return a document.")
@@ -190,14 +218,14 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
             detail=f"Invalid input data or LLM response: {error_msg}",
         )
 
-    except ValidationError as e:
-        # Handle Pydantic validation errors (e.g., skill profile validation failed)
-        error_msg = "Invalid skill profile format."
-        logger.error("Pydantic validation error: %s", str(e))
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=error_msg,
-        )
+    # except ValidationError as e:
+    #     # Handle Pydantic validation errors (e.g., skill profile validation failed)
+    #     error_msg = "Invalid skill profile format."
+    #     logger.error("Pydantic validation error: %s", str(e))
+    #     raise HTTPException(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         detail=error_msg,
+    #     )
 
     except KeyError as e:
         # Handle missing keys in result dictionary
