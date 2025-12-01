@@ -1,6 +1,4 @@
 """
-JobsAI/src/jobsai/utils/scrapers/jobly.py
-
 Functions for scraping the Jobly job board.
 
     scrape_jobly
@@ -18,16 +16,16 @@ URL SCHEME:
     Example:          https://www.jobly.fi/en/jobs?search=python-developer&page=2
 
 HTML PARSING STRATEGY:
-    Title:            <h2> or <a> with job title
-    Company:          Company name element
-    Location:         Location span/div
-    URL:              <a> link to job detail page
-    Published date:   Date element (if available)
+    Title:            .node__title
+    Company:          .company-name, .company, [data-company], .employer
+    Location:         .location, .job-location, [data-location], .city, .region
+    URL:              a[href*='/jobs/'], a[href*='/job/']
+    Published date:   .date, .published, .posted, [data-date], .job-date, time
 
 Jobly's HTML may change; the parser uses several fallback selectors
 If you see missed fields, inspect live HTML and tweak selectors
 Select between light and deep mode
-Light mode scrapes only listing cards
+Light mode scrapes only listing cards, deep mode scrapes the job detail page
 You can easily switch to light mode by setting DEEP_MODE=False in /config/settings.py
 """
 
@@ -36,7 +34,7 @@ import logging
 import requests
 import re
 from typing import List, Dict, Optional
-from urllib.parse import urljoin, quote_plus, urlencode
+from urllib.parse import urljoin, quote_plus
 
 from bs4 import BeautifulSoup
 
@@ -60,20 +58,18 @@ def scrape_jobly(
     per_page_limit: Optional[int] = None,
 ) -> List[Dict]:
     """
-    Fetch job listings from Jobly for the given query.
+    Fetch job listings from Jobly.
 
     Args:
-        query: search query string, e.g. "python developer"
-        num_pages: number of pages to crawl
-        deep_mode: if True, fetch each job's detail page to extract the full description
-        session: requests.Session to reuse connections (recommended)
-        per_page_limit: optional cap on total listings (stops when reached)
+        query: The search query string, e.g. "python developer".
+        num_pages: The number of pages to crawl.
+        deep_mode: If True, fetch each job's detail page to extract the full description.
+        session: The requests.Session to reuse connections (recommended).
+        per_page_limit: The optional cap on total listings (stops when reached).
 
     Returns:
-        results: list of normalized job dictionaries
+        List[Dict]: The list of normalized job dictionaries.
     """
-
-    query = "it"
 
     if session is None:
         # Create HTTP session
@@ -81,7 +77,7 @@ def scrape_jobly(
     # Update default headers
     session.headers.update(HEADERS_JOBLY)
 
-    # URL encode query (handle spaces and special characters)
+    # URL-encode query (handle spaces and special characters)
     query_encoded = quote_plus(query.strip())
 
     results = []
@@ -96,9 +92,8 @@ def scrape_jobly(
 
         logger.info(" Fetching Jobly search page: %s", search_url)
 
-        # Get response safely
+        # Get response from the search URL
         response = _fetch_page(session, search_url)
-
         if not response:
             logger.warning(" Failed to fetch search page %s — stopping", search_url)
             break
@@ -109,25 +104,11 @@ def scrape_jobly(
                 search_url,
             )
             break
-
         # Parse the HTML text with a HTML parser
         soup = BeautifulSoup(response.text, "html.parser")
 
         # Select all job cards
-        job_cards = soup.select("view-content")
-        print("VIEW CONTENT")
-        print("VIEW CONTENT")
-        print("VIEW CONTENT")
-        print(job_cards)
-        print("VIEW CONTENT")
-        print("VIEW CONTENT")
-        print("VIEW CONTENT")
-
-        # TÄSSÄ KAIKKI
-        # view-content
-        # TÄSSÄ YKSI
-        # views-row views-row-2 views-row-even
-        # views-row views-row-2 views-row-odd
+        job_cards = soup.select(".job__content.clearfix")
 
         # If no results on current page
         if not job_cards:
@@ -138,9 +119,8 @@ def scrape_jobly(
             )
             break
 
-        # Iterate over job cards
+        # Iterate over job cards on current page
         for job_card in job_cards:
-            print("KJHÖHHJHJHJ")
             job = _parse_job_card(job_card)
 
             # If in deep mode, and we have a URL
@@ -197,15 +177,14 @@ def _fetch_page(
     Fetch a page with retry logic and error handling.
 
     Args:
-        session: current HTTP session
-        url: search URL
-        retries: number of search retries
-        backoff: backoff multiplier for retries
-        timeout: time to timeout
+        session: The requests.Session to reuse connections (recommended).
+        url: The URL to fetch.
+        retries: Number of search retries.
+        backoff: Backoff multiplier for retries.
+        timeout: Time to timeout.
 
     Returns:
-        resp: Response object if successful
-        None: if all retries failed
+        Optional[requests.Response]: Response object if successful, None if all retries failed
     """
 
     # Iterate 3 times (by default)
@@ -243,18 +222,15 @@ def _parse_job_card(job_card: BeautifulSoup) -> Dict:
     Defensive parsing: returns empty strings for missing fields
 
     Args:
-        card: the job card BeautifulSoup element
+        job_card (BeautifulSoup): The job card BeautifulSoup element.
 
     Returns:
-        Dict: dict with job information
+        Dict: The dictionary with job information.
     """
 
     # Parse title from job card
     title_tag = job_card.select_one(".node__title")
     title = title_tag.get_text(strip=True) if title_tag else ""
-
-    print(title_tag)
-    print(title)
 
     # Parse company from job card
     company_tag = job_card.select_one(
@@ -325,13 +301,12 @@ def _fetch_full_job_description(
     Fetch the job detail page and attempt to extract the full job description text.
 
     Args:
-        session: current HTTP session
-        job_url: URL of the job to get full description of
-        retries: number of retries to fetch full description
+        session: The requests.Session to reuse connections (recommended).
+        job_url: The URL of the job to get full description of.
+        retries: Number of retries to fetch full description.
 
     Returns:
-        description: full job description text
-        "": empty string on failure
+        str: The full job description text, or an empty string if the description is not found.
     """
 
     # Get response safely
