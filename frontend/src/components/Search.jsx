@@ -121,7 +121,7 @@ export default function Search() {
     }
 
     // Group slider question sets (indices 1-8)
-    for (let i = 1; i < QUESTION_SET_NAMES.length; i++) {
+    for (let i = 1; i < QUESTION_SET_NAMES.length - 1; i++) {
       const questionSetData = [
         ...Object.keys(SLIDER_DATA[i - 1])
           .filter((key) => filtered[key] !== undefined)
@@ -134,6 +134,13 @@ export default function Search() {
       if (questionSetData.length > 0) {
         result[QUESTION_SET_NAMES[i]] = questionSetData;
       }
+    }
+
+    // Group text-only question set (index 9)
+    if (filtered["additional-info"] !== undefined) {
+      result[QUESTION_SET_NAMES[9]] = [
+        { "additional-info": filtered["additional-info"] },
+      ];
     }
 
     console.log(result);
