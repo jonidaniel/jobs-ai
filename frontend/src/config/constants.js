@@ -7,12 +7,13 @@
  * Question Set Structure:
  * - 1 General Questions set (index 0): 5 multiple choice questions
  * - 8 Slider Question sets (indices 1-8): Multiple sliders + 1 "Other" text field each
+ * - 1 Text-only Question set (index 9): Single text input field
  *
- * Total: 9 question sets
+ * Total: 10 question sets
  */
 
-/** Total number of question sets (0-8, inclusive) */
-export const TOTAL_QUESTION_SETS = 9;
+/** Total number of question sets (0-9, inclusive) */
+export const TOTAL_QUESTION_SETS = 10;
 
 /** Number of questions in the General Questions set (index 0) */
 export const GENERAL_QUESTIONS_COUNT = 5;
@@ -60,6 +61,7 @@ export const LAST_SLIDER_INDEX = 8;
  * 6: "llms"
  * 7: "doc-and-collab"
  * 8: "operating-systems"
+ * 9: "additional-info"
  */
 export const QUESTION_SET_NAMES = [
   "general",
@@ -71,4 +73,5 @@ export const QUESTION_SET_NAMES = [
   "llms",
   "doc-and-collab",
   "operating-systems",
+  "additional-info",
 ];
