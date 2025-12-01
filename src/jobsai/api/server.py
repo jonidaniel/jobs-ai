@@ -1,9 +1,7 @@
 """
-JobsAI/src/jobsai/api/server.py
+FastAPI server that exposes the JobsAI backend entry point as an HTTP endpoint.
 
-FastAPI server that exposes JobsAI backend entry point as an HTTP endpoint.
-
-To run:
+To run the server:
     python -m uvicorn jobsai.api.server:app --reload --app-dir src
 """
 
@@ -14,60 +12,93 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 from fastapi import FastAPI, Response, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 
-import jobsai.main as jobsai
+# Import the backend module
+import jobsai.main as backend
 
 logger = logging.getLogger(__name__)
 
 # ------------- FastAPI Setup -------------
 
+# Create the FastAPI app
 app = FastAPI(
     title="JobsAI Backend",
-    description="API that triggers full JobsAI pipeline.",
+    description="API that triggers the JobsAI pipeline",
     version="1.0",
 )
-
+# Define the allowed origins for CORS
 origins = [
     "http://localhost:3000",  # your frontend URL (if using a dev server)
     "http://127.0.0.1:3000",  # optional
     "*",  # allow all origins (only for development)
 ]
 
+# Add the CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # or ["*"] to allow any origin
     allow_credentials=True,
-    allow_methods=["*"],  # GET, POST, PUT, DELETE, etc.
+    allow_methods=["*"],  # allow all methods: GET, POST, PUT, DELETE, etc.
     allow_headers=["*"],  # allow all headers
 )
 
 
+# Define the frontend payload model
 class FrontendPayload(BaseModel):
-    """Accept arbitrary key-value pairs from the frontend."""
+    """Accept arbitrary key-value pairs from the frontend.
 
-    model_config = ConfigDict(extra="allow")  # Allow dynamic keys
+    Allows dynamic keys in the frontend payload.
+    """
+
+    model_config = ConfigDict(extra="allow")  # allow dynamic keys
 
 
 # ------------- API Route -------------
+# Define the API endpoint
 @app.post("/api/endpoint")
-async def run_agent_pipeline(payload: FrontendPayload):
+async def run_pipeline(payload: FrontendPayload) -> Response:
     """
-    Run the complete JobsAI agent pipeline and return cover letter document.
+    Run the complete JobsAI backend pipeline and return cover letter document.
 
     This endpoint receives form data from the frontend (slider values, text fields,
-    multiple choice selections) and triggers the full agent pipeline:
-    1. Profile creation
-    2. Job searching
-    3. Job scoring
-    4. Report generation
-    5. Cover letter generation
+    multiple choice selections) and triggers the full pipeline:
+    1. ProfilerAgent: Profile creation
+    2. SearcherService: Job searching
+    3. ScorerService: Job scoring
+    4. ReporterAgent: Report generation
+    5. GeneratorAgent: Cover letter generation
 
     The response is a Word document (.docx) that the browser will download.
 
     Args:
-        payload (FrontendPayload): Form data from frontend containing:
-            - General questions (text fields)
-            - Technology experience levels (slider values 0-7)
-            - Multiple choice selections
+        payload (FrontendPayload): Form data from frontend, grouped by question set.
+
+        Structure:
+            {
+                "general": [
+                    {"job-level": ["Expert", "Intermediate"]},
+                    {"job-boards": ["Duunitori", "Jobly"]},
+                    {"deep-mode": "Yes"},
+                    {"cover-letter-num": "5"},
+                    {"cover-letter-style": "Professional"}
+                ],
+                "languages": [
+                    {"javascript": 5},
+                    {"python": 3},
+                    {"text-field1": "Additional languages..."}
+                ],
+                "databases": [...],
+                "cloud-development": [...],
+                "web-frameworks": [...],
+                "dev-ides": [...],
+                "llms": [...],
+                "doc-and-collab": [...],
+                "operating-systems": [...]
+            }
+
+        Where:
+            - "general": Array of single-key objects with configuration values
+            - Technology sets (languages, databases, etc.): Array of single-key objects
+              where keys are technology names (slider values 0-7) or "text-field{N}" (strings)
 
     Returns:
         Response: HTTP response with:
@@ -79,18 +110,22 @@ async def run_agent_pipeline(payload: FrontendPayload):
         HTTPException: With appropriate status code and error message if pipeline fails
     """
 
-    # Extract dictionary from Pydantic model
+    # Extract the form data from the frontend payload
     form_data = payload.model_dump()
 
     logger.info(f"Received an API request with {len(form_data)} fields.")
+    logger.debug(f"Form data keys: {list(form_data.keys())}")
+    # Debug: Print structure of first few keys
+    for key, value in list(form_data.items())[:3]:
+        logger.debug(f"  {key}: {type(value)} - {str(value)[:200]}")
 
     try:
-        # Run the complete agent pipeline
+        # Run the complete JobsAI pipeline
         # This may take several minutes depending on:
         # - Number of job boards to scrape
         # - Deep mode (whether to fetch full job descriptions)
         # - Number of LLM calls required
-        pipeline_result = jobsai.main(form_data)
+        pipeline_result = backend.main(form_data)
 
         # Validate result structure
         if not isinstance(pipeline_result, dict):
@@ -122,7 +157,9 @@ async def run_agent_pipeline(payload: FrontendPayload):
         # Convert Python-docx Document object to bytes for HTTP response
         # Document is saved to in-memory buffer (BytesIO)
         try:
+            # Convert the document to bytes and save it to a buffer
             buffer = BytesIO()
+            # Save the document to the buffer
             document.save(buffer)
             buffer.seek(0)  # Reset buffer position to beginning for reading
         except Exception as e:
@@ -231,7 +268,7 @@ async def run_agent_pipeline(payload: FrontendPayload):
         )
 
 
-# For running as standalone with 'python src/jobsai/api/server.py'
+# For running as standalone server
 if __name__ == "__main__":
     import uvicorn
 
