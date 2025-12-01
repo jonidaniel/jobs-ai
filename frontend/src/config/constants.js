@@ -15,35 +15,8 @@
 /** Total number of question sets (0-9, inclusive) */
 export const TOTAL_QUESTION_SETS = 10;
 
-/** Number of questions in the General Questions set (index 0) */
-export const GENERAL_QUESTIONS_COUNT = 5;
-
 /** Number of slider-based question sets (indices 1-8) */
 export const SLIDER_QUESTION_SETS_COUNT = 8;
-
-/**
- * Slider Configuration
- *
- * Sliders represent years of experience ranges:
- * 0 = 0 yrs
- * 1 = < 0.5 yrs
- * 2 = < 1.0 yrs
- * 3 = < 1.5 yrs
- * 4 = < 2.0 yrs
- * 5 = < 2.5 yrs
- * 6 = < 3.0 yrs
- * 7 = > 3.0 yrs
- */
-export const SLIDER_MIN = 0;
-export const SLIDER_MAX = 7;
-export const SLIDER_DEFAULT = 0;
-
-/**
- * Question Set Indices
- *
- * Constants for identifying question set types by index
- */
-export const GENERAL_QUESTIONS_INDEX = 0;
 
 /**
  * Question Set Names

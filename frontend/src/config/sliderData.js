@@ -24,6 +24,23 @@
  */
 
 /**
+ * Slider Configuration
+ *
+ * Sliders represent years of experience ranges:
+ * 0 = 0 yrs
+ * 1 = < 0.5 yrs
+ * 2 = < 1.0 yrs
+ * 3 = < 1.5 yrs
+ * 4 = < 2.0 yrs
+ * 5 = < 2.5 yrs
+ * 6 = < 3.0 yrs
+ * 7 = > 3.0 yrs
+ */
+export const SLIDER_MIN = 0;
+export const SLIDER_MAX = 7;
+export const SLIDER_DEFAULT = 0;
+
+/**
  * Raw JSON strings for slider data
  * Stored as strings for easier editing and version control
  * Parsed once at module load time for performance

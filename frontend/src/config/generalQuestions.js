@@ -5,6 +5,12 @@
  * This set contains 5 questions, all of which are multiple choice.
  */
 
+/** Index of the General Questions set in the questionnaire */
+export const GENERAL_QUESTIONS_INDEX = 0;
+
+/** Number of questions in the General Questions set */
+export const GENERAL_QUESTIONS_COUNT = 5;
+
 /**
  * Labels for each question in the General Questions set
  *

@@ -1,8 +1,8 @@
+import { QUESTION_SET_NAMES } from "../config/constants";
 import {
-  QUESTION_SET_NAMES,
+  GENERAL_QUESTION_KEYS,
   GENERAL_QUESTIONS_INDEX,
-} from "../config/constants";
-import { GENERAL_QUESTION_KEYS } from "../config/generalQuestions";
+} from "../config/generalQuestions";
 import { SLIDER_DATA } from "../config/sliderData";
 
 /**
