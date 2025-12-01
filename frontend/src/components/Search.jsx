@@ -108,7 +108,7 @@ export default function Search() {
 
     /**
      * Group filtered data by question set
-     * Structure: { "general-questions": [{key: value}, ...], "languages": [...], ... }
+     * Structure: { "general": [{key: value}, ...], "languages": [...], ... }
      */
     const result = {};
 
@@ -143,7 +143,9 @@ export default function Search() {
       ];
     }
 
-    console.log(result);
+    console.log();
+    console.log("RESULT IN HANDLE_SUBMIT (not stringified yet): ", result);
+    console.log();
 
     // Send to backend and download document
     try {
@@ -212,6 +214,7 @@ export default function Search() {
   };
 
   // Cleanup: Clear timeout if component unmounts
+  // This is to prevent memory leaks
   useEffect(() => {
     return () => {
       if (successTimeoutRef.current) {
@@ -226,10 +229,10 @@ export default function Search() {
       <h3 className="text-3xl font-semibold text-white text-center">
         Answer questions in each category and we will find jobs relevant to you
       </h3>
-      {/* Question sets component - manages all form inputs */}
+      {/* Question sets component with blue/gray background - contains all question sets and manages all form inputs */}
       <QuestionSets onFormDataChange={setFormData} />
 
-      {/* Error message - displayed when submission fails */}
+      {/* Red error message - displayed when submission fails */}
       {error && (
         <div className="flex justify-center mt-4">
           <div
@@ -257,7 +260,7 @@ export default function Search() {
         </div>
       )}
 
-      {/* Success message - displayed when document is successfully downloaded */}
+      {/* Green success message - displayed when document is successfully downloaded */}
       {success && (
         <div className="flex justify-center mt-4">
           <div
@@ -287,7 +290,7 @@ export default function Search() {
         </div>
       )}
 
-      {/* Submit button - triggers form submission and document generation */}
+      {/* Black 'Find Jobs' submit button - triggers form submission and document generation */}
       <div className="flex justify-center mt-6">
         <button
           id="submit-btn"
