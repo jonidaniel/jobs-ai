@@ -14,6 +14,7 @@
  * 6: Large Language Models Experience
  * 7: Code Documentation and Collaboration Experience
  * 8: Computer Operating Systems Experience
+ * 9: Additional Information
  */
 export const QUESTION_SET_TITLES = [
   "General Questions",
@@ -25,4 +26,5 @@ export const QUESTION_SET_TITLES = [
   "Large Language Models Experience",
   "Code Documentation and Collaboration Experience",
   "Computer Operating Systems Experience",
+  "Additional Information",
 ];
