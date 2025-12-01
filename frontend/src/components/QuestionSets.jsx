@@ -64,7 +64,7 @@ export default function QuestionSets({ onFormDataChange }) {
    * Handles form input changes
    * Updates formData state and triggers parent notification via useEffect
    *
-   * @param {string} key - The form field key (e.g., "javascript", "text-field-general-0")
+   * @param {string} key - The form field key (e.g., "javascript", "job-level", "text-field1")
    * @param {string|number|string[]} value - The new value (string, number, or array for checkboxes)
    */
   const handleFormChange = (key, value) => {

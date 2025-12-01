@@ -67,7 +67,7 @@ export default function Search() {
     // Transform form data into grouped structure for backend API
     const result = transformFormData(formData);
 
-    console.log("RESULT IN HANDLE_SUBMIT: ", result);
+    console.log(result);
 
     // Send to backend and download document
     try {

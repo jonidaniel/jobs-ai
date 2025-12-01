@@ -2,8 +2,9 @@
  * MultipleChoice Component
  *
  * Renders a group of checkboxes allowing multiple selections.
- * Used for the "Name" question which allows selecting multiple experience levels
- * (Intern, Entry, Intermediate, Expert).
+ * Used for questions that allow selecting multiple options, such as:
+ * - Job level (Expert, Intermediate, Entry, Intern)
+ * - Job boards (Duunitori, Jobly)
  *
  * @param {string} keyName - Unique identifier for the checkbox group
  * @param {string} label - Display label for the question

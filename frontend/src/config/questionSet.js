@@ -50,7 +50,7 @@ export const QUESTION_SET_NAMES = [
 /**
  * Question Set Titles
  *
- * Display titles for each of the 9 question sets.
+ * Display titles for each of the 10 question sets.
  * These titles are shown as headings above each question set.
  *
  * Index mapping:
