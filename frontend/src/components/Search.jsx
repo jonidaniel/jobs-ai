@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 
 import QuestionSets from "./QuestionSets";
-import SuccessMessage from "./SuccessMessage";
-import ErrorMessage from "./ErrorMessage";
+import SuccessMessage from "./messages/SuccessMessage";
+import ErrorMessage from "./messages/ErrorMessage";
 
 import { API_ENDPOINTS } from "../config/api";
 
