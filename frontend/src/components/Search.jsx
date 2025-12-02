@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-import QuestionSets from "./QuestionSetList";
+import QuestionSetList from "./QuestionSetList";
 import SuccessMessage from "./messages/SuccessMessage";
 import ErrorMessage from "./messages/ErrorMessage";
 
@@ -220,7 +220,7 @@ export default function Search() {
         <i>Find Jobs</i> let's us start the search.
       </h3>
       {/* Question sets component with blue/gray background - contains all question sets and manages all form inputs */}
-      <QuestionSets
+      <QuestionSetList
         onFormDataChange={handleFormDataChange}
         validationErrors={validationErrors}
         activeIndex={activeQuestionSetIndex}

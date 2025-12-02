@@ -20,7 +20,7 @@ import { GENERAL_QUESTION_KEYS } from "../config/generalQuestions";
  * @param {object} validationErrors - Object mapping question keys to error messages
  * @param {number} activeIndex - Optional external control of active question set index
  */
-export default function QuestionSets({
+export default function QuestionSetList({
   onFormDataChange,
   validationErrors = {},
   activeIndex,
