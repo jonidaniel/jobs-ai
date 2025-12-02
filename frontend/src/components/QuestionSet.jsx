@@ -68,7 +68,8 @@ export default function QuestionSet({
             required={true}
           />
         ) : index === GENERAL_QUESTIONS_INDEX ? (
-          // General Questions (index 0): 5 questions, all are multiple choice
+          // Create 'General Questions' set (index 0)
+          // 5 questions, all are multiple choice
           Array.from({ length: GENERAL_QUESTIONS_COUNT }).map((_, j) => {
             const keyName = GENERAL_QUESTION_KEYS[j];
             if (j === 0) {
@@ -90,8 +91,6 @@ export default function QuestionSet({
               // Insert paragraph between questions 1 and 2
               return (
                 <div key={`info-${j}`}>
-                  <h3>We'll search popular job listing sites for you...</h3>
-                  <br />
                   <MultipleChoice
                     key={j}
                     keyName={keyName}
@@ -125,8 +124,6 @@ export default function QuestionSet({
               // Options: 1, 2, 3, 4, 5, 10
               return (
                 <div key={`info-${j}`}>
-                  <h3>...and then write cover letters for the top jobs</h3>
-                  <br />
                   <SingleChoice
                     key={j}
                     keyName={keyName}
@@ -159,7 +156,8 @@ export default function QuestionSet({
             return null;
           })
         ) : (
-          // Slider question sets (indices 1-8): Multiple sliders + one "Other" text field
+          // Slider question sets (indices 1-8)
+          // Multiple sliders + one "Other" text field each
           <>
             {/* Render sliders for this question set */}
             {/* SLIDER_DATA[index - 1] contains the key-value pairs for this set */}

@@ -26,10 +26,10 @@ export default function SingleChoice({
     <div className="flex flex-col w-full">
       <label className="mb-1">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-red-400 ml-1">*</span>}
       </label>
       {error && (
-        <p className="text-red-500 text-sm mb-2" role="alert">
+        <p className="text-red-300 text-sm mb-2" role="alert">
           {error}
         </p>
       )}

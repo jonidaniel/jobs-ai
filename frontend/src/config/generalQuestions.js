@@ -24,24 +24,13 @@ export const GENERAL_QUESTIONS_COUNT = 5;
  * 4: Cover letter style (single choice - see COVER_LETTER_STYLE_OPTIONS)
  */
 export const GENERAL_QUESTION_LABELS = [
-  "1. What level of job are you looking for?",
-  "2. What job boards you want to include in the search?",
-  "3. Do you want to use 'deep mode' when searching?",
-  "4. For how many top jobs you want cover letters?",
-  "5. What kind of style you want the letters to be?",
+  "First things first.What's the level of job you're looking for? (you might select two adjacent levels)",
+  "We'll scrape popular job boards with many keywords. What boards do you want us to include?",
+  "Do you want to use deep search? This will take a bit longer, but it'll find jobs with more relevance to you.",
+  "Once we've found jobs, we'll rank them, and then write cover letters for them. How many top jobs do you want cover letters for?",
+  "How about the style of the letters? Strictly professional or something else? A combination of two?",
 ];
 
-/**
- * Key names for each question in the General Questions set
- *
- * These are the keys used in the form data object sent to the backend.
- * Index mapping:
- * 0: "job-level"
- * 1: "job-boards"
- * 2: "deep-mode"
- * 3: "cover-letter-num"
- * 4: "cover-letter-style"
- */
 export const GENERAL_QUESTION_KEYS = [
   "job-level",
   "job-boards",
@@ -56,7 +45,7 @@ export const GENERAL_QUESTION_KEYS = [
  * Users can select multiple options (checkboxes).
  * These represent experience levels that can be combined.
  */
-export const NAME_OPTIONS = ["Expert", "Intermediate", "Entry", "Intern"];
+export const NAME_OPTIONS = ["Expert-level", "Intermediate", "Entry", "Intern"];
 
 /**
  * Multiple choice options for the second question (Job boards)
@@ -80,7 +69,18 @@ export const DEEP_MODE_OPTIONS = ["Yes", "No"];
  * Users can select only one option (radio buttons).
  * These represent the number of jobs to include in the job report.
  */
-export const JOB_COUNT_OPTIONS = ["1", "2", "3", "4", "5", "10"];
+export const JOB_COUNT_OPTIONS = [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+];
 
 /**
  * Single choice options for the fifth question (Cover letter style)
@@ -92,4 +92,5 @@ export const COVER_LETTER_STYLE_OPTIONS = [
   "Professional",
   "Friendly",
   "Confident",
+  "Funny",
 ];
