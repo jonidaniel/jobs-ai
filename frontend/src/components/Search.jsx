@@ -199,7 +199,7 @@ export default function Search() {
         <i>We will find jobs for you.</i>
       </h3>
       <h3 className="text-3xl font-semibold text-white text-center">
-        The way to make sure we find <i>the most relevant jobs</i> and{" "}
+        And the way you can make sure we find <i>the most relevant jobs</i> and{" "}
         <i>write the best cover letters</i> is to provide us with a dose of
         information.
       </h3>
@@ -209,9 +209,9 @@ export default function Search() {
       <h3 className="text-3xl font-semibold text-white text-center">
         By answering as many questions as possible, you enable us to use all
         tools in our arsenal when we scrape jobs for you. This is how we find
-        the gems. The questions are easy, and in most of them you just select
-        the option that best describes you. Even if you felt like you didn't
-        have much experience, be truthful -
+        the absolute gems. The questions are easy, and in most of them you just
+        select the option that best describes you. Even if you felt like you
+        didn't have much experience, be truthful -
       </h3>
       <h3 className="text-3xl font-semibold text-white text-center">
         <i>if there is a job matching your skills, we will find it.</i>
