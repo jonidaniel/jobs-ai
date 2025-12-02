@@ -195,28 +195,28 @@ export default function Search() {
   return (
     <section id="search">
       <h2>Search</h2>
-      <h3 className="text-3xl font-semibold text-white text-center">
+      <h3 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white text-center">
         <i>We will find jobs for you.</i>
       </h3>
-      <h3 className="text-3xl font-semibold text-white text-center">
+      <h3 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white text-center">
         And the way you can make sure we find <i>the most relevant jobs</i> and{" "}
         <i>write the best cover letters</i> is to provide us with a dose of
         information.
       </h3>
-      <h3 className="text-3xl font-semibold text-white text-center">
+      <h3 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white text-center">
         <i>We don't ask you for any personal information.</i>
       </h3>
-      <h3 className="text-3xl font-semibold text-white text-center">
+      <h3 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white text-center">
         By answering as many questions as possible, you enable us to use all
         tools in our arsenal when we scrape jobs for you. This is how we find
         the absolute gems. The questions are easy, and in most of them you just
         select the option that best describes you. Even if you felt like you
         didn't have much experience, be truthful -
       </h3>
-      <h3 className="text-3xl font-semibold text-white text-center">
+      <h3 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white text-center">
         <i>if there is a job matching your skills, we will find it.</i>
       </h3>
-      <h3 className="text-3xl font-semibold text-white text-center">
+      <h3 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white text-center">
         <i>Find Jobs</i> let's us start the search.
       </h3>
       {/* Question sets component with blue/gray background - contains all question sets and manages all form inputs */}
@@ -236,7 +236,7 @@ export default function Search() {
           id="submit-btn"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="text-3xl px-6 py-3 border border-white bg-transparent text-white font-semibold rounded-lg shadow disabled:opacity-50 disabled:cursor-not-allowed"
+          className="text-lg sm:text-xl md:text-2xl lg:text-3xl px-4 sm:px-6 py-2 sm:py-3 border border-white bg-transparent text-white font-semibold rounded-lg shadow disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="Submit form and generate job search document"
         >
           {isSubmitting ? "Finding Jobs..." : "Find Jobs"}

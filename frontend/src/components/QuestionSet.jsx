@@ -98,10 +98,19 @@ export default function QuestionSet({
       aria-labelledby={`question-set-${index}-title`}
       data-index={index}
     >
-      <h3 className="text-3xl" id={`question-set-${index}-title`}>
+      <h3
+        className="text-3xl"
+        style={{ fontSize: "clamp(1.25rem, 4vw, 1.875rem)" }}
+        id={`question-set-${index}-title`}
+      >
         {index + 1}/{TOTAL_QUESTION_SETS}
       </h3>
-      <h3 className="text-3xl">{QUESTION_SET_TITLES[index]}</h3>
+      <h3
+        className="text-3xl"
+        style={{ fontSize: "clamp(1.25rem, 4vw, 1.875rem)" }}
+      >
+        {QUESTION_SET_TITLES[index]}
+      </h3>
 
       {/* Questions */}
       <div className="space-y-4">

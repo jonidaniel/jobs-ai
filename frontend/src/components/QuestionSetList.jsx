@@ -161,10 +161,17 @@ export default function QuestionSets({
       {/* Left arrow */}
       <div
         className="prev-btn-container sticky self-start h-0 flex items-center z-10"
-        style={{ top: "250px", maxHeight: "calc(100vh - 100px)" }}
+        style={{
+          top: "clamp(100px, 20vh, 250px)",
+          maxHeight: "calc(100vh - 100px)",
+        }}
       >
         <button
-          className="prev-btn text-white text-2xl px-3 py-1 rounded-lg transition-colors"
+          className="prev-btn text-white rounded-lg transition-colors hover:bg-gray-700"
+          style={{
+            fontSize: "clamp(1rem, 3vw, 1.5rem)",
+            padding: "clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1rem)",
+          }}
           onClick={handlePrevious}
           aria-label="Previous question set"
           aria-controls="question-set-wrapper"
@@ -175,7 +182,7 @@ export default function QuestionSets({
       </div>
 
       {/* TailwindCSS form */}
-      <div className="bg-gray-800 p-10 rounded-2xl shadow-lg flex-1">
+      <div className="bg-gray-800 p-4 sm:p-6 md:p-10 rounded-2xl shadow-lg flex-1">
         {/* Render all question sets, but only show the active one */}
         {Array.from({ length: TOTAL_QUESTION_SETS }).map((_, i) => (
           <QuestionSet
@@ -195,10 +202,17 @@ export default function QuestionSets({
       {/* Right arrow */}
       <div
         className="next-btn-container sticky self-start h-0 flex items-center z-10 ml-auto"
-        style={{ top: "250px", maxHeight: "calc(100vh - 100px)" }}
+        style={{
+          top: "clamp(100px, 20vh, 250px)",
+          maxHeight: "calc(100vh - 100px)",
+        }}
       >
         <button
-          className="next-btn text-white text-2xl px-3 py-1 rounded-lg transition-colors"
+          className="next-btn text-white rounded-lg transition-colors hover:bg-gray-700"
+          style={{
+            fontSize: "clamp(1rem, 3vw, 1.5rem)",
+            padding: "clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1rem)",
+          }}
           onClick={handleNext}
           aria-label="Next question set"
           aria-controls="question-set-wrapper"

@@ -1,14 +1,39 @@
 /* Hero section styles */
 
 #hero {
-  padding: 280px 10%;
+  padding: 120px 5% 80px;
   text-align: center;
 }
 #hero h1 {
-  font-size: 3.2rem;
-  margin-bottom: 20px;
+  font-size: 2rem;
+  margin-bottom: 15px;
 }
 #hero p {
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   opacity: 0.85;
+}
+
+@media (min-width: 640px) {
+  #hero {
+    padding: 200px 8% 120px;
+  }
+  #hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+  }
+  #hero p {
+    font-size: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  #hero {
+    padding: 280px 10%;
+  }
+  #hero h1 {
+    font-size: 3.2rem;
+  }
+  #hero p {
+    font-size: 1.4rem;
+  }
 }
