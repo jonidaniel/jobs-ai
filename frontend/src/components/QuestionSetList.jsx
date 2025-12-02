@@ -106,9 +106,14 @@ export default function QuestionSetList({
       if (section) {
         // Small delay to ensure DOM is ready
         setTimeout(() => {
-          section.scrollIntoView({
+          // Calculate position with offset to show question set number clearly
+          const rect = section.getBoundingClientRect();
+          const scrollOffset = 120; // Offset to show question set number (e.g., "3/10")
+          const targetPosition = window.scrollY + rect.top - scrollOffset;
+
+          window.scrollTo({
+            top: targetPosition,
             behavior: "smooth",
-            block: "start",
           });
         }, 100);
       }
