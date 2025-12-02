@@ -14,25 +14,21 @@ export default function Contact() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            JobsAI code on GitHub
+            JobsAI on GitHub
           </a>
         </div>
         <p>+358405882001</p>
         <p>joni-makinen@live.fi</p>
 
-        {[
-          {
-            href: "https://www.linkedin.com/in/joni-daniel-makinen/",
-            text: "LinkedIn",
-          },
-          { href: "https://github.com/jonidaniel", text: "GitHub" },
-        ].map(({ href, text }) => (
-          <div key={href} className="text-center">
-            <a href={href} target="_blank" rel="noopener noreferrer">
-              {text}
-            </a>
-          </div>
-        ))}
+        <div className="text-center">
+          <a
+            href="https://www.linkedin.com/in/joni-daniel-makinen/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            LinkedIn
+          </a>
+        </div>
       </div>
     </section>
   );
