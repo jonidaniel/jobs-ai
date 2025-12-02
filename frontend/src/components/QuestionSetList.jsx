@@ -36,6 +36,10 @@ export default function QuestionSets({
 
   // Refs to DOM elements for each question set section (for scrolling)
   const sectionRefs = useRef({});
+  // Track if this is the initial mount (page refresh)
+  const isInitialMount = useRef(true);
+  // Track if navigation was triggered by user action (arrow click)
+  const isUserNavigation = useRef(false);
 
   /**
    * Initialize form data with default values
@@ -85,18 +89,31 @@ export default function QuestionSets({
 
   /**
    * Scroll to active question set when navigation changes
-   * Uses smooth scrolling for better UX
+   * - On page refresh: scroll to top of page
+   * - On arrow click: scroll to top of question set
    */
   useEffect(() => {
-    const section = sectionRefs.current[currentIndex];
-    if (section) {
-      // Small delay to ensure DOM is ready
-      setTimeout(() => {
-        section.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 100);
+    if (isInitialMount.current) {
+      // On initial mount (page refresh), scroll to top of page
+      isInitialMount.current = false;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    // Only scroll to question set if navigation was from user action
+    if (isUserNavigation.current) {
+      const section = sectionRefs.current[currentIndex];
+      if (section) {
+        // Small delay to ensure DOM is ready
+        setTimeout(() => {
+          section.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }, 100);
+      }
+      // Reset the flag after scrolling
+      isUserNavigation.current = false;
     }
   }, [currentIndex]);
 
@@ -107,6 +124,7 @@ export default function QuestionSets({
   const handlePrevious = () => {
     const newIndex =
       currentIndex === 0 ? TOTAL_QUESTION_SETS - 1 : currentIndex - 1;
+    isUserNavigation.current = true; // Mark as user navigation
     setInternalIndex(newIndex);
     // Clear external control when user manually navigates
     if (onActiveIndexChange) {
@@ -120,6 +138,7 @@ export default function QuestionSets({
    */
   const handleNext = () => {
     const newIndex = (currentIndex + 1) % TOTAL_QUESTION_SETS;
+    isUserNavigation.current = true; // Mark as user navigation
     setInternalIndex(newIndex);
     // Clear external control when user manually navigates
     if (onActiveIndexChange) {
