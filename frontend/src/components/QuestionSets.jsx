@@ -18,13 +18,21 @@ import { GENERAL_QUESTION_KEYS } from "../config/generalQuestions";
  * @param {function} onFormDataChange - Callback to notify parent when form data changes
  *                                      Receives the complete formData object
  * @param {object} validationErrors - Object mapping question keys to error messages
+ * @param {number} activeIndex - Optional external control of active question set index
  */
 export default function QuestionSets({
   onFormDataChange,
   validationErrors = {},
+  activeIndex,
+  onActiveIndexChange,
 }) {
   // Current active question set index (0-9)
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // Use activeIndex prop if provided, otherwise use internal state
+  const [internalIndex, setInternalIndex] = useState(0);
+
+  // Determine current index: use activeIndex if provided, otherwise use internal state
+  // When activeIndex is set externally, sync internal state for when it's cleared
+  const currentIndex = activeIndex !== undefined ? activeIndex : internalIndex;
 
   // Refs to DOM elements for each question set section (for scrolling)
   const sectionRefs = useRef({});
@@ -82,10 +90,13 @@ export default function QuestionSets({
   useEffect(() => {
     const section = sectionRefs.current[currentIndex];
     if (section) {
-      section.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
     }
   }, [currentIndex]);
 
@@ -94,9 +105,13 @@ export default function QuestionSets({
    * Wraps around to last question set if currently at first (0)
    */
   const handlePrevious = () => {
-    setCurrentIndex((prev) =>
-      prev === 0 ? TOTAL_QUESTION_SETS - 1 : prev - 1
-    );
+    const newIndex =
+      currentIndex === 0 ? TOTAL_QUESTION_SETS - 1 : currentIndex - 1;
+    setInternalIndex(newIndex);
+    // Clear external control when user manually navigates
+    if (onActiveIndexChange) {
+      onActiveIndexChange(undefined);
+    }
   };
 
   /**
@@ -104,7 +119,12 @@ export default function QuestionSets({
    * Wraps around to first question set (0) if currently at last
    */
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % TOTAL_QUESTION_SETS);
+    const newIndex = (currentIndex + 1) % TOTAL_QUESTION_SETS;
+    setInternalIndex(newIndex);
+    // Clear external control when user manually navigates
+    if (onActiveIndexChange) {
+      onActiveIndexChange(undefined);
+    }
   };
 
   return (
@@ -120,7 +140,10 @@ export default function QuestionSets({
       aria-label="Question sets navigation"
     >
       {/* Left arrow */}
-      <div className="prev-btn-container sticky top-1/2 -translate-y-1/2 self-start h-0 flex items-center z-10">
+      <div
+        className="prev-btn-container sticky self-start h-0 flex items-center z-10"
+        style={{ top: "250px", maxHeight: "calc(100vh - 100px)" }}
+      >
         <button
           className="prev-btn text-white text-2xl px-3 py-1 rounded-lg transition-colors"
           onClick={handlePrevious}
@@ -151,7 +174,10 @@ export default function QuestionSets({
       </div>
 
       {/* Right arrow */}
-      <div className="next-btn-container sticky top-1/2 -translate-y-1/2 self-start h-0 flex items-center z-10 ml-auto">
+      <div
+        className="next-btn-container sticky self-start h-0 flex items-center z-10 ml-auto"
+        style={{ top: "250px", maxHeight: "calc(100vh - 100px)" }}
+      >
         <button
           className="next-btn text-white text-2xl px-3 py-1 rounded-lg transition-colors"
           onClick={handleNext}

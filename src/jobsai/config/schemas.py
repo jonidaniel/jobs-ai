@@ -387,7 +387,7 @@ VALID_GENERAL_KEYS = {
 }
 
 # Valid job level options
-VALID_JOB_LEVELS = {"Expert", "Intermediate", "Entry", "Intern"}
+VALID_JOB_LEVELS = {"Expert-level", "Expert", "Intermediate", "Entry", "Intern"}
 
 # Valid job board options
 VALID_JOB_BOARDS = {"Duunitori", "Jobly"}
@@ -399,7 +399,7 @@ VALID_DEEP_MODE = {"Yes", "No"}
 VALID_COVER_LETTER_NUM = {"1", "2", "3", "4", "5", "10"}
 
 # Valid cover letter style options
-VALID_COVER_LETTER_STYLE = {"Professional", "Friendly", "Confident"}
+VALID_COVER_LETTER_STYLE = {"Professional", "Friendly", "Confident", "Funny"}
 
 
 class GeneralQuestionItem(BaseModel):
@@ -434,11 +434,30 @@ class GeneralQuestionItem(BaseModel):
                 raise ValueError(
                     "job-level must be a non-empty array with at least one option"
                 )
+            if len(v) > 2:
+                raise ValueError("job-level must contain at most 2 options")
             invalid = [x for x in v if x not in VALID_JOB_LEVELS]
             if invalid:
                 raise ValueError(
                     f"Invalid job-level options: {invalid}. Valid options: {VALID_JOB_LEVELS}"
                 )
+            # If 2 options selected, they must be adjacent
+            if len(v) == 2:
+                valid_pairs = [
+                    {"Expert-level", "Intermediate"},
+                    {
+                        "Expert",
+                        "Intermediate",
+                    },  # Also accept "Expert" for backward compatibility
+                    {"Intermediate", "Entry"},
+                    {"Entry", "Intern"},
+                ]
+                option_set = set(v)
+                if not any(option_set == pair for pair in valid_pairs):
+                    raise ValueError(
+                        "If selecting two job levels, they must be adjacent "
+                        "(Expert-level + Intermediate, Intermediate + Entry, or Entry + Intern)"
+                    )
         elif key == "job-boards":
             if not isinstance(v, list) or len(v) == 0:
                 raise ValueError(
@@ -458,9 +477,16 @@ class GeneralQuestionItem(BaseModel):
                     f"cover-letter-num must be one of: {VALID_COVER_LETTER_NUM}"
                 )
         elif key == "cover-letter-style":
-            if not isinstance(v, str) or v not in VALID_COVER_LETTER_STYLE:
+            if not isinstance(v, list) or len(v) == 0:
                 raise ValueError(
-                    f"cover-letter-style must be one of: {VALID_COVER_LETTER_STYLE}"
+                    "cover-letter-style must be a non-empty array with at least one option"
+                )
+            if len(v) > 2:
+                raise ValueError("cover-letter-style must contain at most 2 options")
+            invalid = [x for x in v if x not in VALID_COVER_LETTER_STYLE]
+            if invalid:
+                raise ValueError(
+                    f"Invalid cover-letter-style options: {invalid}. Valid options: {VALID_COVER_LETTER_STYLE}"
                 )
         else:
             raise ValueError(

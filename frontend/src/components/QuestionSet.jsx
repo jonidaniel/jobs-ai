@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Slider from "./questions/Slider";
 import TextField from "./questions/TextField";
 import MultipleChoice from "./questions/MultipleChoice";
@@ -41,6 +42,52 @@ export default function QuestionSet({
   onFormChange,
   validationErrors = {},
 }) {
+  // State to track how many "Other" field sets are shown for slider question sets (indices 1-8)
+  // Always show at least one "Other" field set
+  const baseOtherFieldKey = `text-field${index}`;
+  // Count how many "other" fields have values, default to 1
+  const countOtherFields = () => {
+    let count = 1; // Always show at least one
+    let i = 1;
+    while (
+      formData[`${baseOtherFieldKey}${i > 1 ? `-${i}` : ""}`] ||
+      formData[`${baseOtherFieldKey}${i > 1 ? `-${i}` : ""}-slider`]
+    ) {
+      i++;
+      count = i;
+    }
+    return count;
+  };
+  const [otherFieldCount, setOtherFieldCount] = useState(countOtherFields);
+
+  const label = <p>The last question.</p>;
+  const label2 = (
+    <p>
+      <br />
+      <br />
+      Give us a depiction of <i>what kind of person you are.</i> What are your
+      interests and aspirations? Here's where you should bring up your
+      personality.
+      <br />
+      <br />
+      What do you look for in a job?
+      <br />
+      What is the one big thing you bring to the table?
+      <br />
+      And what separates you from others?
+      <br />
+      <br />
+      Consider this answer as <i>the engine</i> of the job search.
+      <br />
+      <br />
+      Don't worry too much about grammar. We'll find the best words for you.
+      <br />
+      There's no need to repeat any of the information here that you've already
+      given in earlier steps. Don't enter any personally identifiable
+      information.
+    </p>
+  );
+
   return (
     <section
       ref={sectionRef}
@@ -61,11 +108,13 @@ export default function QuestionSet({
           // Text-only question set (index 9): Single text input field
           <TextField
             keyName="additional-info"
-            label="Give us a short, top-level depiction of who you are, and what are your main interests and aspirations. This will help us find the most relevant jobs for you. You don't have to repeat any of the information you've already given in earlier question sets. Consider this answer as 'the engine' of the job search."
+            label={label}
+            label2={label2}
             value={formData["additional-info"] || ""}
             onChange={onFormChange}
             error={validationErrors["additional-info"]}
             required={true}
+            height="150px"
           />
         ) : index === GENERAL_QUESTIONS_INDEX ? (
           // Create 'General Questions' set (index 0)
@@ -74,7 +123,8 @@ export default function QuestionSet({
             const keyName = GENERAL_QUESTION_KEYS[j];
             if (j === 0) {
               // First question (Job level) is a multiple choice with checkboxes
-              // Options: Intern, Entry, Intermediate, Expert
+              // Options: Expert-level, Intermediate, Entry, Intern
+              // Users can select 1 or 2 options, but if 2, they must be adjacent
               return (
                 <MultipleChoice
                   key={j}
@@ -85,6 +135,8 @@ export default function QuestionSet({
                   onChange={onFormChange}
                   error={validationErrors[keyName]}
                   required={true}
+                  maxSelections={2}
+                  requireAdjacent={true}
                 />
               );
             } else if (j === 1) {
@@ -121,7 +173,8 @@ export default function QuestionSet({
             } else if (j === 3) {
               // Insert paragraph between questions 3 and 4
               // Fourth question (Job count) is a single choice with radio buttons
-              // Options: 1, 2, 3, 4, 5, 10
+              // Options: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+              // Split at index 5: options 1-5 on left, 6-10 on right
               return (
                 <div key={`info-${j}`}>
                   <SingleChoice
@@ -133,22 +186,25 @@ export default function QuestionSet({
                     onChange={onFormChange}
                     error={validationErrors[keyName]}
                     required={true}
+                    splitAt={5}
                   />
                 </div>
               );
             } else if (j === 4) {
-              // Fifth question (Cover letter style) is a single choice with radio buttons
-              // Options: Professional, Friendly, Confident
+              // Fifth question (Cover letter style) is a multiple choice with checkboxes
+              // Users can select 1 or 2 options
+              // Options: Professional, Friendly, Confident, Funny
               return (
-                <SingleChoice
+                <MultipleChoice
                   key={j}
                   keyName={keyName}
                   label={GENERAL_QUESTION_LABELS[j]}
                   options={COVER_LETTER_STYLE_OPTIONS}
-                  value={formData[keyName] || ""}
+                  value={formData[keyName] || []}
                   onChange={onFormChange}
                   error={validationErrors[keyName]}
                   required={true}
+                  maxSelections={2}
                 />
               );
             }
@@ -170,13 +226,47 @@ export default function QuestionSet({
                 onChange={onFormChange}
               />
             ))}
-            {/* "Other" text field for additional input */}
-            <TextField
-              keyName={`text-field${index}`}
-              label="Other"
-              value={formData[`text-field${index}`] || ""}
-              onChange={onFormChange}
-            />
+            {/* "Other" text fields and sliders - always show at least one, can add more */}
+            {Array.from({ length: otherFieldCount }).map((_, i) => {
+              const fieldIndex = i + 1;
+              const fieldKey =
+                fieldIndex === 1
+                  ? baseOtherFieldKey
+                  : `${baseOtherFieldKey}-${fieldIndex}`;
+              const sliderKey = `${fieldKey}-slider`;
+
+              const isFirst = fieldIndex === 1;
+
+              return (
+                <div key={fieldKey} className="mt-4">
+                  <TextField
+                    keyName={fieldKey}
+                    label={
+                      isFirst
+                        ? "Type a new experience and choose amount of years"
+                        : ""
+                    }
+                    value={formData[fieldKey] || ""}
+                    onChange={onFormChange}
+                  />
+                  <Slider
+                    keyName={sliderKey}
+                    label=""
+                    value={formData[sliderKey] || SLIDER_DEFAULT}
+                    onChange={onFormChange}
+                  />
+                </div>
+              );
+            })}
+            {/* Button to add another "Other" field set */}
+            <button
+              type="button"
+              onClick={() => setOtherFieldCount(otherFieldCount + 1)}
+              className="mt-4 px-4 py-2 text-sm border border-gray-400 rounded hover:bg-gray-800 transition-colors"
+              style={{ backgroundColor: "#0e0e0e" }}
+            >
+              Add more
+            </button>
           </>
         )}
       </div>

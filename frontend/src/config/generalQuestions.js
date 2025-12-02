@@ -24,11 +24,11 @@ export const GENERAL_QUESTIONS_COUNT = 5;
  * 4: Cover letter style (single choice - see COVER_LETTER_STYLE_OPTIONS)
  */
 export const GENERAL_QUESTION_LABELS = [
-  "First things first.What's the level of job you're looking for? (you might select two adjacent levels)",
-  "We'll scrape popular job boards with many keywords. What boards do you want us to include?",
-  "Do you want to use deep search? This will take a bit longer, but it'll find jobs with more relevance to you.",
-  "Once we've found jobs, we'll rank them, and then write cover letters for them. How many top jobs do you want cover letters for?",
-  "How about the style of the letters? Strictly professional or something else? A combination of two?",
+  "First things first.\nWhat's the *level of job* you're looking for? (you might select two adjacent levels)",
+  "We'll scrape popular job boards with many keywords.\n*What boards* do you want us to include?",
+  "Do you want to use *deep search*?\nIf yes, we'll open every job post and analyze them in detail. This will take a bit longer, but it'll find jobs with more relevance to you.",
+  "Once we've found jobs, we'll rank them, and then write cover letters for them.\n*How many top jobs* do you want cover letters for?",
+  "How about the *style* of the letters?\nStrictly professional or something else? A combination of two?",
 ];
 
 export const GENERAL_QUESTION_KEYS = [
@@ -83,10 +83,10 @@ export const JOB_COUNT_OPTIONS = [
 ];
 
 /**
- * Single choice options for the fifth question (Cover letter style)
+ * Multiple choice options for the fifth question (Cover letter style)
  *
- * Users can select only one option (radio buttons).
- * These represent the desired style for the cover letter.
+ * Users can select 1 or 2 options (checkboxes with max 2 selections).
+ * These represent the desired style(s) for the cover letter.
  */
 export const COVER_LETTER_STYLE_OPTIONS = [
   "Professional",

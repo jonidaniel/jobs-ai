@@ -1,4 +1,7 @@
-import { GENERAL_QUESTION_KEYS } from "../config/generalQuestions";
+import {
+  GENERAL_QUESTION_KEYS,
+  NAME_OPTIONS,
+} from "../config/generalQuestions";
 
 /**
  * Validates that all mandatory questions are answered
@@ -15,11 +18,22 @@ import { GENERAL_QUESTION_KEYS } from "../config/generalQuestions";
 export function validateGeneralQuestions(formData) {
   const errors = {};
 
-  // Question 1 (job-level): At least one option must be picked (array)
+  // Question 1 (job-level): At least one option must be picked (array, max 2, must be adjacent if 2)
   const jobLevel = formData[GENERAL_QUESTION_KEYS[0]];
   if (!jobLevel || !Array.isArray(jobLevel) || jobLevel.length === 0) {
     errors[GENERAL_QUESTION_KEYS[0]] =
       "Please select at least one job level option.";
+  } else if (jobLevel.length > 2) {
+    errors[GENERAL_QUESTION_KEYS[0]] =
+      "Please select at most two job level options.";
+  } else if (jobLevel.length === 2) {
+    // Check if the two selected options are adjacent
+    const index1 = NAME_OPTIONS.indexOf(jobLevel[0]);
+    const index2 = NAME_OPTIONS.indexOf(jobLevel[1]);
+    if (index1 === -1 || index2 === -1 || Math.abs(index1 - index2) !== 1) {
+      errors[GENERAL_QUESTION_KEYS[0]] =
+        "If selecting two job levels, they must be adjacent (e.g., Expert-level + Intermediate, Intermediate + Entry, Entry + Intern).";
+    }
   }
 
   // Question 2 (job-boards): At least one option must be picked (array)
@@ -40,10 +54,16 @@ export function validateGeneralQuestions(formData) {
     errors[GENERAL_QUESTION_KEYS[3]] = "Please select an option.";
   }
 
-  // Question 5 (cover-letter-style): A selection must be made (string)
+  // Question 5 (cover-letter-style): At least one option must be selected (array, max 2)
   const coverLetterStyle = formData[GENERAL_QUESTION_KEYS[4]];
-  if (!coverLetterStyle || coverLetterStyle.trim() === "") {
-    errors[GENERAL_QUESTION_KEYS[4]] = "Please select an option.";
+  if (
+    !coverLetterStyle ||
+    !Array.isArray(coverLetterStyle) ||
+    coverLetterStyle.length === 0
+  ) {
+    errors[GENERAL_QUESTION_KEYS[4]] = "Please select at least one option.";
+  } else if (coverLetterStyle.length > 2) {
+    errors[GENERAL_QUESTION_KEYS[4]] = "Please select at most two options.";
   }
 
   // Question 10 (additional-info): Personal description is mandatory (string)

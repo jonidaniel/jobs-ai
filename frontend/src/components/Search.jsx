@@ -39,6 +39,10 @@ export default function Search() {
   // Validation errors for general questions
   const [validationErrors, setValidationErrors] = useState({});
 
+  // Active question set index (for navigating to error location)
+  const [activeQuestionSetIndex, setActiveQuestionSetIndex] =
+    useState(undefined);
+
   /**
    * Handle form data changes
    * Memoized to prevent infinite loops in QuestionSets useEffect
@@ -103,23 +107,29 @@ export default function Search() {
     const validation = validateGeneralQuestions(formData);
     if (!validation.isValid) {
       setValidationErrors(validation.errors);
-      // Scroll to first question set (general questions) if validation fails
-      setTimeout(() => {
-        const firstQuestionSet = document.querySelector(
-          `#question-set-wrapper section[data-index="0"]`
-        );
-        if (firstQuestionSet) {
-          firstQuestionSet.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
+
+      // Find the first error and navigate to the question set containing it
+      const errorKeys = Object.keys(validation.errors);
+      if (errorKeys.length > 0) {
+        const firstErrorKey = errorKeys[0];
+
+        // Map error keys to question set indices
+        // General questions (job-level, job-boards, deep-mode, cover-letter-num, cover-letter-style) -> index 0
+        // Additional info (additional-info) -> index 9
+        let targetIndex = 0; // Default to general questions
+        if (firstErrorKey === "additional-info") {
+          targetIndex = 9;
         }
-      }, 100);
+        // All other errors are in general questions (index 0)
+
+        setActiveQuestionSetIndex(targetIndex);
+      }
       return;
     }
 
     // Clear validation errors if validation passes
     setValidationErrors({});
+    setActiveQuestionSetIndex(undefined); // Clear active index when validation passes
     setIsSubmitting(true);
 
     // Transform form data into grouped structure for backend API
@@ -213,6 +223,8 @@ export default function Search() {
       <QuestionSets
         onFormDataChange={handleFormDataChange}
         validationErrors={validationErrors}
+        activeIndex={activeQuestionSetIndex}
+        onActiveIndexChange={setActiveQuestionSetIndex}
       />
       {/* Success message - displayed when document is successfully downloaded */}
       {success && <SuccessMessage />}

@@ -15,9 +15,11 @@ import { SLIDER_MIN, SLIDER_MAX } from "../../config/sliders";
 export default function Slider({ keyName, label, value, onChange }) {
   return (
     <div className="flex flex-col w-full">
-      <label htmlFor={keyName} className="mb-1">
-        {label}
-      </label>
+      {label && (
+        <label htmlFor={keyName} className="mb-1">
+          {label}
+        </label>
+      )}
       <input
         id={keyName}
         className="slider accent-blue-500 w-full"
