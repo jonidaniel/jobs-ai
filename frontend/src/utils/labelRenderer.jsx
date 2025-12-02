@@ -1,0 +1,91 @@
+/**
+ * Shared utility for rendering labels with formatting support
+ * Used by MultipleChoice and SingleChoice components
+ *
+ * Supports:
+ * - Line breaks (\n)
+ * - Italic text (*text*)
+ * - Red asterisk (* at end of line)
+ * - Small text ({small}text{/small})
+ */
+
+/**
+ * Renders italic text parts
+ */
+const renderItalicParts = (text) => {
+  const italicParts = text.split(/(\*[^*]+\*)/g);
+  return italicParts.map((part, partIndex) => {
+    if (part.startsWith("*") && part.endsWith("*") && part.length > 2) {
+      return (
+        <em key={partIndex} className="italic">
+          {part.slice(1, -1)}
+        </em>
+      );
+    }
+    return <span key={partIndex}>{part}</span>;
+  });
+};
+
+/**
+ * Processes small text markers and returns parts array
+ */
+const processSmallText = (str) => {
+  const parts = [];
+  let remaining = str;
+  let partIndex = 0;
+
+  while (remaining.length > 0) {
+    const smallStart = remaining.indexOf("{small}");
+    const smallEnd = remaining.indexOf("{/small}");
+
+    if (smallStart !== -1 && smallEnd !== -1 && smallEnd > smallStart) {
+      if (smallStart > 0) {
+        parts.push({
+          type: "normal",
+          text: remaining.slice(0, smallStart),
+          index: partIndex++,
+        });
+      }
+      parts.push({
+        type: "small",
+        text: remaining.slice(smallStart + 7, smallEnd),
+        index: partIndex++,
+      });
+      remaining = remaining.slice(smallEnd + 8);
+    } else {
+      parts.push({ type: "normal", text: remaining, index: partIndex++ });
+      break;
+    }
+  }
+
+  return parts;
+};
+
+/**
+ * Renders label text with support for line breaks, italic text, red asterisk, and small text
+ */
+export const renderLabel = (text) => {
+  return text.split("\n").map((line, lineIndex, lineArray) => {
+    const hasRedAsterisk = line.endsWith(" *");
+    const lineWithoutAsterisk = hasRedAsterisk ? line.slice(0, -2) : line;
+    const smallParts = processSmallText(lineWithoutAsterisk);
+
+    return (
+      <span key={lineIndex}>
+        {smallParts.map(({ type, text, index }) => {
+          if (type === "small") {
+            return (
+              <span key={index} className="text-sm">
+                {renderItalicParts(text)}
+              </span>
+            );
+          } else {
+            return <span key={index}>{renderItalicParts(text)}</span>;
+          }
+        })}
+        {hasRedAsterisk && <span className="text-red-400 ml-1">*</span>}
+        {lineIndex < lineArray.length - 1 && <br />}
+      </span>
+    );
+  });
+};

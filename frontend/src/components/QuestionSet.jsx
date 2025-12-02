@@ -61,6 +61,29 @@ export default function QuestionSet({
   const [otherFieldCount, setOtherFieldCount] = useState(countOtherFields);
   const [addMoreClicked, setAddMoreClicked] = useState(false);
 
+  // Helper to generate field key for a given index
+  const getFieldKey = (fieldIndex) =>
+    fieldIndex === 1 ? baseOtherFieldKey : `${baseOtherFieldKey}-${fieldIndex}`;
+
+  // Shared button component for "Add more"
+  const AddMoreButton = ({ onClick, warningMessage }) => (
+    <div className="flex flex-col items-start">
+      <button
+        type="button"
+        onClick={onClick}
+        className="mt-4 px-4 py-2 text-sm border border-gray-400 rounded hover:bg-gray-800 transition-colors"
+        style={{ backgroundColor: "#0e0e0e" }}
+      >
+        Add more
+      </button>
+      {warningMessage && (
+        <p className="text-red-500 text-sm mt-2" role="alert">
+          {warningMessage}
+        </p>
+      )}
+    </div>
+  );
+
   const label = <p>The last question.</p>;
   const label2 = (
     <p>
@@ -153,24 +176,19 @@ export default function QuestionSet({
                 />
               );
             } else if (j === 1) {
-              // Insert paragraph between questions 1 and 2
               return (
-                <div key={`info-${j}`}>
-                  <MultipleChoice
-                    key={j}
-                    keyName={keyName}
-                    label={GENERAL_QUESTION_LABELS[j]}
-                    options={JOB_BOARD_OPTIONS}
-                    value={formData[keyName] || []}
-                    onChange={onFormChange}
-                    error={validationErrors[keyName]}
-                    required={true}
-                  />
-                </div>
+                <MultipleChoice
+                  key={j}
+                  keyName={keyName}
+                  label={GENERAL_QUESTION_LABELS[j]}
+                  options={JOB_BOARD_OPTIONS}
+                  value={formData[keyName] || []}
+                  onChange={onFormChange}
+                  error={validationErrors[keyName]}
+                  required={true}
+                />
               );
             } else if (j === 2) {
-              // Third question (Deep mode) is a single choice with radio buttons
-              // Options: Yes, No
               return (
                 <SingleChoice
                   key={j}
@@ -184,24 +202,18 @@ export default function QuestionSet({
                 />
               );
             } else if (j === 3) {
-              // Insert paragraph between questions 3 and 4
-              // Fourth question (Job count) is a single choice with radio buttons
-              // Options: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-              // Split at index 5: options 1-5 on left, 6-10 on right
               return (
-                <div key={`info-${j}`}>
-                  <SingleChoice
-                    key={j}
-                    keyName={keyName}
-                    label={GENERAL_QUESTION_LABELS[j]}
-                    options={JOB_COUNT_OPTIONS}
-                    value={formData[keyName] || ""}
-                    onChange={onFormChange}
-                    error={validationErrors[keyName]}
-                    required={true}
-                    splitAt={5}
-                  />
-                </div>
+                <SingleChoice
+                  key={j}
+                  keyName={keyName}
+                  label={GENERAL_QUESTION_LABELS[j]}
+                  options={JOB_COUNT_OPTIONS}
+                  value={formData[keyName] || ""}
+                  onChange={onFormChange}
+                  error={validationErrors[keyName]}
+                  required={true}
+                  splitAt={5}
+                />
               );
             } else if (j === 4) {
               // Fifth question (Cover letter style) is a multiple choice with checkboxes
@@ -242,10 +254,7 @@ export default function QuestionSet({
             {/* "Other" text fields and sliders - shown only after clicking "Add more" */}
             {Array.from({ length: otherFieldCount }).map((_, i) => {
               const fieldIndex = i + 1;
-              const fieldKey =
-                fieldIndex === 1
-                  ? baseOtherFieldKey
-                  : `${baseOtherFieldKey}-${fieldIndex}`;
+              const fieldKey = getFieldKey(fieldIndex);
               const sliderKey = `${fieldKey}-slider`;
 
               // Check if this is the last (currently editable) field
@@ -289,106 +298,74 @@ export default function QuestionSet({
               );
             })}
             {/* Button to add another "Other" field set */}
-            {(() => {
-              // If no fields are shown yet, allow adding the first one
-              if (otherFieldCount === 0) {
-                const handleAddMore = () => {
+            {otherFieldCount === 0 ? (
+              <AddMoreButton
+                onClick={() => {
                   setOtherFieldCount(1);
                   setAddMoreClicked(false);
-                };
+                }}
+              />
+            ) : (
+              (() => {
+                const lastFieldKey = getFieldKey(otherFieldCount);
+                const lastFieldValue = formData[lastFieldKey] || "";
+                const lastSliderValue =
+                  formData[`${lastFieldKey}-slider`] ?? SLIDER_DEFAULT;
 
-                return (
-                  <div className="flex flex-col items-start">
-                    <button
-                      type="button"
-                      onClick={handleAddMore}
-                      className="mt-4 px-4 py-2 text-sm border border-gray-400 rounded hover:bg-gray-800 transition-colors"
-                      style={{ backgroundColor: "#0e0e0e" }}
-                    >
-                      Add more
-                    </button>
-                  </div>
+                const isFieldEmpty = !lastFieldValue.trim();
+                const isSliderZero = lastSliderValue === 0;
+
+                // Check for duplicate experiences
+                const defaultLabels = Object.values(
+                  SLIDER_DATA[index - 1] || {}
                 );
-              }
+                const addedExperiences = Array.from(
+                  { length: otherFieldCount - 1 },
+                  (_, j) => {
+                    return formData[getFieldKey(j + 1)]?.trim() || "";
+                  }
+                ).filter(Boolean);
 
-              // Get the last/most recently added field key
-              const lastFieldKey =
-                otherFieldCount === 1
-                  ? baseOtherFieldKey
-                  : `${baseOtherFieldKey}-${otherFieldCount}`;
-              const lastSliderKey = `${lastFieldKey}-slider`;
+                const normalizedCurrentValue = lastFieldValue
+                  .trim()
+                  .toLowerCase();
+                const isDuplicate =
+                  defaultLabels.some(
+                    (label) => label.toLowerCase() === normalizedCurrentValue
+                  ) ||
+                  addedExperiences.some(
+                    (exp) => exp.toLowerCase() === normalizedCurrentValue
+                  );
 
-              const lastFieldValue = formData[lastFieldKey] || "";
-              const lastSliderValue = formData[lastSliderKey] ?? SLIDER_DEFAULT;
+                const shouldShowWarning =
+                  isFieldEmpty || isSliderZero || isDuplicate;
 
-              // Both must be filled: field must not be empty AND slider must not be 0
-              const isFieldEmpty = !lastFieldValue.trim();
-              const isSliderZero = lastSliderValue === 0;
-
-              // Check for duplicate experiences
-              // Get default slider labels for this question set
-              const defaultLabels = Object.values(SLIDER_DATA[index - 1] || {});
-
-              // Get all already added custom experiences (excluding the current one)
-              const addedExperiences = [];
-              for (let j = 1; j < otherFieldCount; j++) {
-                const fieldKey =
-                  j === 1 ? baseOtherFieldKey : `${baseOtherFieldKey}-${j}`;
-                const experienceValue = formData[fieldKey] || "";
-                if (experienceValue.trim()) {
-                  addedExperiences.push(experienceValue.trim());
-                }
-              }
-
-              // Normalize for comparison (case-insensitive, trimmed)
-              const normalizedCurrentValue = lastFieldValue
-                .trim()
-                .toLowerCase();
-              const isDuplicateOfDefault = defaultLabels.some(
-                (label) => label.toLowerCase() === normalizedCurrentValue
-              );
-              const isDuplicateOfAdded = addedExperiences.some(
-                (exp) => exp.toLowerCase() === normalizedCurrentValue
-              );
-              const isDuplicate = isDuplicateOfDefault || isDuplicateOfAdded;
-
-              const shouldShowWarning =
-                isFieldEmpty || isSliderZero || isDuplicate;
-
-              // Reset the clicked state if conditions are no longer met
-              if (!shouldShowWarning && addMoreClicked) {
-                setAddMoreClicked(false);
-              }
-
-              const handleAddMore = () => {
-                if (shouldShowWarning) {
-                  setAddMoreClicked(true);
-                } else {
-                  setOtherFieldCount(otherFieldCount + 1);
+                // Reset the clicked state if conditions are no longer met
+                if (!shouldShowWarning && addMoreClicked) {
                   setAddMoreClicked(false);
                 }
-              };
 
-              return (
-                <div className="flex flex-col items-start">
-                  <button
-                    type="button"
-                    onClick={handleAddMore}
-                    className="mt-4 px-4 py-2 text-sm border border-gray-400 rounded hover:bg-gray-800 transition-colors"
-                    style={{ backgroundColor: "#0e0e0e" }}
-                  >
-                    Add more
-                  </button>
-                  {shouldShowWarning && addMoreClicked && (
-                    <p className="text-red-500 text-sm mt-2" role="alert">
-                      {isDuplicate
-                        ? "This experience already exists. Please enter a different one."
-                        : "Please fill in the experience field and set the years before adding more."}
-                    </p>
-                  )}
-                </div>
-              );
-            })()}
+                return (
+                  <AddMoreButton
+                    onClick={() => {
+                      if (shouldShowWarning) {
+                        setAddMoreClicked(true);
+                      } else {
+                        setOtherFieldCount(otherFieldCount + 1);
+                        setAddMoreClicked(false);
+                      }
+                    }}
+                    warningMessage={
+                      shouldShowWarning && addMoreClicked
+                        ? isDuplicate
+                          ? "This experience already exists. Please enter a different one."
+                          : "Please fill in the experience field and set the years before adding more."
+                        : null
+                    }
+                  />
+                );
+              })()
+            )}
           </>
         )}
       </div>

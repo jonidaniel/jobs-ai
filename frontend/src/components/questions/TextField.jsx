@@ -30,8 +30,11 @@ export default function TextField({
   showValidation = true,
 }) {
   const [hasInteracted, setHasInteracted] = useState(false);
-  const currentLength = (value || "").length;
-  const exceedsLimit = currentLength > maxLength;
+
+  // Only calculate limit check if validation is enabled
+  const exceedsLimit = showValidation
+    ? (value || "").length > maxLength
+    : false;
 
   const handleChange = (e) => {
     if (!hasInteracted && showValidation) {
@@ -51,7 +54,7 @@ export default function TextField({
   };
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full" data-question-key={keyName}>
       {(label || required) && (
         <label htmlFor={keyName} className="mb-1">
           {label}

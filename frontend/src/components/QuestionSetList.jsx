@@ -19,12 +19,14 @@ import { GENERAL_QUESTION_KEYS } from "../config/generalQuestions";
  *                                      Receives the complete formData object
  * @param {object} validationErrors - Object mapping question keys to error messages
  * @param {number} activeIndex - Optional external control of active question set index
+ * @param {function} onCurrentIndexChange - Optional callback to report current question set index
  */
 export default function QuestionSetList({
   onFormDataChange,
   validationErrors = {},
   activeIndex,
   onActiveIndexChange,
+  onCurrentIndexChange,
 }) {
   // Current active question set index (0-9)
   // Use activeIndex prop if provided, otherwise use internal state
@@ -33,6 +35,13 @@ export default function QuestionSetList({
   // Determine current index: use activeIndex if provided, otherwise use internal state
   // When activeIndex is set externally, sync internal state for when it's cleared
   const currentIndex = activeIndex !== undefined ? activeIndex : internalIndex;
+
+  // Report current index to parent when it changes
+  useEffect(() => {
+    if (onCurrentIndexChange) {
+      onCurrentIndexChange(currentIndex);
+    }
+  }, [currentIndex, onCurrentIndexChange]);
 
   // Refs to DOM elements for each question set section (for scrolling)
   const sectionRefs = useRef({});
@@ -151,12 +160,17 @@ export default function QuestionSetList({
     }
   };
 
+  // Shared arrow button container styles
+  const arrowContainerStyle = {
+    top: "clamp(450px, 20vh, 250px)",
+    maxHeight: "calc(100vh - 100px)",
+  };
+  const arrowButtonStyle = {
+    fontSize: "clamp(1rem, 3vw, 1.5rem)",
+    padding: "clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1rem)",
+  };
+
   return (
-    /*
-     * Question set wrapper
-     *
-     * Only one question set is shown on the page at a time
-     */
     <div
       id="question-set-wrapper"
       className="relative flex w-full"
@@ -166,17 +180,11 @@ export default function QuestionSetList({
       {/* Left arrow */}
       <div
         className="prev-btn-container sticky self-start h-0 flex items-center z-10"
-        style={{
-          top: "clamp(450px, 20vh, 250px)",
-          maxHeight: "calc(100vh - 100px)",
-        }}
+        style={arrowContainerStyle}
       >
         <button
           className="prev-btn text-white rounded-lg transition-colors hover:bg-gray-700"
-          style={{
-            fontSize: "clamp(1rem, 3vw, 1.5rem)",
-            padding: "clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1rem)",
-          }}
+          style={arrowButtonStyle}
           onClick={handlePrevious}
           aria-label="Previous question set"
           aria-controls="question-set-wrapper"
@@ -207,17 +215,11 @@ export default function QuestionSetList({
       {/* Right arrow */}
       <div
         className="next-btn-container sticky self-start h-0 flex items-center z-10 ml-auto"
-        style={{
-          top: "clamp(450px, 20vh, 250px)",
-          maxHeight: "calc(100vh - 100px)",
-        }}
+        style={arrowContainerStyle}
       >
         <button
           className="next-btn text-white rounded-lg transition-colors hover:bg-gray-700"
-          style={{
-            fontSize: "clamp(1rem, 3vw, 1.5rem)",
-            padding: "clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1rem)",
-          }}
+          style={arrowButtonStyle}
           onClick={handleNext}
           aria-label="Next question set"
           aria-controls="question-set-wrapper"

@@ -10,6 +10,7 @@ import { transformFormData } from "../utils/formDataTransform";
 import { downloadBlob } from "../utils/fileDownload";
 import { getErrorMessage } from "../utils/errorMessages";
 import { validateGeneralQuestions } from "../utils/validation";
+import { GENERAL_QUESTION_KEYS } from "../config/generalQuestions";
 
 import "../styles/search.css";
 
@@ -42,6 +43,8 @@ export default function Search() {
   // Active question set index (for navigating to error location)
   const [activeQuestionSetIndex, setActiveQuestionSetIndex] =
     useState(undefined);
+  // Current question set index (tracked from QuestionSetList)
+  const [currentQuestionSetIndex, setCurrentQuestionSetIndex] = useState(0);
 
   /**
    * Handle form data changes
@@ -108,21 +111,57 @@ export default function Search() {
     if (!validation.isValid) {
       setValidationErrors(validation.errors);
 
-      // Find the first error and navigate to the question set containing it
+      // Check if the current question set has any errors
+      const currentSetHasErrors = (() => {
+        if (currentQuestionSetIndex === 0) {
+          // Check if any general question has an error
+          return GENERAL_QUESTION_KEYS.some((key) => validation.errors[key]);
+        } else if (currentQuestionSetIndex === 9) {
+          // Check if additional-info has an error
+          return validation.errors["additional-info"] !== undefined;
+        }
+        return false;
+      })();
+
+      // Find the first error key
       const errorKeys = Object.keys(validation.errors);
       if (errorKeys.length > 0) {
         const firstErrorKey = errorKeys[0];
 
-        // Map error keys to question set indices
-        // General questions (job-level, job-boards, deep-mode, cover-letter-num, cover-letter-style) -> index 0
-        // Additional info (additional-info) -> index 9
-        let targetIndex = 0; // Default to general questions
-        if (firstErrorKey === "additional-info") {
-          targetIndex = 9;
-        }
-        // All other errors are in general questions (index 0)
+        // Only navigate if the current question set doesn't have errors
+        // If it does have errors, stay on the current set
+        if (!currentSetHasErrors) {
+          // Map error keys to question set indices
+          // General questions (job-level, job-boards, deep-mode, cover-letter-num, cover-letter-style) -> index 0
+          // Additional info (additional-info) -> index 9
+          let targetIndex = 0; // Default to general questions
+          if (firstErrorKey === "additional-info") {
+            targetIndex = 9;
+          }
+          // All other errors are in general questions (index 0)
 
-        setActiveQuestionSetIndex(targetIndex);
+          // Only navigate if the target index is different from the current visible one
+          if (targetIndex !== currentQuestionSetIndex) {
+            setActiveQuestionSetIndex(targetIndex);
+          }
+        }
+
+        // Scroll to the first error question after a short delay to ensure DOM is ready
+        setTimeout(() => {
+          const errorQuestion = document.querySelector(
+            `[data-question-key="${firstErrorKey}"]`
+          );
+          if (errorQuestion) {
+            const rect = errorQuestion.getBoundingClientRect();
+            const scrollOffset = 120; // Offset to show question clearly
+            const targetPosition = window.scrollY + rect.top - scrollOffset;
+
+            window.scrollTo({
+              top: targetPosition,
+              behavior: "smooth",
+            });
+          }
+        }, 150);
       }
       return;
     }
@@ -134,8 +173,6 @@ export default function Search() {
 
     // Transform form data into grouped structure for backend API
     const result = transformFormData(formData);
-
-    console.log(result);
 
     // Send to backend and download document
     try {
@@ -173,7 +210,6 @@ export default function Search() {
         successTimeoutRef.current = null;
       }, 5000);
     } catch (error) {
-      console.error("Download failed:", error);
       setError(getErrorMessage(error));
       setSuccess(false);
     } finally {
@@ -225,6 +261,7 @@ export default function Search() {
         validationErrors={validationErrors}
         activeIndex={activeQuestionSetIndex}
         onActiveIndexChange={setActiveQuestionSetIndex}
+        onCurrentIndexChange={setCurrentQuestionSetIndex}
       />
       {/* Success message - displayed when document is successfully downloaded */}
       {success && <SuccessMessage />}
