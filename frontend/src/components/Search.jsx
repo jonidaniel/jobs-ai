@@ -186,20 +186,38 @@ export default function Search() {
     <section id="search">
       <h2>Search</h2>
       <h3 className="text-3xl font-semibold text-white text-center">
-        Answer questions in each category and we will find jobs relevant to you
+        <i>We will find jobs for you.</i>
+      </h3>
+      <h3 className="text-3xl font-semibold text-white text-center">
+        The way to make sure we find <i>the most relevant jobs</i> and{" "}
+        <i>write the best cover letters</i> is to provide us with a dose of
+        information.
+      </h3>
+      <h3 className="text-3xl font-semibold text-white text-center">
+        <i>We don't ask you for any personal information.</i>
+      </h3>
+      <h3 className="text-3xl font-semibold text-white text-center">
+        By answering as many questions as possible, you enable us to use all
+        tools in our arsenal when we scrape jobs for you. This is how we find
+        the gems. The questions are easy, and in most of them you just select
+        the option that best describes you. Even if you felt like you didn't
+        have much experience, be truthful -
+      </h3>
+      <h3 className="text-3xl font-semibold text-white text-center">
+        <i>if there is a job matching your skills, we will find it.</i>
+      </h3>
+      <h3 className="text-3xl font-semibold text-white text-center">
+        <i>Find Jobs</i> let's us start the search.
       </h3>
       {/* Question sets component with blue/gray background - contains all question sets and manages all form inputs */}
       <QuestionSets
         onFormDataChange={handleFormDataChange}
         validationErrors={validationErrors}
       />
-
       {/* Success message - displayed when document is successfully downloaded */}
       {success && <SuccessMessage />}
-
       {/* Error message - displayed when submission fails */}
       {error && <ErrorMessage message={error} />}
-
       {/* Black 'Find Jobs' submit button - triggers form submission and document generation */}
       <div className="flex justify-center mt-6">
         <button

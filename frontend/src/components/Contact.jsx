@@ -8,6 +8,15 @@ export default function Contact() {
         Feel free to contact us on any channel
       </h3>
       <div className="bg-gray-800 p-10 rounded-2xl shadow-lg space-y-4 w-full max-w-2xl mx-auto">
+        <div className="text-center">
+          <a
+            href="https://github.com/jonidaniel/jobsai"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            JobsAI code on GitHub
+          </a>
+        </div>
         <p>+358405882001</p>
         <p>joni-makinen@live.fi</p>
 
