@@ -38,12 +38,13 @@ export default function Search() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  // Track if we just completed a submission (to prevent scroll on remount)
-  const justCompletedSubmission = useRef(false);
-  // Store scroll position to restore after download
-  const savedScrollPosition = useRef(null);
-  // Track if we've had a successful submission (to keep question sets hidden)
-  const hasSuccessfulSubmission = useRef(false);
+  // Consolidated submission state ref
+  // Tracks submission-related state that doesn't need to trigger re-renders
+  const submissionState = useRef({
+    justCompleted: false, // Track if we just completed a submission (to prevent scroll on remount)
+    savedScrollPosition: null, // Store scroll position to restore after download
+    hasSuccessfulSubmission: false, // Track if we've had a successful submission (to keep question sets hidden)
+  });
 
   // Form data received from QuestionSets component via callback
   const [formData, setFormData] = useState({});
@@ -111,12 +112,12 @@ export default function Search() {
     e.stopPropagation();
 
     // If this is a "Find Again" click, navigate to question set 1 and reset
-    if (hasSuccessfulSubmission.current) {
+    if (submissionState.current.hasSuccessfulSubmission) {
       // Reset states
       setError(null);
       setSuccess(false);
-      justCompletedSubmission.current = false;
-      hasSuccessfulSubmission.current = false;
+      submissionState.current.justCompleted = false;
+      submissionState.current.hasSuccessfulSubmission = false;
       // Navigate to question set 1 (index 0)
       setActiveQuestionSetIndex(0);
       // Scroll to question set 1 after a brief delay to ensure DOM is ready
@@ -142,9 +143,9 @@ export default function Search() {
     // Clear previous errors and success messages
     setError(null);
     setSuccess(false);
-    justCompletedSubmission.current = false;
+    submissionState.current.justCompleted = false;
     // Reset successful submission flag when starting a new submission
-    hasSuccessfulSubmission.current = false;
+    submissionState.current.hasSuccessfulSubmission = false;
 
     // Validate general questions before submission
     const validation = validateGeneralQuestions(formData);
@@ -233,7 +234,8 @@ export default function Search() {
       const blob = await response.blob();
 
       // Save scroll position before any state changes
-      savedScrollPosition.current = window.scrollY || window.pageYOffset;
+      submissionState.current.savedScrollPosition =
+        window.scrollY || window.pageYOffset;
 
       // Download the file
       downloadBlob(blob, response.headers);
@@ -241,8 +243,8 @@ export default function Search() {
       // Show success message
       setSuccess(true);
       setError(null);
-      justCompletedSubmission.current = true;
-      hasSuccessfulSubmission.current = true;
+      submissionState.current.justCompleted = true;
+      submissionState.current.hasSuccessfulSubmission = true;
 
       // Auto-dismiss success message after timeout (but keep the text visible)
       // Clear any existing timeout first to prevent multiple timers
@@ -257,7 +259,7 @@ export default function Search() {
     } catch (error) {
       setError(getErrorMessage(error));
       setSuccess(false);
-      justCompletedSubmission.current = true;
+      submissionState.current.justCompleted = true;
     } finally {
       // Reset submission flag after request completes (success or error)
       setIsSubmitting(false);
@@ -269,8 +271,8 @@ export default function Search() {
    * Prevents page from jumping to top when download completes
    */
   useEffect(() => {
-    if (!isSubmitting && savedScrollPosition.current !== null) {
-      const targetScroll = savedScrollPosition.current;
+    if (!isSubmitting && submissionState.current.savedScrollPosition !== null) {
+      const targetScroll = submissionState.current.savedScrollPosition;
 
       // Restore scroll position using requestAnimationFrame for smooth restoration
       const restoreScroll = () => {
@@ -295,11 +297,11 @@ export default function Search() {
    * Ensures the skipInitialScroll prop is processed before resetting
    */
   useEffect(() => {
-    if (!isSubmitting && justCompletedSubmission.current) {
+    if (!isSubmitting && submissionState.current.justCompleted) {
       // Reset the flag after a brief delay to ensure QuestionSetList has processed it
       const timeoutId = setTimeout(() => {
-        justCompletedSubmission.current = false;
-        savedScrollPosition.current = null; // Clear saved position
+        submissionState.current.justCompleted = false;
+        submissionState.current.savedScrollPosition = null; // Clear saved position
       }, 200);
       return () => clearTimeout(timeoutId);
     }
@@ -330,7 +332,7 @@ export default function Search() {
             This might take a minute
           </h3>
         </>
-      ) : hasSuccessfulSubmission.current ? (
+      ) : submissionState.current.hasSuccessfulSubmission ? (
         // Success state: show completion message (stays visible even after success message disappears)
         <>
           <h3 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white text-center">
@@ -368,16 +370,18 @@ export default function Search() {
       )}
       {/* Question sets component with blue/gray background - contains all question sets and manages all form inputs */}
       {/* Only show question sets if not submitting AND not successfully completed */}
-      {!isSubmitting && !success && !hasSuccessfulSubmission.current && (
-        <QuestionSetList
-          onFormDataChange={handleFormDataChange}
-          validationErrors={validationErrors}
-          activeIndex={activeQuestionSetIndex}
-          onActiveIndexChange={setActiveQuestionSetIndex}
-          onCurrentIndexChange={setCurrentQuestionSetIndex}
-          skipInitialScroll={justCompletedSubmission.current}
-        />
-      )}
+      {!isSubmitting &&
+        !success &&
+        !submissionState.current.hasSuccessfulSubmission && (
+          <QuestionSetList
+            onFormDataChange={handleFormDataChange}
+            validationErrors={validationErrors}
+            activeIndex={activeQuestionSetIndex}
+            onActiveIndexChange={setActiveQuestionSetIndex}
+            onCurrentIndexChange={setCurrentQuestionSetIndex}
+            skipInitialScroll={submissionState.current.justCompleted}
+          />
+        )}
       {/* Success message - displayed when document is successfully downloaded */}
       {success && <SuccessMessage />}
       {/* Error message - displayed when submission fails */}
@@ -390,14 +394,14 @@ export default function Search() {
           disabled={isSubmitting}
           className="text-lg sm:text-xl md:text-2xl lg:text-3xl px-4 sm:px-6 py-2 sm:py-3 border border-white bg-transparent text-white font-semibold rounded-lg shadow disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label={
-            hasSuccessfulSubmission.current
+            submissionState.current.hasSuccessfulSubmission
               ? "Start a new job search"
               : "Submit form and generate job search document"
           }
         >
           {isSubmitting
             ? "Finding Jobs..."
-            : hasSuccessfulSubmission.current
+            : submissionState.current.hasSuccessfulSubmission
             ? "Find Again"
             : "Find Jobs"}
         </button>

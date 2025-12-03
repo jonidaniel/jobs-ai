@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Slider from "./questions/Slider";
 import TextField from "./questions/TextField";
 import MultipleChoice from "./questions/MultipleChoice";
@@ -171,6 +171,71 @@ export default function QuestionSet({
   };
 
   /**
+   * Memoized validation check for duplicate experiences
+   * Only recalculates when relevant dependencies change
+   *
+   * @returns {Object} Validation result with isFieldEmpty, isSliderZero, isDuplicate, and shouldShowWarning
+   */
+  const validationResult = useMemo(() => {
+    // Only calculate if we have fields to validate
+    if (otherFieldCount === 0) {
+      return {
+        isFieldEmpty: false,
+        isSliderZero: false,
+        isDuplicate: false,
+        shouldShowWarning: false,
+      };
+    }
+
+    // Inline field key generation to avoid dependency on getFieldKey function
+    // baseOtherFieldKey is `text-field${index}`, so we inline it here
+    const baseKey = `text-field${index}`;
+    const lastFieldKey =
+      otherFieldCount === 1 ? baseKey : `${baseKey}-${otherFieldCount}`;
+    const lastFieldValue = formData[lastFieldKey] || "";
+    const lastSliderValue =
+      formData[`${lastFieldKey}-slider`] ?? SLIDER_DEFAULT;
+
+    // Validation checks
+    const isFieldEmpty = !lastFieldValue.trim();
+    const isSliderZero = lastSliderValue === 0;
+
+    // Only check for duplicates if field has a value
+    let isDuplicate = false;
+    if (!isFieldEmpty) {
+      // Check for duplicate experiences (case-insensitive)
+      const defaultLabels = Object.values(SLIDER_DATA[index - 1] || {});
+      const addedExperiences = Array.from(
+        { length: otherFieldCount - 1 },
+        (_, j) => {
+          const fieldIndex = j + 1;
+          const fieldKey =
+            fieldIndex === 1 ? baseKey : `${baseKey}-${fieldIndex}`;
+          return formData[fieldKey]?.trim() || "";
+        }
+      ).filter(Boolean);
+
+      const normalizedCurrentValue = lastFieldValue.trim().toLowerCase();
+      isDuplicate =
+        defaultLabels.some(
+          (label) => label.toLowerCase() === normalizedCurrentValue
+        ) ||
+        addedExperiences.some(
+          (exp) => exp.toLowerCase() === normalizedCurrentValue
+        );
+    }
+
+    const shouldShowWarning = isFieldEmpty || isSliderZero || isDuplicate;
+
+    return {
+      isFieldEmpty,
+      isSliderZero,
+      isDuplicate,
+      shouldShowWarning,
+    };
+  }, [otherFieldCount, formData, index]);
+
+  /**
    * Renders the "Add more" button with validation logic for existing fields
    * Validates that:
    * - The last field is filled (not empty)
@@ -180,34 +245,7 @@ export default function QuestionSet({
    * @returns {JSX.Element} The AddMoreButton component with appropriate props
    */
   const renderAddMoreButtonWithValidation = () => {
-    const lastFieldKey = getFieldKey(otherFieldCount);
-    const lastFieldValue = formData[lastFieldKey] || "";
-    const lastSliderValue =
-      formData[`${lastFieldKey}-slider`] ?? SLIDER_DEFAULT;
-
-    // Validation checks
-    const isFieldEmpty = !lastFieldValue.trim();
-    const isSliderZero = lastSliderValue === 0;
-
-    // Check for duplicate experiences (case-insensitive)
-    const defaultLabels = Object.values(SLIDER_DATA[index - 1] || {});
-    const addedExperiences = Array.from(
-      { length: otherFieldCount - 1 },
-      (_, j) => {
-        return formData[getFieldKey(j + 1)]?.trim() || "";
-      }
-    ).filter(Boolean);
-
-    const normalizedCurrentValue = lastFieldValue.trim().toLowerCase();
-    const isDuplicate =
-      defaultLabels.some(
-        (label) => label.toLowerCase() === normalizedCurrentValue
-      ) ||
-      addedExperiences.some(
-        (exp) => exp.toLowerCase() === normalizedCurrentValue
-      );
-
-    const shouldShowWarning = isFieldEmpty || isSliderZero || isDuplicate;
+    const { isDuplicate, shouldShowWarning } = validationResult;
 
     // Reset the clicked state if validation conditions are no longer met
     if (!shouldShowWarning && addMoreClicked) {
