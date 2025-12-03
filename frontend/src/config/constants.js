@@ -1,14 +1,33 @@
 /**
  * Application-wide constants
+ *
+ * Centralized constants used throughout the frontend application.
+ * These values define timeouts, scroll behavior, and input field limits.
  */
 
-// Timeouts (in milliseconds)
-export const SUCCESS_MESSAGE_TIMEOUT = 5000; // Auto-dismiss success message after 5 seconds
-export const SCROLL_DELAY = 100; // Delay for scroll operations to ensure DOM is ready
+/**
+ * Timeouts (in milliseconds)
+ */
 
-// Scroll offsets (in pixels)
-export const SCROLL_OFFSET = 120; // Offset to show question set number clearly when scrolling
+/** Auto-dismiss success message after this many milliseconds */
+export const SUCCESS_MESSAGE_TIMEOUT = 5000;
 
-// Character limits
-export const DEFAULT_TEXT_FIELD_MAX_LENGTH = 50; // Default max length for tech experience fields
-export const PERSONAL_DESCRIPTION_MAX_LENGTH = 3000; // Max length for personal description field
+/** Delay for scroll operations to ensure DOM is ready before scrolling */
+export const SCROLL_DELAY = 100;
+
+/**
+ * Scroll offsets (in pixels)
+ */
+
+/** Offset in pixels to show question set number clearly when scrolling to a question set */
+export const SCROLL_OFFSET = 120;
+
+/**
+ * Character limits
+ */
+
+/** Default maximum character length for tech experience text fields */
+export const DEFAULT_TEXT_FIELD_MAX_LENGTH = 50;
+
+/** Maximum character length for personal description field */
+export const PERSONAL_DESCRIPTION_MAX_LENGTH = 3000;

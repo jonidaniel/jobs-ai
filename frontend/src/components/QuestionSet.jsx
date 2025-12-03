@@ -65,11 +65,12 @@ export default function QuestionSet({
   onFormChange,
   validationErrors = {},
 }) {
-  // State to track how many "Other" field sets are shown for slider question sets (indices 1-8)
-  // Start with 0 fields, show first field only after clicking "Add more"
+  // Base key for "Other" field sets in slider question sets (indices 1-8)
+  // Format: "text-field1", "text-field2", etc.
   const baseOtherFieldKey = `text-field${index}`;
 
-  // Count how many "other" fields have values, default to 0
+  // State to track how many "Other" field sets are shown
+  // Start with 0 fields, show first field only after clicking "Add more"
   // Use lazy initialization to only calculate once on mount
   const [otherFieldCount, setOtherFieldCount] = useState(() => {
     let count = 0;
@@ -85,13 +86,22 @@ export default function QuestionSet({
   });
   const [addMoreClicked, setAddMoreClicked] = useState(false);
 
-  // Helper to generate field key for a given index
+  /**
+   * Generates field key for a given index
+   * First field uses base key, subsequent fields append index (e.g., "text-field1-2")
+   *
+   * @param {number} fieldIndex - The field index (1-based)
+   * @returns {string} The field key
+   */
   const getFieldKey = (fieldIndex) =>
     fieldIndex === 1 ? baseOtherFieldKey : `${baseOtherFieldKey}-${fieldIndex}`;
 
   /**
    * Renders a general question based on its index
-   * Uses configuration to determine component type and props
+   * Uses configuration array to determine component type and props
+   *
+   * @param {number} j - Question index (0-4)
+   * @returns {JSX.Element|null} The rendered question component or null
    */
   const renderGeneralQuestion = (j) => {
     const keyName = GENERAL_QUESTION_KEYS[j];
@@ -162,7 +172,12 @@ export default function QuestionSet({
 
   /**
    * Renders the "Add more" button with validation logic for existing fields
-   * Validates that the last field is filled, slider is not zero, and no duplicates exist
+   * Validates that:
+   * - The last field is filled (not empty)
+   * - The slider is not zero
+   * - No duplicate experiences exist (case-insensitive)
+   *
+   * @returns {JSX.Element} The AddMoreButton component with appropriate props
    */
   const renderAddMoreButtonWithValidation = () => {
     const lastFieldKey = getFieldKey(otherFieldCount);
@@ -170,10 +185,11 @@ export default function QuestionSet({
     const lastSliderValue =
       formData[`${lastFieldKey}-slider`] ?? SLIDER_DEFAULT;
 
+    // Validation checks
     const isFieldEmpty = !lastFieldValue.trim();
     const isSliderZero = lastSliderValue === 0;
 
-    // Check for duplicate experiences
+    // Check for duplicate experiences (case-insensitive)
     const defaultLabels = Object.values(SLIDER_DATA[index - 1] || {});
     const addedExperiences = Array.from(
       { length: otherFieldCount - 1 },
@@ -193,7 +209,7 @@ export default function QuestionSet({
 
     const shouldShowWarning = isFieldEmpty || isSliderZero || isDuplicate;
 
-    // Reset the clicked state if conditions are no longer met
+    // Reset the clicked state if validation conditions are no longer met
     if (!shouldShowWarning && addMoreClicked) {
       setAddMoreClicked(false);
     }
@@ -272,10 +288,10 @@ export default function QuestionSet({
         {QUESTION_SET_TITLES[index]}
       </h3>
 
-      {/* Questions */}
+      {/* Questions section - renders different question types based on index */}
       <div className="space-y-4">
         {index === 9 ? (
-          // Text-only question set (index 9): Single text input field
+          // Text-only question set (index 9): Personal description textarea
           <TextField
             keyName="additional-info"
             label={label}
@@ -288,16 +304,14 @@ export default function QuestionSet({
             maxLength={PERSONAL_DESCRIPTION_MAX_LENGTH}
           />
         ) : index === GENERAL_QUESTIONS_INDEX ? (
-          // Create 'General Questions' set (index 0)
-          // 5 questions rendered using configuration-based approach
+          // General Questions set (index 0): 5 questions rendered using configuration-based approach
           Array.from({ length: GENERAL_QUESTIONS_COUNT }).map((_, j) =>
             renderGeneralQuestion(j)
           )
         ) : (
-          // Slider question sets (indices 1-8)
-          // Multiple sliders + one "Other" text field each
+          // Slider question sets (indices 1-8): Multiple sliders + optional "Other" text fields
           <>
-            {/* Render sliders for this question set */}
+            {/* Render default sliders for this question set */}
             {/* SLIDER_DATA[index - 1] contains the key-value pairs for this set */}
             {Object.entries(SLIDER_DATA[index - 1]).map(([key, label]) => (
               <Slider
@@ -308,7 +322,7 @@ export default function QuestionSet({
                 onChange={onFormChange}
               />
             ))}
-            {/* "Other" text fields and sliders - shown only after clicking "Add more" */}
+            {/* Custom "Other" text fields and sliders - shown only after clicking "Add more" */}
             {Array.from({ length: otherFieldCount }).map((_, i) => {
               const fieldIndex = i + 1;
               const fieldKey = getFieldKey(fieldIndex);
@@ -321,7 +335,7 @@ export default function QuestionSet({
               return (
                 <div key={fieldKey} className="mt-4">
                   {isLastField ? (
-                    // Last field: editable
+                    // Last field: editable text input and slider
                     <>
                       <TextField
                         keyName={fieldKey}
@@ -354,7 +368,7 @@ export default function QuestionSet({
                 </div>
               );
             })}
-            {/* Button to add another "Other" field set */}
+            {/* Button to add another custom "Other" field set */}
             {otherFieldCount === 0 ? (
               <AddMoreButton
                 onClick={() => {

@@ -10,12 +10,14 @@
  */
 export function downloadBlob(blob, headers, defaultFilename = "document.docx") {
   // Extract filename from Content-Disposition header if available
-  // Format: "attachment; filename=\"document.docx\""
+  // Expected format: "attachment; filename=\"document.docx\""
   const contentDisposition = headers.get("Content-Disposition");
   let filename = defaultFilename;
   if (contentDisposition) {
     const match = contentDisposition.match(/filename="?(.+)"?/);
-    if (match && match[1]) filename = match[1];
+    if (match && match[1]) {
+      filename = match[1];
+    }
   }
 
   // Create a temporary URL for the blob
@@ -36,12 +38,12 @@ export function downloadBlob(blob, headers, defaultFilename = "document.docx") {
   download_link.setAttribute("aria-hidden", "true");
   document.body.appendChild(download_link);
 
-  // Save scroll position right before click
+  // Save scroll position right before click to restore if download causes scroll
   const scrollBeforeClick = window.scrollY || window.pageYOffset;
 
   download_link.click();
 
-  // Immediately restore scroll if it changed
+  // Immediately restore scroll position if it changed during download
   requestAnimationFrame(() => {
     if (window.scrollY !== scrollBeforeClick) {
       window.scrollTo(0, scrollBeforeClick);

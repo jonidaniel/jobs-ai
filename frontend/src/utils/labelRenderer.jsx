@@ -10,7 +10,10 @@
  */
 
 /**
- * Renders italic text parts
+ * Renders italic text parts by parsing *text* markers
+ *
+ * @param {string} text - Text that may contain italic markers
+ * @returns {Array<JSX.Element>} Array of span and em elements
  */
 const renderItalicParts = (text) => {
   const italicParts = text.split(/(\*[^*]+\*)/g);
@@ -27,7 +30,10 @@ const renderItalicParts = (text) => {
 };
 
 /**
- * Processes small text markers and returns parts array
+ * Processes small text markers ({small}...{/small}) and returns parts array
+ *
+ * @param {string} str - Text that may contain small text markers
+ * @returns {Array<Object>} Array of objects with type ("normal" or "small"), text, and index
  */
 const processSmallText = (str) => {
   const parts = [];
@@ -63,6 +69,9 @@ const processSmallText = (str) => {
 
 /**
  * Renders label text with support for line breaks, italic text, red asterisk, and small text
+ *
+ * @param {string} text - The label text to render
+ * @returns {Array<JSX.Element>} Array of span elements with formatted content
  */
 export const renderLabel = (text) => {
   return text.split("\n").map((line, lineIndex, lineArray) => {

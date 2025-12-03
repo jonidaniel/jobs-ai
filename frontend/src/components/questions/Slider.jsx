@@ -44,7 +44,7 @@ export default function Slider({
         aria-valuemax={SLIDER_MAX}
         aria-valuenow={value}
       />
-      {/* Notch labels */}
+      {/* Year amount indicators - always visible, scale proportionally */}
       <div
         className="flex justify-between mt-1 text-gray-600 overflow-x-auto"
         style={{

@@ -30,13 +30,21 @@ export default function TextField({
   maxLength = DEFAULT_TEXT_FIELD_MAX_LENGTH,
   showValidation = true,
 }) {
+  // Track if user has interacted with the field (for validation display)
   const [hasInteracted, setHasInteracted] = useState(false);
 
   // Only calculate limit check if validation is enabled
+  // When showValidation is false, input is hard-limited via maxLength attribute
   const exceedsLimit = showValidation
     ? (value || "").length > maxLength
     : false;
 
+  /**
+   * Handles input change events
+   * For tech fields (showValidation=false), enforces maxLength by slicing input
+   *
+   * @param {Event} e - The change event
+   */
   const handleChange = (e) => {
     if (!hasInteracted && showValidation) {
       setHasInteracted(true);
@@ -48,6 +56,10 @@ export default function TextField({
     onChange(keyName, newValue);
   };
 
+  /**
+   * Handles input blur events
+   * Marks field as interacted for validation display
+   */
   const handleBlur = () => {
     if (showValidation) {
       setHasInteracted(true);

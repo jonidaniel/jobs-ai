@@ -27,7 +27,7 @@ export function validateGeneralQuestions(formData) {
     errors[GENERAL_QUESTION_KEYS[0]] =
       "Please select at most two job level options.";
   } else if (jobLevel.length === 2) {
-    // Check if the two selected options are adjacent
+    // Check if the two selected options are adjacent in the options array
     const index1 = NAME_OPTIONS.indexOf(jobLevel[0]);
     const index2 = NAME_OPTIONS.indexOf(jobLevel[1]);
     if (index1 === -1 || index2 === -1 || Math.abs(index1 - index2) !== 1) {

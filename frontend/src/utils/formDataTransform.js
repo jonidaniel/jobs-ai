@@ -19,12 +19,13 @@ import { SLIDER_DATA } from "../config/sliders";
  */
 export function transformFormData(formData) {
   /**
-   * Filter form data to only include non-empty values for optional fields
+   * Filters form data to only include non-empty values for optional fields
    * - Strings: Include if trimmed value is not empty
    * - Numbers: Include if value is not 0 (sliders default to 0)
    * - Arrays: Include if array has at least one element (checkboxes)
    *
    * Note: Required fields (general questions and additional-info) are always included
+   * even if empty, as they are validated separately
    */
   const filtered = Object.fromEntries(
     Object.entries(formData)
@@ -52,20 +53,24 @@ export function transformFormData(formData) {
   const generalQuestions = GENERAL_QUESTION_KEYS.map((key) => ({
     [key]: formData[key],
   }));
-  // Backend requires exactly 5 items, so always include the array
+  // Backend requires exactly 5 items, so always include the array even if some values are empty
   result[QUESTION_SET_NAMES[GENERAL_QUESTIONS_INDEX]] = generalQuestions;
 
   // Group slider question sets (indices 1-8)
+  // Each set includes default sliders and optional "Other" custom fields
   for (let i = 1; i < QUESTION_SET_NAMES.length - 1; i++) {
     const questionSetData = [
+      // Include default sliders that have non-zero values
       ...Object.keys(SLIDER_DATA[i - 1])
         .filter((key) => filtered[key] !== undefined)
         .map((key) => ({ [key]: filtered[key] })),
+      // Include custom "Other" fields if they have values
       ...(filtered[`text-field${i}`] !== undefined
         ? [{ [`text-field${i}`]: filtered[`text-field${i}`] }]
         : []),
     ];
 
+    // Only include question set if it has at least one field with data
     if (questionSetData.length > 0) {
       result[QUESTION_SET_NAMES[i]] = questionSetData;
     }

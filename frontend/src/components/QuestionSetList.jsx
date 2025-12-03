@@ -32,25 +32,28 @@ export default function QuestionSetList({
   skipInitialScroll = false,
 }) {
   // Current active question set index (0-9)
-  // Use activeIndex prop if provided, otherwise use internal state
+  // Use activeIndex prop if provided (external control), otherwise use internal state
   const [internalIndex, setInternalIndex] = useState(0);
 
   // Determine current index: use activeIndex if provided, otherwise use internal state
-  // When activeIndex is set externally, sync internal state for when it's cleared
+  // When activeIndex is set externally (e.g., for error navigation), it overrides internal state
   const currentIndex = activeIndex !== undefined ? activeIndex : internalIndex;
 
-  // Report current index to parent when it changes
+  /**
+   * Reports current question set index to parent component
+   * Allows Search component to track which question set is currently visible
+   */
   useEffect(() => {
     if (onCurrentIndexChange) {
       onCurrentIndexChange(currentIndex);
     }
   }, [currentIndex, onCurrentIndexChange]);
 
-  // Refs to DOM elements for each question set section (for scrolling)
+  // Refs to DOM elements for each question set section (used for scrolling)
   const sectionRefs = useRef({});
-  // Track if this is the initial mount (page refresh)
+  // Track if this is the initial mount (page refresh vs remount after submission)
   const isInitialMount = useRef(true);
-  // Track if navigation was triggered by user action (arrow click)
+  // Track if navigation was triggered by user action (arrow click vs external control)
   const isUserNavigation = useRef(false);
 
   /**
@@ -142,13 +145,13 @@ export default function QuestionSetList({
   }, [currentIndex, skipInitialScroll]);
 
   /**
-   * Navigate to previous question set
+   * Navigates to previous question set
    * Wraps around to last question set if currently at first (0)
    */
   const handlePrevious = () => {
     const newIndex =
       currentIndex === 0 ? TOTAL_QUESTION_SETS - 1 : currentIndex - 1;
-    isUserNavigation.current = true; // Mark as user navigation
+    isUserNavigation.current = true; // Mark as user navigation for scroll behavior
     setInternalIndex(newIndex);
     // Clear external control when user manually navigates
     if (onActiveIndexChange) {
@@ -157,12 +160,12 @@ export default function QuestionSetList({
   };
 
   /**
-   * Navigate to next question set
+   * Navigates to next question set
    * Wraps around to first question set (0) if currently at last
    */
   const handleNext = () => {
     const newIndex = (currentIndex + 1) % TOTAL_QUESTION_SETS;
-    isUserNavigation.current = true; // Mark as user navigation
+    isUserNavigation.current = true; // Mark as user navigation for scroll behavior
     setInternalIndex(newIndex);
     // Clear external control when user manually navigates
     if (onActiveIndexChange) {

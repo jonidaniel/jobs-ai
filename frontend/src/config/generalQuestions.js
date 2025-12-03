@@ -31,6 +31,17 @@ export const GENERAL_QUESTION_LABELS = [
   "How about the *style* of the letters? *\n{small}Strictly professional or something else? A combination of two?{/small}",
 ];
 
+/**
+ * Question keys for each question in the General Questions set
+ * These keys are used to identify questions in form data and validation
+ *
+ * Index mapping:
+ * 0: "job-level"
+ * 1: "job-boards"
+ * 2: "deep-mode"
+ * 3: "cover-letter-num"
+ * 4: "cover-letter-style"
+ */
 export const GENERAL_QUESTION_KEYS = [
   "job-level",
   "job-boards",

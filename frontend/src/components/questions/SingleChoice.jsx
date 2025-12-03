@@ -27,6 +27,9 @@ export default function SingleChoice({
 }) {
   /**
    * Renders a single radio button option
+   *
+   * @param {string} option - The option text to display
+   * @returns {JSX.Element} The radio button and label elements
    */
   const renderRadioOption = (option) => {
     const optionKey = option.toLowerCase().replace(/\s+/g, "-");

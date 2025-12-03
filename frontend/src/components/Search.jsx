@@ -58,17 +58,19 @@ export default function Search() {
   const [currentQuestionSetIndex, setCurrentQuestionSetIndex] = useState(0);
 
   /**
-   * Handle form data changes
-   * Memoized to prevent infinite loops in QuestionSets useEffect
+   * Handles form data changes from QuestionSetList component
+   * Memoized with useCallback to prevent infinite loops in QuestionSetList's useEffect
+   *
+   * @param {Object} newFormData - Complete form data object from QuestionSetList
    */
   const handleFormDataChange = useCallback((newFormData) => {
     setFormData(newFormData);
   }, []);
 
   /**
-   * Clear validation errors when user fixes them
-   * Runs separately from handleFormDataChange to avoid loops
-   * Only runs when formData changes and there are existing errors
+   * Clears validation errors when user fixes them
+   * Runs separately from handleFormDataChange to avoid infinite loops
+   * Only validates when formData changes and there are existing errors
    */
   useEffect(() => {
     // Only validate if there are existing errors (user is fixing them)
@@ -78,7 +80,7 @@ export default function Search() {
         setValidationErrors({});
       } else {
         // Update validation errors to reflect current state
-        // Only update if errors have actually changed to avoid loops
+        // Only update if errors have actually changed to avoid infinite loops
         const errorKeys = Object.keys(validation.errors).sort().join(",");
         const currentErrorKeys = Object.keys(validationErrors).sort().join(",");
         if (errorKeys !== currentErrorKeys) {
@@ -89,7 +91,7 @@ export default function Search() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData]);
 
-  // Ref to track timeout for auto-dismissing success message
+  // Ref to track timeout for auto-dismissing success message after download
   const successTimeoutRef = useRef(null);
 
   /**
@@ -242,13 +244,14 @@ export default function Search() {
       justCompletedSubmission.current = true;
       hasSuccessfulSubmission.current = true;
 
-      // Auto-dismiss success message after 5 seconds (but keep the text visible)
+      // Auto-dismiss success message after timeout (but keep the text visible)
       // Clear any existing timeout first to prevent multiple timers
       if (successTimeoutRef.current) {
         clearTimeout(successTimeoutRef.current);
       }
       successTimeoutRef.current = setTimeout(() => {
-        setSuccess(false); // Hide the green success message, but text stays via hasSuccessfulSubmission
+        // Hide the green success message, but text stays visible via hasSuccessfulSubmission
+        setSuccess(false);
         successTimeoutRef.current = null;
       }, SUCCESS_MESSAGE_TIMEOUT);
     } catch (error) {
@@ -261,7 +264,10 @@ export default function Search() {
     }
   };
 
-  // Restore scroll position after component remounts and success message appears
+  /**
+   * Restores scroll position after component remounts and success message appears
+   * Prevents page from jumping to top when download completes
+   */
   useEffect(() => {
     if (!isSubmitting && savedScrollPosition.current !== null) {
       const targetScroll = savedScrollPosition.current;
@@ -284,7 +290,10 @@ export default function Search() {
     }
   }, [isSubmitting, success]);
 
-  // Reset the submission completion flag after QuestionSetList has remounted
+  /**
+   * Resets the submission completion flag after QuestionSetList has remounted
+   * Ensures the skipInitialScroll prop is processed before resetting
+   */
   useEffect(() => {
     if (!isSubmitting && justCompletedSubmission.current) {
       // Reset the flag after a brief delay to ensure QuestionSetList has processed it
@@ -296,8 +305,10 @@ export default function Search() {
     }
   }, [isSubmitting]);
 
-  // Cleanup: Clear timeout if component unmounts
-  // This is to prevent memory leaks
+  /**
+   * Cleanup: Clear timeout if component unmounts
+   * Prevents memory leaks by clearing any pending timeouts
+   */
   useEffect(() => {
     return () => {
       if (successTimeoutRef.current) {

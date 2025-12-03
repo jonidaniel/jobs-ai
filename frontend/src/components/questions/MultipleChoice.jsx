@@ -31,6 +31,10 @@ export default function MultipleChoice({
 }) {
   /**
    * Checks if two selected options are adjacent in the options array
+   *
+   * @param {string} option1 - First option
+   * @param {string} option2 - Second option
+   * @returns {boolean} True if options are adjacent, false otherwise
    */
   const areAdjacent = (option1, option2) => {
     const index1 = options.indexOf(option1);
@@ -43,6 +47,9 @@ export default function MultipleChoice({
    * Handles checkbox change events
    * Adds option to array if checked, removes if unchecked
    * Respects maxSelections limit and adjacency requirement if provided
+   *
+   * @param {string} option - The option that was clicked
+   * @param {boolean} checked - Whether the checkbox is now checked
    */
   const handleCheckboxChange = (option, checked) => {
     const currentValues = value || [];

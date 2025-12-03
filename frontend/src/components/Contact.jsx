@@ -1,5 +1,11 @@
 import "../styles/contact.css";
 
+/**
+ * Contact Component
+ *
+ * Renders the contact section with contact information and links.
+ * Displays phone number, email, and links to GitHub and LinkedIn.
+ */
 export default function Contact() {
   return (
     <section id="contact">

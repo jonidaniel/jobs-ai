@@ -23,11 +23,25 @@ class ErrorBoundary extends Component {
     this.state = { hasError: false, error: null };
   }
 
+  /**
+   * Updates state when an error is caught
+   * Called during render phase, so side effects are not allowed
+   *
+   * @param {Error} error - The error that was thrown
+   * @returns {Object} New state with hasError flag and error object
+   */
   static getDerivedStateFromError(error) {
     // Update state so the next render will show the fallback UI
     return { hasError: true, error };
   }
 
+  /**
+   * Called after an error has been thrown
+   * Used for logging errors or sending error reports
+   *
+   * @param {Error} error - The error that was thrown
+   * @param {Object} errorInfo - Additional error information from React
+   */
   componentDidCatch(error, errorInfo) {
     // Log error to console for debugging
     console.error("ErrorBoundary caught an error:", error, errorInfo);
