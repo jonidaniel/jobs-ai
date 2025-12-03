@@ -4,6 +4,7 @@ import QuestionSet from "./QuestionSet";
 
 import { TOTAL_QUESTION_SETS } from "../config/questionSet";
 import { GENERAL_QUESTION_KEYS } from "../config/generalQuestions";
+import { SLIDER_DATA } from "../config/sliders";
 import { SCROLL_OFFSET, SCROLL_DELAY } from "../config/constants";
 
 /**
@@ -59,24 +60,42 @@ export default function QuestionSetList({
   /**
    * Initialize form data with default values
    * Runs once on component mount using lazy initialization
+   *
+   * Sets defaults for:
+   * - All 5 mandatory general questions
+   * - First 3 sliders in each technology set (sets 1-8)
+   * - Additional info text field
    */
   const [formData, setFormData] = useState(() => {
     const initial = {};
 
     // Set default values for general questions (question set 0)
-    GENERAL_QUESTION_KEYS.forEach((keyName, j) => {
-      initial[keyName] = j < 2 ? [] : ""; // First 2 are arrays, rest are strings
+    // All 5 questions are mandatory and have default values
+    initial[GENERAL_QUESTION_KEYS[0]] = ["Expert-level"]; // job-level
+    initial[GENERAL_QUESTION_KEYS[1]] = ["Duunitori"]; // job-boards
+    initial[GENERAL_QUESTION_KEYS[2]] = "Yes"; // deep-mode
+    initial[GENERAL_QUESTION_KEYS[3]] = "2"; // cover-letter-num
+    initial[GENERAL_QUESTION_KEYS[4]] = ["Professional"]; // cover-letter-style
+
+    // Set default values for the first 3 sliders in each technology set (question sets 1-8)
+    // SLIDER_DATA[0] = languages, SLIDER_DATA[1] = databases, etc.
+    // Each set's first 3 sliders default to 3 (less than 1.5 years experience)
+    SLIDER_DATA.forEach((sliderSet, setIndex) => {
+      // Get first 3 technology keys from each set
+      const technologyKeys = Object.keys(sliderSet).slice(0, 3);
+      technologyKeys.forEach((key) => {
+        initial[key] = 3; // Default slider value is 3 (less than 1.5 years)
+      });
     });
 
-    // Set default values for slider question sets (question sets 1-8)
-    // Sliders default to 0 (handled in Slider component)
-    // Only need to initialize the "Other" text fields
+    // Set default values for "Other" text fields in slider question sets (question sets 1-8)
     for (let i = 1; i < TOTAL_QUESTION_SETS - 1; i++) {
       initial[`text-field${i}`] = "";
     }
 
     // Set default value for text-only question set (index 9)
-    initial["additional-info"] = "";
+    initial["additional-info"] =
+      "I am a software developer looking for new opportunities. I have experience with various technologies and am eager to contribute to innovative projects.";
 
     return initial;
   });
