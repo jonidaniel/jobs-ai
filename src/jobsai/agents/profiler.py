@@ -71,10 +71,8 @@ class ProfilerAgent:
             SkillProfile: The candidate's skill profile.
         """
 
-        # Build the final user prompt
+        # Build the user prompt for the LLM to do the extraction of the skill profile
         user_prompt = self._build_prompt(form_submissions)
-
-        # Retrieve raw LLM response
         raw = call_llm(SYSTEM_PROMPT, user_prompt)
 
         # Extract the JSON from the raw response

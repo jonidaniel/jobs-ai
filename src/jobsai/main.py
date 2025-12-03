@@ -22,6 +22,7 @@ from jobsai.agents import (
     ReporterAgent,
     GeneratorAgent,
 )
+from jobsai.utils.form_data import extract_form_data
 
 logging.basicConfig(level=logging.INFO)
 # For debug logging
@@ -54,34 +55,8 @@ def main(form_submissions: Dict) -> Dict:
             - "filename" (str): Suggested filename for the cover letter document
     """
 
-    job_level = form_submissions.get("general")[0].get("job-level")
-    job_boards = form_submissions.get("general")[1].get("job-boards")
-    deep_mode = form_submissions.get("general")[2].get("deep-mode")
-    # Convert cover_letter_num to integer (comes from frontend as string)
-    try:
-        cover_letter_num = int(
-            form_submissions.get("general")[3].get("cover-letter-num")
-        )
-    except (ValueError, TypeError) as e:
-        logger.warning(f"Invalid cover_letter_num, defaulting to 5: {e}")
-        cover_letter_num = 5
-
-    # Handle cover_letter_style (can be string or array from frontend)
-    cover_letter_style_raw = form_submissions.get("general")[4].get(
-        "cover-letter-style"
-    )
-    if isinstance(cover_letter_style_raw, list):
-        # If array, join with " and " (e.g., ["Professional", "Friendly"] -> "Professional and Friendly")
-        cover_letter_style = " and ".join(cover_letter_style_raw)
-    else:
-        cover_letter_style = cover_letter_style_raw or "Professional"
-    description = form_submissions.get("additional-info")[0].get("additional-info")
-    print(job_level)
-    print(job_boards)
-    print(deep_mode)
-    print(cover_letter_num)
-    print(cover_letter_style)
-    print(description)
+    # Extract and transform form submission data
+    answers = extract_form_data(form_submissions)
 
     # Generate a constant timestamp for consistent file naming across pipeline
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -91,7 +66,9 @@ def main(form_submissions: Dict) -> Dict:
         # Each agent uses the timestamp to create consistently named output files
         logger.info("Initializing agents...")
         profiler = ProfilerAgent(timestamp)
-        searcher = SearcherService(job_level, job_boards, deep_mode, timestamp)
+        searcher = SearcherService(
+            answers["job_level"], answers["job_boards"], answers["deep_mode"], timestamp
+        )
         scorer = ScorerService(timestamp)
         reporter = ReporterAgent(timestamp)
         generator = GeneratorAgent(timestamp)
@@ -139,10 +116,12 @@ def main(form_submissions: Dict) -> Dict:
 
     # Step 4: Generate analysis report on top-scoring jobs
     # Uses LLM to create personalized cover letter instructions for each job (used by GeneratorAgent)
-    # Report is saved to /data/reports/job_report.txt
+    # Report is saved to /data/job_reports/{timestamp}_job_report.txt
     try:
         logger.info(" Step 4/5: Generating job report...")
-        job_report = reporter.generate_report(skill_profile, cover_letter_num)
+        job_report = reporter.generate_report(
+            skill_profile, answers["cover_letter_num"]
+        )
         logger.info(" Step 4/5: Job report generated successfully")
     except Exception as e:
         error_msg = f" Step 4/5 Report generation failed: {str(e)}"
@@ -150,15 +129,12 @@ def main(form_submissions: Dict) -> Dict:
         raise RuntimeError(error_msg) from e
 
     # Step 5: Generate cover letter document
-    # Uses LLM to write cover letter based on skill profile and job report
+    # Uses LLM to write cover letter based on skill profile, job report and cover letter style
     # Document is saved to /data/cover_letters/{timestamp}_cover_letter.docx and returned
     try:
         logger.info(" Step 5/5: Generating cover letter...")
-        print(skill_profile)
-        print(job_report)
-        print(cover_letter_style)
         document = generator.generate_letters(
-            skill_profile, job_report, cover_letter_style
+            skill_profile, job_report, answers["cover_letter_style"]
         )
         logger.info(" Step 5/5: Cover letter generated successfully")
     except Exception as e:
