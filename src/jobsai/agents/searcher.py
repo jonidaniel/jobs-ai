@@ -1,13 +1,13 @@
 """
-Orchestrate the job listings search.
+Orchestrates the job listings search.
 
 CLASSES:
     SearcherService
 
-FUNCTIONS (in order of workflow):
-    1. search_jobs          (public use)
-    2. _save_raw_jobs       (internal use)
-    3. _deduplicate_jobs    (internal use)
+FUNCTIONS:
+    search_jobs          (public)
+    _save_raw_jobs       (internal)
+    _deduplicate_jobs    (internal)
 """
 
 import os
@@ -16,11 +16,9 @@ import json
 from typing import List, Dict
 
 from jobsai.config.paths import RAW_JOB_LISTING_PATH
-from jobsai.config.schemas import SkillProfile
 
 from jobsai.utils.scrapers.duunitori import scrape_duunitori
 from jobsai.utils.scrapers.jobly import scrape_jobly
-from jobsai.utils.queries import build_queries
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +33,6 @@ class SearcherService:
     4. Store the job listings
 
     Args:
-        job_boards (List[str]): The job boards to search.
-        deep_mode (bool): If True, fetch each job's detail page to extract the full description.
         timestamp (str): The backend-wide timestamp for consistent file naming.
     """
 
@@ -51,26 +47,28 @@ class SearcherService:
     # ------------------------------
     def search_jobs(
         self,
-        profile: SkillProfile,
-        job_level: str,
+        keywords: List[str],
         job_boards: List[str],
         deep_mode: bool,
     ) -> List[Dict]:
         """Run searches on all job boards using queries from the candidate profile.
 
         Args:
-            profile (SkillProfile): The candidate profile.
+            keywords (List[str]): The list of keywords.
 
         Returns:
             List[Dict]: The deduplicated list of jobs.
         """
 
+        print("START OF KEYWORDS IN SEARCHER")
+        print(type(keywords))
+        print(keywords)
+        print("END OF KEYWORDS IN SEARCHER")
+
         all_jobs = []
 
-        # Build deterministic job search queries
-        queries = build_queries(profile.model_dump())
-
-        for query in queries:
+        # For every keyword
+        for query in keywords:
             for job_board in job_boards:
                 print()
                 logger.info(" Searching %s for query '%s'", job_board, query)

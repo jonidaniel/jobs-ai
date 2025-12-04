@@ -5,9 +5,10 @@ CLASSES:
     ScorerService
 
 FUNCTIONS (in order of workflow):
-    1. score_jobs           (public use)
-    2. _compute_job_score   (internal use)
-    3. _save_scored_jobs    (internal use)
+    score_jobs           (public)
+    _compute_scores      (internal)
+    _score_job_against_tech_stack (internal)
+    _save_scored_jobs    (internal)
 """
 
 import os
@@ -16,7 +17,6 @@ import json
 from typing import List, Dict
 
 from jobsai.config.paths import SCORED_JOB_LISTING_PATH
-from jobsai.config.schemas import SkillProfile
 
 from jobsai.utils.normalization import normalize_list
 
@@ -38,30 +38,78 @@ class ScorerService:
     def __init__(self, timestamp: str):
         self.timestamp = timestamp
 
+    def _compute_scores(self, raw_jobs: List[Dict], tech_stack: List) -> List[Dict]:
+        """
+        Compute a relevancy score for each job based on the candidate tech stack.
+
+        Args:
+            raw_jobs (List[Dict]): The raw job listings from the searcher.
+            tech_stack (List): A list of technology categories, where each category
+                is a list of dicts with format {technology_name: experience_level}.
+                Only technologies with experience_level > 0 are included.
+
+        Returns:
+            List[Dict]: The scored job listings with added score, matched_skills, and missing_skills.
+        """
+        # Flatten tech_stack into a single list of technology names
+        # Each category is a list of dicts: [{"Python": 7}, {"JavaScript": 6}, ...]
+        flattened_tech_stack = []
+        for category in tech_stack:
+            if isinstance(category, list):
+                for item in category:
+                    if isinstance(item, dict):
+                        # Extract technology names (keys) from dict
+                        # Only include technologies with experience level > 0
+                        for tech_name, experience_level in item.items():
+                            # Experience level is an integer (0-7), 0 means no experience
+                            if (
+                                isinstance(experience_level, int)
+                                and experience_level > 0
+                            ):
+                                flattened_tech_stack.append(tech_name)
+                            elif isinstance(experience_level, str):
+                                # Handle text fields or string values
+                                flattened_tech_stack.append(tech_name)
+                    elif isinstance(item, str):
+                        # Direct string technology name
+                        flattened_tech_stack.append(item)
+            elif isinstance(category, str):
+                flattened_tech_stack.append(category)
+
+        # Normalize the tech stack (deduplicate, standardize capitalization)
+        flattened_tech_stack = normalize_list(flattened_tech_stack)
+
+        # Score each job against the tech stack
+        scored_jobs = []
+        for job in raw_jobs:
+            scored_job = self._score_job_against_tech_stack(job, flattened_tech_stack)
+            scored_jobs.append(scored_job)
+
+        return scored_jobs
+
     # ------------------------------
     # Public interface
     # ------------------------------
-    def score_jobs(self, raw_jobs: List[Dict], profile: SkillProfile) -> List[Dict]:
+    def score_jobs(self, raw_jobs: List[Dict], tech_stack: List[str]) -> List[Dict]:
         """Score the raw job listings based on the candidate profile.
 
         Saves the scored jobs to /data/job_listings/scored/{timestamp}_scored_jobs.json.
 
         Args:
             raw_jobs (List[Dict]): The raw job listings from the searcher.
-            profile (SkillProfile): The candidate profile.
+            tech_stack (List[str]): The candidate tech stack.
 
         Returns:
             List[Dict]: The scored job listings.
         """
 
-        # THIS IS NOT NEEDED SINCE WE ARE PASSING THE RAW JOBS DIRECTLY
-        # job_listings = self._load_job_listings()
-
         if not raw_jobs:
             logger.warning(" No job listings found to score.")
             return
 
-        scored_jobs = [self._compute_job_score(job, profile) for job in raw_jobs]
+        scored_jobs = self._compute_scores(raw_jobs, tech_stack)
+
+        # scored_jobs = [self._compute_job_score(job, profile) for job in raw_jobs]
         # Sort by score descending
         scored_jobs.sort(key=lambda x: x["score"], reverse=True)
 
@@ -78,45 +126,23 @@ class ScorerService:
     # Internal functions
     # ------------------------------
 
-    def _compute_job_score(self, job: Dict, profile: SkillProfile) -> Dict:
+    def _score_job_against_tech_stack(self, job: Dict, tech_stack: List[str]) -> Dict:
         """
-        Compute a relevancy score for a job based on the candidate profile.
-
-        Scoring algorithm:
-        1. Extract all skill keywords from the candidate's profile
-        2. Search for these keywords in the job description (title, snippet, full description)
-        3. Calculate score as percentage of matched skills
-        4. Return job dict enriched with score and matched/missing skills lists
+        Score a single job against a tech stack.
 
         Args:
             job (Dict): The job listing dictionary containing:
                 - "title": Job title
                 - "description_snippet": Short description from search results
                 - "full_description": Full job description (if deep mode was used)
-            profile (SkillProfile): The candidate profile.
+            tech_stack (List[str]): The flattened list of technology names to match.
 
         Returns:
             Dict: The job dictionary with added fields:
                 - "score": Integer score (0-100) representing match percentage
-                - "matched_skills": The list of profile skills found in the job description
-                - "missing_skills": The list of profile skills not found in the job description
+                - "matched_skills": The list of technologies found in the job description
+                - "missing_skills": The list of technologies not found in the job description
         """
-
-        # Combine all skill keywords from all profile categories
-        # This creates a comprehensive list of skills to search for
-        profile_keywords = (
-            profile.core_languages
-            + profile.frameworks_and_libraries
-            + profile.tools_and_platforms
-            + profile.agentic_ai_experience
-            + profile.ai_ml_experience
-            + profile.soft_skills
-            + profile.projects_mentioned
-            + profile.job_search_keywords
-        )
-        # Normalize keywords (deduplicate, standardize capitalization)
-        profile_keywords = normalize_list(profile_keywords)
-
         # Combine all job text into a single searchable string
         # Includes title, snippet, and full description (if available)
         job_text = " ".join(
@@ -127,13 +153,13 @@ class ScorerService:
             ]
         ).lower()
 
-        # Find which profile skills appear in the job description
-        matched_skills = [kw for kw in profile_keywords if kw.lower() in job_text]
-        missing_skills = [kw for kw in profile_keywords if kw.lower() not in job_text]
+        # Find which technologies from the tech stack appear in the job description
+        matched_skills = [tech for tech in tech_stack if tech.lower() in job_text]
+        missing_skills = [tech for tech in tech_stack if tech.lower() not in job_text]
 
-        # Calculate score as percentage of matched skills
-        # Score ranges from 0-100, where 100 means all profile skills were found
-        score = int(len(matched_skills) / max(1, len(profile_keywords)) * 100)
+        # Calculate score as percentage of matched technologies
+        # Score ranges from 0-100, where 100 means all technologies were found
+        score = int(len(matched_skills) / max(1, len(tech_stack)) * 100)
 
         # Enrich job dict with scoring information
         scored_job = job.copy()
@@ -168,61 +194,3 @@ class ScorerService:
                 json.dump(jobs, f, ensure_ascii=False, indent=2)
         except Exception as e:
             logger.error(f" Failed to save scored jobs: {e}")
-
-    # def _load_job_listings(self) -> List[Dict]:
-    #     """Load the raw job listings.
-
-    #     Loads all JSON files from /src/jobsai/data/job_listings/raw and returns them as a list.
-
-    #     Returns:
-    #         List[Dict]: The list of raw job listings.
-    #     """
-
-    #     jobs = []
-    #     for filename in os.listdir(RAW_JOB_LISTING_PATH):
-    #         if not filename.endswith(".json"):
-    #             continue
-    #         path = os.path.join(RAW_JOB_LISTING_PATH, filename)
-    #         try:
-    #             with open(path, "r", encoding="utf-8") as file:
-    #                 job_listings_data = json.load(file)
-    #                 if isinstance(job_listings_data, list):
-    #                     jobs.extend(job_listings_data)
-    #         except Exception as e:
-    #             logger.error(f" Failed to load {path}: {e}")
-    #     # Deduplicate by URL (falling back to lightweight fingerprint when URL missing)
-    #     seen_fingerprints = set()
-    #     unique_jobs = []
-    #     for job in jobs:
-    #         fingerprint = self._job_identity(job)
-    #         if fingerprint and fingerprint not in seen_fingerprints:
-    #             unique_jobs.append(job)
-    #             seen_fingerprints.add(fingerprint)
-    #     return unique_jobs
-
-    # @staticmethod
-    # def _job_identity(job: Dict) -> str:
-    #     """Build a repeatable identifier for a job.
-
-    #     Prefer URL, otherwise a hashable combo of fields that tends to be stable across scrapes.
-
-    #     Args:
-    #         job (Dict): The job listing dictionary.
-
-    #     Returns:
-    #         str: The job identifier.
-    #     """
-    #     # Try to use the URL as the identifier
-    #     url = (job.get("url") or "").strip()
-    #     # If the URL is not empty, return it
-    #     if url:
-    #         return url
-
-    #     title = (job.get("title") or "").strip().lower()
-    #     query = (job.get("query_used") or "").strip().lower()
-    #     snippet = (job.get("description_snippet") or "").strip().lower()
-    #     if not title and not query and not snippet:
-    #         return ""
-    #     # Limit snippet length to keep keys short while remaining distinctive
-    #     snippet_prefix = snippet[:80]
-    #     return f"{title}|{query}|{snippet_prefix}"

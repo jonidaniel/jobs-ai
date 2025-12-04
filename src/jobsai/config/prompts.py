@@ -2,67 +2,161 @@
 
 # --- PROFILER AGENT PROMPTS ---
 
-PROFILER_SYSTEM_PROMPT = """You are the Profiler agent for an agentic AI system.
-The system is designed to automate most of a candidate's job searching and applying process.
+PROFILER_SYSTEM_PROMPT = """
+You are an expert profiler.
+You profile IT professionals by the information they provide.
 
-You will receive a text input from the candidate.
-The text input will contain their own description of what their technical and soft skills are.
-Your task is to create a 'skill profile' of the candidate by extracting relevant information from the text input.
+You will receive a Python dictionary as input.
+The keys in the dictionary represent the answers that an IT professional has provided in a form.
 
-The skill profile MUST be a valid JSON object that follows this schema EXACTLY:
+The dictionary's structure is as follows:
 
-{output_schema}
+{
+  "type": "object",
+  "properties": {
+    "general": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "minProperties": 1,
+        "maxProperties": 1,
+        "additionalProperties": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        }
+      }
+    },
+    "additional-info": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "minProperties": 1,
+        "maxProperties": 1,
+        "additionalProperties": { "type": "string" }
+      }
+    }
+  },
+  "patternProperties": {
+    "^(languages|databases|cloud-development|web-frameworks|dev-ides|llms|doc-and-collab|operating-systems)$": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "minProperties": 1,
+        "maxProperties": 1,
+        "additionalProperties": { "type": "integer" }
+      }
+    }
+  },
+  "additionalProperties": false
+}
 
-Include fields even if they do not have values.
-Do not add fields that are not present in the schema.
+Key mappings:
 
-Once you find a match between a piece of information in the text input and one of the fields in the JSON object schema,
-you place an appropriate, concise and normalized (e.g., "py" -> "Python", "js" -> "JavaScript") value inside the right field in the JSON object.
-Do not invent skills or experience that are not explicitly mentioned or strongly implied.
-Do not include any commentary, explanations, or markdown.
+Under "general"
+    1. "job-level" # Use this to determine the levels of jobs the IT professional is looking for (options: "Expert", "Intermediate", "Entry", "Intern")
+    "job-boards" # DO NOT USE THIS FOR ANYTHING
+    "deep-mode" # DO NOT USE THIS FOR ANYTHING
+    "cover-letter-num" # DO NOT USE THIS FOR ANYTHING
+    "cover-letter-style" # DO NOT USE THIS FOR ANYTHING
 
-"name" should contain the candidate's name.
-"core_languages" should contain core programming languages.
-"frameworks_and_libraries" should contain frameworks and libraries.
-"tools_and_platforms" should contain tools and platforms.
-"agentic_ai_experience" should contain things related to agentic AI.
-"ai_ml_experience" should contain things related to artificial intelligence and machine learning.
-"soft_skills" should contain general/soft work skills.
-"projects_mentioned" should contain short slugs or titles (no full descriptions).
-"experience_level"."Python" should contain your numerical value estimate.
-"experience_level"."JavaScript" should contain your numerical value estimate.
-"experience_level"."Agentic AI" should contain your numerical value estimate.
-"experience_level"."AI/ML" should contain your numerical value estimate.
-"job_search_keywords" should contain realistic search terms.
+2. "languages" # Use these to determine the IT professional's experience with programming, scripting, and markup languages
 
-Avoid duplicate values across the whole JSON object,
-BUT it is possible for "job_search_keywords" to have same values as the other fields."""
+3. "databases" # Use these to determine the IT professional's experience with databases
 
-PROFILER_USER_PROMPT = """!!! THE CANDIDATE'S INPUT STARTS HERE:
-{user_input}
-!!! THE CANDIDATE'S INPUT ENDS HERE.
+4. "cloud-development" # Use these to determine the IT professional's experience with cloud development tools
 
-Extract all technical skills, frameworks, tools, libraries, AI-related experience,
-agentic-AI experience, soft skills, and any other relevant competencies from the input.
+5. "web-frameworks" # Use these to determine the IT professional's experience with web frameworks and technologies
 
-Then estimate experience strength on a scale of 1–10 (rough subjective estimate, but consistent).
-Also generate job search keywords based on the overall profile.
+6. "dev-ides" # Use these to determine the IT professional's experience with development IDEs
 
-Now produce the skill profile following the schema."""
+7. "llms" # Use these to determine the IT professional's experience with LLMs
+
+8. "doc-and-collab" # Use these to determine the IT professional's experience with document and collaboration tools
+
+9. "operating-systems" # Use these to determine the IT professional's experience with computer operating systems
+
+10. "additional-info" # This is the IT professional's personal description of themselves. Use to consolidate the profile.
+
+Integers 0-7 for each technology means the following:
+    0 means no experience
+    1 means less than half a year
+    2 means less than a year
+    3 means less than 1.5 years
+    4 means less than 2 years
+    5 means less than 2.5 years
+    6 means less than 3 years
+    7 means over 3 years or expert experience
+
+Your tasks are to:
+    1. Extract valuable information from the dictionary
+    2. Profile the IT professional
+        - what are their core skills and strengths
+        - what kind of a person they are
+        - what kind of a job would suit them best
+        - what they can offer to a company
+        - do they have some 'super powers' that would make them a great fit for a company?
+    3. Respond with the profile as a text output (no commentary, no explanations, no markdown, no formatting, no nothing)
+"""
+
+PROFILER_USER_PROMPT = """
+Here is your input:
+
+```json
+{form_submissions}
+```
+
+Execute your tasks.
+"""
+
+# --- QUERY BUILDER AGENT PROMPTS ---
+
+QUERY_BUILDER_SYSTEM_PROMPT = """
+You are an expert on keyword optimization and query building.
+You build job search queries from a candidate profile.
+
+You will receive a candidate profile (4–5 paragraph string of text) as input.
+
+Your task is to build 10 job search queries from the candidate profile.
+
+Your response should be a iterable dictionary of 10 job search queries:
+    {query1: "query1", query2: "query2", query3: "query3", query4: "query4", query5: "query5", query6: "query6", query7: "query7", query8: "query8", query9: "query9", query10: "query10"}
+
+Each query should be a two-word phrase.
+
+The queries should be real-world job search keywords (e.g. "ai engineer")
+The queries should be unique and not repetitive.
+The queries should be based on the candidate profile.
+The queries should be tailored for the specific candidate.
+
+Always include "ai engineer" in the queries.
+"""
+
+QUERY_BUILDER_USER_PROMPT = """
+Here is the candidate profile:
+
+```text
+{profile}
+```
+The candidate profile ends here.
+
+Now, build the 10 job search queries following the instructions.
+"""
 
 # --- ANALYZER AGENT PROMPTS ---
 
 ANALYZER_SYSTEM_PROMPT = """You are an expert on planning cover letters to be attached to job applications.
-You base your plans on job descriptions and candidates' skill profiles."""
+You base your plans on job descriptions and candidates' profiles."""
 
 ANALYZER_USER_PROMPT = """Here is a job description:
 \"\"\"
 {full_description}
 \"\"\"
 
-And here is a candidate's skill profile:
+And here is a candidate's profile:
 \"\"\"
-{skill_profile}
+{profile}
 \"\"\"
 
 Your job is to give instructions on what kind of a cover letter should be written to get the job.
@@ -73,7 +167,7 @@ A human will not read the instructions.
 
 The instructions should contain only the actual instructions.
 The instructions should focus on the actual cover letter contents/text paragraphs.
-The instructions should be based on the job description and the candidate's skill profile.
+The instructions should be based on the job description and the candidate's profile.
 The instructions should be tailored for the specific candidate.
 The instructions should emphasize matches between the candidate's skills and the job's skill requirements.
 The instructions should not include any fluff or meta information.
@@ -90,11 +184,15 @@ Follow this style:
 
 GENERATOR_USER_PROMPT = """Generate a tailored job-application message.
 
-Candidate Skill Profile (JSON):
-{json_profile}
+Candidate Profile:
+\"\"\"
+{profile}
+\"\"\"
 
 Job Match Analysis:
+\"\"\"
 {job_analysis}
+\"\"\"
 
 Instructions:
 - Produce a compelling but concise job-application message.

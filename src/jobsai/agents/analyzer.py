@@ -4,8 +4,8 @@ Orchestrates the writing of an analysis on the best-scored jobs.
 CLASSES:
     AnalyzerAgent
 
-FUNCTIONS (in order of workflow):
-    1. write_analysis      (public use)
+FUNCTIONS:
+    write_analysis      (public)
 """
 
 import os
@@ -17,7 +17,6 @@ from jobsai.config.prompts import (
     ANALYZER_SYSTEM_PROMPT as SYSTEM_PROMPT,
     ANALYZER_USER_PROMPT as USER_PROMPT,
 )
-from jobsai.config.schemas import SkillProfile
 
 from jobsai.utils.llms import call_llm
 
@@ -41,9 +40,7 @@ class AnalyzerAgent:
     # ------------------------------
     # Public interface
     # ------------------------------
-    def write_analysis(
-        self, jobs: List[Dict], profile: SkillProfile, analysis_size: int
-    ) -> str:
+    def write_analysis(self, jobs: List[Dict], profile: str, analysis_size: int) -> str:
         """
         Write an analysis on the most-scored jobs.
 
@@ -56,7 +53,7 @@ class AnalyzerAgent:
 
         Args:
             jobs (List[Dict]): The job listings.
-            profile (SkillProfile): The candidate profile.
+            profile (str): The candidate profile text.
             analysis_size (int): The desired number of top jobs to include in the analysis.
 
         Returns:
@@ -67,8 +64,8 @@ class AnalyzerAgent:
         # scored_jobs = self._load_scored_jobs()
 
         if not jobs:
-            logger.warning(" No scored jobs found for reporting.")
-            return ""
+            logger.warning(" No scored jobs found for analysis.")
+            raise ValueError(" No scored jobs found for analysis.")
 
         # Sort jobs by score descending (already done in scorer, but safe to re-sort)
         jobs.sort(key=lambda x: x.get("score", 0), reverse=True)
@@ -87,7 +84,7 @@ class AnalyzerAgent:
                 SYSTEM_PROMPT,
                 USER_PROMPT.format(
                     full_description=full_description,
-                    skill_profile=profile,
+                    profile=profile,
                 ),
             )
 
@@ -127,29 +124,3 @@ class AnalyzerAgent:
             logger.error(f" Failed to save job analysis: {e}")
 
         return analysis_text
-
-    # ------------------------------
-    # Internal function
-    # ------------------------------
-    # def _load_scored_jobs(self) -> List[Dict]:
-    #     """Load the scored job listings.
-
-    #     Loads the scored job listings from SCORED_JOB_LISTING_PATH.
-
-    #     Returns:
-    #         List[Dict]: The list of scored job listings.
-    #     """
-
-    #     path = os.path.join(
-    #         SCORED_JOB_LISTING_PATH, f"{self.timestamp}_scored_jobs.json"
-    #     )
-    #     if not os.path.exists(path):
-    #         return []
-
-    #     try:
-    #         with open(path, "r", encoding="utf-8") as f:
-    #             data = json.load(f)
-    #             return data if isinstance(data, list) else []
-    #     except Exception as e:
-    #         logger.error(f" Failed to load scored jobs: {e}")
-    #         return []

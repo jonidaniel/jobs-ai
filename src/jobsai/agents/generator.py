@@ -94,7 +94,7 @@ class GeneratorAgent:
 
     def _build_user_prompt(
         self,
-        profile: SkillProfile,
+        profile: str,
         job_analysis: str,
     ) -> str:
         """Build the user prompt that is used to write the cover letter.
@@ -107,10 +107,7 @@ class GeneratorAgent:
             str: The user prompt that is used to write the cover letter.
         """
 
-        # KS:DJNÖJKSD
-        json_profile = profile.model_dump_json(indent=2)
-
-        return USER_PROMPT.format(json_profile=json_profile, job_analysis=job_analysis)
+        return USER_PROMPT.format(profile=profile, job_analysis=job_analysis)
 
     def _write_letters(self, system_prompt: str, user_prompt: str) -> Document:
         """
