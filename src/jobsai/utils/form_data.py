@@ -1,8 +1,15 @@
 """
-Form data extraction and transformation utilities.
+Form Data Extraction and Transformation Utilities.
 
-Extracts and transforms frontend form submission data into structured format
-for use by the JobsAI pipeline.
+This module provides utilities for extracting and transforming frontend form
+submission data into a structured format suitable for the JobsAI pipeline.
+
+The main function, extract_form_data(), processes the complex nested structure
+from the frontend and extracts:
+- Job board selections and deep mode setting
+- Cover letter generation preferences (number and style)
+- Technology stack organized by category
+- Data type conversions and validations
 """
 
 import logging

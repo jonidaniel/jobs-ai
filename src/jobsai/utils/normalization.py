@@ -1,12 +1,18 @@
 """
-JobsAI/src/jobsai/utils/normalization.py
+Text and Data Normalization Utilities.
 
-Normalization functions.
+This module provides functions for normalizing text, lists, and structured data
+throughout the JobsAI pipeline. Normalization ensures consistency in:
+- Technology name capitalization and aliasing
+- List deduplication
+- Text formatting (whitespace, line breaks)
+- Skill profile structure validation
 
-    normalize_parsed
-    normalize_list
-    normalize_text
-    _normalize_token    (internal use only)
+Functions:
+    normalize_parsed: Normalize and validate parsed skill profile dictionaries
+    normalize_list: Deduplicate and standardize capitalization in skill lists
+    normalize_text: Clean and format LLM-generated text
+    _normalize_token: Internal function for token-level normalization
 """
 
 import re

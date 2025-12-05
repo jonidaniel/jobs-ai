@@ -1,9 +1,12 @@
 """
-JobsAI/src/jobsai/utils/queries.py
+Deterministic Query Builder Utilities.
 
-Query builder. Deterministic keyword generator.
+This module provides utilities for generating job search queries from skill
+profiles. The query generation is deterministic (same input = same output)
+to ensure consistent search results across pipeline runs.
 
-    build_queries
+The query builder creates search queries tailored to the candidate's skills,
+including variations for different experience levels and specializations.
 """
 
 

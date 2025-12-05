@@ -1,15 +1,20 @@
 """
-JOBSAI
-BACKEND ENTRY POINT
+JobsAI Backend Pipeline Orchestration.
 
-This module launches the backend of JobsAI.
-It initializes all agents, loads configuration files, sets up logging, and handles workflow orchestration.
+This module serves as the main entry point for the JobsAI backend pipeline.
+It orchestrates the complete workflow from form submissions to cover letter generation:
 
+1. ProfilerAgent: Creates candidate profile from form submissions
+2. QueryBuilderAgent: Generates search keywords from profile
+3. SearcherService: Searches job boards for relevant positions
+4. ScorerService: Scores jobs based on candidate profile match
+5. AnalyzerAgent: Analyzes top-scoring jobs and generates cover letter instructions
+6. GeneratorAgent: Generates personalized cover letter document
+
+The pipeline uses a decorator-based approach for consistent error handling and logging
+across all steps.
 
 For overall project description, see README.md or docs/README.md.
-
-Date: Fall 2025
-Author: Joni Mäkinen
 """
 
 import logging

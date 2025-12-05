@@ -1,11 +1,15 @@
 """
-Orchestrates the writing of an analysis on the best-scored jobs.
+Analyzer Agent - Job Analysis and Cover Letter Instruction Generation.
 
-CLASSES:
-    AnalyzerAgent
+This module contains the AnalyzerAgent class, which analyzes top-scoring job
+listings and generates personalized cover letter instructions for each position.
+The agent uses an LLM to analyze job descriptions against candidate profiles
+and create specific instructions for writing tailored cover letters.
 
-FUNCTIONS:
-    write_analysis      (public)
+The analysis includes:
+- Job details (title, company, location, score)
+- Matched and missing skills
+- Personalized cover letter writing instructions
 """
 
 import os
@@ -24,14 +28,19 @@ logger = logging.getLogger(__name__)
 
 
 class AnalyzerAgent:
-    """Orchestrates the writing of an analysis on the best-scored jobs.
+    """Agent responsible for analyzing top-scoring jobs and generating cover letter instructions.
 
-    Responsibilities:
-    1. Sort the scored job listings by score descending
-    2. Write an analysis of the top-scoring jobs
+    Processes the highest-scoring job listings and uses an LLM to generate
+    personalized instructions for writing cover letters tailored to each position.
+    The instructions focus on matching the candidate's skills to job requirements
+    and highlighting relevant experience.
+
+    The analysis is saved to disk for debugging and returned as formatted text
+    that will be used by the GeneratorAgent to write the actual cover letters.
 
     Args:
-        timestamp (str): The backend-wide timestamp for consistent file naming.
+        timestamp (str): Backend-wide timestamp for consistent file naming.
+            Format: YYYYMMDD_HHMMSS (e.g., "20250115_143022")
     """
 
     def __init__(self, timestamp: str):
@@ -60,20 +69,26 @@ class AnalyzerAgent:
             str: The complete job analysis as a formatted text string.
         """
 
+        # Validate input
         if not jobs:
-            logger.warning(" No scored jobs found for analysis.")
-            raise ValueError(" No scored jobs found for analysis.")
+            logger.warning("No scored jobs found for analysis.")
+            raise ValueError("No scored jobs found for analysis.")
 
-        # Initialize report with header
+        # Initialize analysis report with header
         analysis_lines = ["Job Analysis", "=" * 40, f"Top {analysis_size} Jobs:\n"]
 
-        # Process each top-scoring job
+        # Process each top-scoring job (already sorted by score descending)
         for job in jobs[:analysis_size]:
-            full_description = job.get("full_description")
+            # Get full job description if available (from deep mode)
+            # Falls back to description_snippet if full_description not available
+            full_description = job.get("full_description") or job.get(
+                "description_snippet", ""
+            )
 
             # Generate personalized cover letter instructions using LLM
-            # The LLM analyzes the job description and skill profile to create
-            # specific instructions for writing a tailored cover letter
+            # The LLM analyzes the job description against the candidate profile
+            # and creates specific instructions for writing a tailored cover letter
+            # that highlights relevant skills and experience
             instructions = call_llm(
                 SYSTEM_PROMPT,
                 USER_PROMPT.format(
@@ -82,16 +97,16 @@ class AnalyzerAgent:
                 ),
             )
 
-            # Get the job details
+            # Extract job metadata for the analysis report
             title = job.get("title") or "N/A"
             company = job.get("company") or "N/A"
             location = job.get("location") or "N/A"
             score = job.get("score", 0)
-            matched = ", ".join(job.get("matched_skills", []))
-            missing = ", ".join(job.get("missing_skills", []))
+            matched = ", ".join(job.get("matched_skills", [])) or "None"
+            missing = ", ".join(job.get("missing_skills", [])) or "None"
             url = job.get("url") or "N/A"
 
-            # Add the job details to the report
+            # Format job details and LLM-generated instructions into report
             analysis_lines.append(f"Title: {title}")
             analysis_lines.append(f"Company: {company}")
             analysis_lines.append(f"Location: {location}")
@@ -102,19 +117,19 @@ class AnalyzerAgent:
             analysis_lines.append(f"Instructions: {instructions}")
             analysis_lines.append("-" * 40)
 
+        # Combine all analysis lines into a single text string
         analysis_text = "\n".join(analysis_lines)
 
-        # Form a dated filename and make a path
+        # Save analysis to disk for debugging and record-keeping
         filename = f"{self.timestamp}_job_analysis.txt"
         path = os.path.join(JOB_ANALYSIS_PATH, filename)
 
-        # Save to the path
         try:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(analysis_text)
-
-            logger.info(f" Saved job analysis to /{path}")
+            logger.info(f"Saved job analysis to {path}")
         except Exception as e:
-            logger.error(f" Failed to save job analysis: {e}")
+            # Log error but don't fail - analysis text is still returned
+            logger.error(f"Failed to save job analysis to disk: {e}")
 
         return analysis_text

@@ -1,10 +1,18 @@
 """
-JobsAI/src/jobsai/utils/llms.py
+LLM Utilities - OpenAI API Integration and JSON Extraction.
 
-Functions related to LLM use.
+This module provides utilities for interacting with OpenAI's LLM API and
+processing LLM responses. It includes:
 
-    call_llm
-    extract_json
+- call_llm: Central function for all LLM API calls with automatic retry logic
+- extract_json: Utility for extracting JSON from LLM responses that may be
+  wrapped in markdown or contain extra text
+
+The module handles:
+- Environment variable validation
+- OpenAI client initialization
+- Automatic retry with exponential backoff for transient failures
+- Response validation and error handling
 """
 
 import os
@@ -20,23 +28,33 @@ from openai import RateLimitError, APIConnectionError, APITimeoutError
 
 logger = logging.getLogger(__name__)
 
+# Load environment variables from .env file
 load_dotenv()
+
+# Retrieve OpenAI configuration from environment variables
 OPENAI_MODEL = os.getenv("OPENAI_MODEL")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Validate required environment variables
+# These must be set for the application to function
 if not OPENAI_MODEL:
-    error_msg = "OPENAI_MODEL not found in environment variables. Please set OPENAI_MODEL in your .env file or environment."
+    error_msg = (
+        "OPENAI_MODEL not found in environment variables. "
+        "Please set OPENAI_MODEL in your .env file or environment."
+    )
     logger.error(error_msg)
     raise ValueError(error_msg)
 
 if not OPENAI_API_KEY:
-    error_msg = "OPENAI_API_KEY not found in environment variables. Please set OPENAI_API_KEY in your .env file or environment."
+    error_msg = (
+        "OPENAI_API_KEY not found in environment variables. "
+        "Please set OPENAI_API_KEY in your .env file or environment."
+    )
     logger.error(error_msg)
     raise ValueError(error_msg)
 
 # Initialize OpenAI client with validated API key
-# This will raise an error immediately if the API key is invalid format
+# This will raise an error immediately if the API key format is invalid
 try:
     client = OpenAI(api_key=OPENAI_API_KEY)
 except Exception as e:

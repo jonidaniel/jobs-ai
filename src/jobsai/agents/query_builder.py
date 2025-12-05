@@ -1,11 +1,13 @@
 """
-Builds search queries from candidate profile.
+Query Builder Agent - Search Keyword Generation.
 
-CLASSES:
-    QueryBuilderAgent
+This module contains the QueryBuilderAgent class, which generates job search
+keywords from candidate profiles. The agent uses an LLM to analyze the profile
+and create a set of optimized search queries that will be used to find relevant
+job listings on job boards.
 
-FUNCTIONS:
-    create_keywords   (public)
+The generated keywords are typically two-word phrases (e.g., "ai engineer",
+"software engineer") that are tailored to the candidate's skills and experience.
 """
 
 import logging
@@ -23,11 +25,17 @@ logger = logging.getLogger(__name__)
 
 
 class QueryBuilderAgent:
-    """Builds search queries from the candidate profile.
+    """Agent responsible for generating job search keywords from candidate profiles.
 
-    Responsibilities:
-    1. Call the LLM with the system prompt and the candidate profile text
-    2. Return the list of keywords
+    Analyzes a candidate profile and generates a list of optimized search queries
+    that will be used to search job boards. The keywords are tailored to the
+    candidate's specific skills and experience level.
+
+    The agent includes retry logic to handle cases where the LLM doesn't return
+    valid JSON, ensuring robust operation even when the LLM response format varies.
+
+    Attributes:
+        None (stateless agent - no instance variables required)
     """
 
     # ------------------------------
@@ -54,15 +62,18 @@ class QueryBuilderAgent:
             ValueError: If LLM consistently fails to return parseable JSON after retries
         """
 
-        # Build prompt from profile
+        # Format the user prompt with the candidate profile
         USER_PROMPT = USER_PROMPT_BASE.format(profile=profile)
 
+        # Retry loop: attempt to get valid JSON response from LLM
         for attempt in range(max_retries + 1):
             try:
-                # Get keywords from LLM (returns a string)
+                # Call LLM to generate keywords
+                # The LLM is instructed to return a dictionary of 10 search queries
                 raw_response = call_llm(SYSTEM_PROMPT, USER_PROMPT)
 
-                # Extract JSON from the response
+                # Extract JSON from the LLM response
+                # LLMs often wrap JSON in markdown code blocks or add extra text
                 json_text = extract_json(raw_response)
                 if json_text is None:
                     if attempt < max_retries:

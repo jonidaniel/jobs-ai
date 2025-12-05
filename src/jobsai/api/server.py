@@ -137,25 +137,27 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
         HTTPException: With appropriate status code and error message if pipeline fails
     """
 
-    # Extract the form data from the frontend payload
-    # Use by_alias=True to get kebab-case keys (e.g., "additional-info" instead of "additional_info")
+    # Convert Pydantic model to dictionary for pipeline processing
+    # Use by_alias=True to preserve kebab-case keys from frontend
+    # (e.g., "additional-info" instead of "additional_info")
     answers = payload.model_dump(by_alias=True)
 
-    logger.info(f"Received an API request with {len(answers)} fields.")
+    logger.info(f"Received API request with {len(answers)} form fields")
     logger.debug(f"Form data keys: {list(answers.keys())}")
-    # Debug: Print structure of first few keys
+    # Log structure of first few fields for debugging
     for key, value in list(answers.items())[:3]:
-        logger.debug(f"  {key}: {type(value)} - {str(value)[:200]}")
+        logger.debug(f"  {key}: {type(value).__name__} - {str(value)[:200]}")
 
     try:
-        # Run the complete JobsAI pipeline
-        # This may take several minutes depending on:
-        # - Number of job boards to scrape
-        # - Deep mode (whether to fetch full job descriptions)
-        # - Number of LLM calls required
+        # Execute the complete JobsAI pipeline
+        # Pipeline execution time varies based on:
+        # - Number of job boards selected (more boards = longer search time)
+        # - Deep mode setting (fetching full descriptions is slower)
+        # - Number of LLM calls required (profile, keywords, analysis, generation)
+        # Typical execution: 2-5 minutes for a complete run
         cover_letters = backend.main(answers)
 
-        # Validate result structure
+        # Validate pipeline result structure
         if not isinstance(cover_letters, dict):
             logger.error(
                 "Pipeline returned invalid result type: %s", type(cover_letters)
@@ -165,40 +167,43 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
                 detail="Pipeline returned invalid result format.",
             )
 
+        # Extract document and filename from pipeline result
         document = cover_letters.get("document")
         filename = cover_letters.get("filename")
 
+        # Validate that pipeline returned required fields
         if document is None:
-            logger.error("Pipeline did not return a document.")
+            logger.error("Pipeline did not return a document")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to generate cover letter document.",
             )
 
         if not filename:
-            logger.error("Pipeline did not return a filename.")
+            logger.error("Pipeline did not return a filename")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to generate document filename.",
             )
 
-        # Convert Python-docx Document object to bytes for HTTP response
-        # Document is saved to in-memory buffer (BytesIO)
+        # Convert python-docx Document object to bytes for HTTP response
+        # The document is written to an in-memory buffer (BytesIO) to avoid
+        # temporary file creation
         try:
-            # Convert the document to bytes and save it to a buffer
             buffer = BytesIO()
-            # Save the document to the buffer
+            # Write document to buffer
             document.save(buffer)
-            buffer.seek(0)  # Reset buffer position to beginning for reading
+            # Reset buffer position to beginning for reading
+            buffer.seek(0)
         except Exception as e:
-            logger.error("Failed to save document to buffer: %s", str(e))
+            logger.error("Failed to convert document to bytes: %s", str(e))
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to process document for download.",
             )
 
-        # Return file as HTTP response with appropriate headers
-        # Browser will automatically trigger download due to Content-Disposition header
+        # Return document as HTTP response with appropriate headers
+        # Content-Disposition header triggers browser download dialog
         return Response(
             content=buffer.read(),
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",

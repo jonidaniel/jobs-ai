@@ -1,14 +1,16 @@
 """
-Orchestrates the scoring of the raw job listings.
+Scorer Service - Job Listing Scoring and Matching.
 
-CLASSES:
-    ScorerService
+This module contains the ScorerService class, which scores job listings based
+on how well they match the candidate's technology stack. The service computes
+relevancy scores (0-100%) by comparing job descriptions against the candidate's
+skills and experience.
 
-FUNCTIONS (in order of workflow):
-    score_jobs                      (public)
-    _compute_scores                 (internal)
-    _score_job_against_tech_stack   (internal)
-    _save_scored_jobs               (internal)
+The scoring process:
+1. Flattens the candidate's tech stack into a list of technology names
+2. Matches technologies found in job descriptions
+3. Calculates match percentage based on matched vs. total technologies
+4. Enriches job listings with scores, matched skills, and missing skills
 """
 
 import os
@@ -24,15 +26,21 @@ logger = logging.getLogger(__name__)
 
 
 class ScorerService:
-    """Orchestrates the scoring of the raw job listings.
+    """Service responsible for scoring job listings against candidate profiles.
 
-    Responsibilities:
-    1. Compute a relevancy score for a job based on the candidate profile
-    2. Enrich the job listing with the score and the matched/missing skills
-    3. Save the scored job listings
+    Computes relevancy scores for job listings by matching the candidate's
+    technology stack against job descriptions. The scoring is based on:
+    - Number of candidate technologies found in the job description
+    - Percentage of matched technologies (score = matched / total * 100)
+
+    Each scored job is enriched with:
+    - Score (0-100 integer percentage)
+    - Matched skills (technologies found in job description)
+    - Missing skills (technologies not found in job description)
 
     Args:
-        timestamp (str): The backend-wide timestamp for consistent file naming.
+        timestamp (str): Backend-wide timestamp for consistent file naming.
+            Format: YYYYMMDD_HHMMSS (e.g., "20250115_143022")
     """
 
     def __init__(self, timestamp: str):
@@ -54,16 +62,18 @@ class ScorerService:
             List[Dict]: The scored job listings.
         """
 
+        # Handle empty job list
         if not raw_jobs:
-            logger.warning(" No job listings found to score.")
+            logger.warning("No job listings found to score.")
             return []
 
+        # Compute scores for all jobs
         scored_jobs = self._compute_scores(raw_jobs, tech_stack)
 
-        # Sort by score descending
+        # Sort jobs by score in descending order (highest scores first)
         scored_jobs.sort(key=lambda x: x["score"], reverse=True)
 
-        # Save only for safety
+        # Persist scored jobs to disk for debugging and record-keeping
         self._save_scored_jobs(scored_jobs)
 
         logger.info(
@@ -93,8 +103,9 @@ class ScorerService:
                 - "matched_skills": The list of technologies found in the job description
                 - "missing_skills": The list of technologies not found in the job description
         """
-        # Combine all job text into a single searchable string
-        # Includes title, snippet, and full description (if available)
+        # Combine all job text fields into a single searchable string
+        # Includes: title, description snippet, and full description (if deep mode was used)
+        # Convert to lowercase for case-insensitive matching
         job_text = " ".join(
             [
                 str(job.get("title", "")),
@@ -103,13 +114,17 @@ class ScorerService:
             ]
         ).lower()
 
-        # Find which technologies from the tech stack appear in the job description
+        # Find technologies from candidate's tech stack that appear in job description
+        # Uses simple substring matching (case-insensitive)
         matched_skills = [tech for tech in tech_stack if tech.lower() in job_text]
-        # Compute missing skills as technologies not found in job description
+
+        # Identify technologies not found in the job description
         missing_skills = [tech for tech in tech_stack if tech.lower() not in job_text]
 
-        # Calculate score as percentage of matched technologies
-        # Score ranges from 0-100, where 100 means all technologies were found
+        # Calculate relevancy score as percentage of matched technologies
+        # Formula: (matched_skills / total_skills) * 100
+        # Score ranges from 0-100, where 100 means all candidate technologies were found
+        # Use max(1, len(tech_stack)) to avoid division by zero
         score = int(len(matched_skills) / max(1, len(tech_stack)) * 100)
 
         # Enrich job dict with scoring information
@@ -136,29 +151,34 @@ class ScorerService:
         Returns:
             List[Dict]: The scored job listings with added score, matched_skills, and missing_skills.
         """
-        # Flatten tech_stack into a single list of technology names
-        # Each category is a list of dicts: [{"Python": 7}, {"JavaScript": 6}, ...]
+        # Flatten the nested tech_stack structure into a single list of technology names
+        # Input structure: List of categories, each containing lists of dicts
+        # Example: [{"Python": 7}, {"JavaScript": 6}, ...]
         flattened_tech_stack = []
         for category in tech_stack:
             if isinstance(category, list):
+                # Category is a list of technology items
                 for item in category:
                     if isinstance(item, dict):
+                        # Item is a dict: {technology_name: experience_level}
                         # Extract technology names (keys) from dict
-                        # Only include technologies with experience level > 0
                         for tech_name, experience_level in item.items():
-                            # Experience level is an integer (0-7), 0 means no experience
+                            # Experience level is an integer (0-7)
+                            # 0 = no experience, 1-7 = increasing experience levels
                             if (
                                 isinstance(experience_level, int)
                                 and experience_level > 0
                             ):
+                                # Only include technologies with experience level > 0
                                 flattened_tech_stack.append(tech_name)
                             elif isinstance(experience_level, str):
-                                # Handle text fields or string values
+                                # Handle text fields or string values (custom technologies)
                                 flattened_tech_stack.append(tech_name)
                     elif isinstance(item, str):
-                        # Direct string technology name
+                        # Direct string technology name (fallback format)
                         flattened_tech_stack.append(item)
             elif isinstance(category, str):
+                # Category is a direct string (unexpected but handle gracefully)
                 flattened_tech_stack.append(category)
 
         # Normalize the tech stack (deduplicate, standardize capitalization)
