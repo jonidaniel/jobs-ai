@@ -39,7 +39,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # These must be set for the application to function
 if not OPENAI_MODEL:
     error_msg = (
-        "OPENAI_MODEL not found in environment variables. "
+        " OPENAI_MODEL not found in environment variables. "
         "Please set OPENAI_MODEL in your .env file or environment."
     )
     logger.error(error_msg)
@@ -47,7 +47,7 @@ if not OPENAI_MODEL:
 
 if not OPENAI_API_KEY:
     error_msg = (
-        "OPENAI_API_KEY not found in environment variables. "
+        " OPENAI_API_KEY not found in environment variables. "
         "Please set OPENAI_API_KEY in your .env file or environment."
     )
     logger.error(error_msg)
@@ -58,7 +58,7 @@ if not OPENAI_API_KEY:
 try:
     client = OpenAI(api_key=OPENAI_API_KEY)
 except Exception as e:
-    error_msg = f"Failed to initialize OpenAI client: {str(e)}"
+    error_msg = f" Failed to initialize OpenAI client: {str(e)}"
     logger.error(error_msg)
     raise ValueError(error_msg) from e
 
@@ -119,33 +119,33 @@ def call_llm(
                 # Exponential backoff: delay doubles with each retry
                 delay = retry_delay * (2**attempt)
                 logger.warning(
-                    f"LLM API call failed (attempt {attempt + 1}/{max_retries + 1}): {type(e).__name__}. "
+                    f" LLM API call failed (attempt {attempt + 1}/{max_retries + 1}): {type(e).__name__}. "
                     f"Retrying in {delay:.1f}s..."
                 )
                 time.sleep(delay)
             else:
                 # Final attempt failed
                 logger.error(
-                    f"LLM API call failed after {max_retries + 1} attempts: {type(e).__name__}"
+                    f" LLM API call failed after {max_retries + 1} attempts: {type(e).__name__}"
                 )
                 raise
         except Exception as e:
             # Non-retryable errors (e.g., authentication, invalid request) fail immediately
             logger.error(
-                f"LLM API call failed with non-retryable error: {type(e).__name__}: {str(e)}"
+                f" LLM API call failed with non-retryable error: {type(e).__name__}: {str(e)}"
             )
             raise
 
     # Validate response structure
     if not response or not hasattr(response, "choices"):
         error_msg = (
-            "Invalid response structure from OpenAI API: missing 'choices' attribute"
+            " Invalid response structure from OpenAI API: missing 'choices' attribute"
         )
         logger.error(error_msg)
         raise ValueError(error_msg)
 
     if not response.choices or len(response.choices) == 0:
-        error_msg = "OpenAI API returned empty choices array"
+        error_msg = " OpenAI API returned empty choices array"
         logger.error(error_msg)
         raise ValueError(error_msg)
 
@@ -153,7 +153,7 @@ def call_llm(
     message = response.choices[0].message
     if not message or not hasattr(message, "content"):
         error_msg = (
-            "Invalid response structure from OpenAI API: missing 'content' attribute"
+            " Invalid response structure from OpenAI API: missing 'content' attribute"
         )
         logger.error(error_msg)
         raise ValueError(error_msg)
@@ -162,7 +162,7 @@ def call_llm(
 
     # Check if content is None (can happen with some API responses)
     if text is None:
-        error_msg = "OpenAI API returned None content in response"
+        error_msg = " OpenAI API returned None content in response"
         logger.error(error_msg)
         raise ValueError(error_msg)
 

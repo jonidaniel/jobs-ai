@@ -394,8 +394,9 @@ VALID_JOB_BOARDS = {"Duunitori", "Jobly"}
 # Valid deep mode options
 VALID_DEEP_MODE = {"Yes", "No"}
 
-# Valid cover letter count options
-VALID_COVER_LETTER_NUM = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
+# Valid cover letter count range (now accepts integers, not strings)
+# Frontend sends integers 1-10
+VALID_COVER_LETTER_NUM_RANGE = range(1, 11)  # 1 to 10 inclusive
 
 # Valid cover letter style options
 VALID_COVER_LETTER_STYLE = {"Professional", "Friendly", "Confident", "Funny"}
@@ -471,10 +472,24 @@ class GeneralQuestionItem(BaseModel):
             if not isinstance(v, str) or v not in VALID_DEEP_MODE:
                 raise ValueError(f"deep-mode must be one of: {VALID_DEEP_MODE}")
         elif key == "cover-letter-num":
-            if not isinstance(v, str) or v not in VALID_COVER_LETTER_NUM:
+            # Accept integer values (frontend now sends integers, not strings)
+            # Also accept string values for backward compatibility and convert to int
+            try:
+                # Convert to integer (handles both int and string "5")
+                cover_letter_num = int(v) if not isinstance(v, int) else v
+                # Validate range (1-10)
+                if cover_letter_num not in VALID_COVER_LETTER_NUM_RANGE:
+                    raise ValueError(
+                        f"cover-letter-num must be between 1 and 10, got {cover_letter_num}"
+                    )
+                # Return as integer
+                return cover_letter_num
+            except (ValueError, TypeError) as e:
+                if isinstance(e, ValueError) and "between 1 and 10" in str(e):
+                    raise  # Re-raise range errors
                 raise ValueError(
-                    f"cover-letter-num must be one of: {VALID_COVER_LETTER_NUM}"
-                )
+                    f"cover-letter-num must be a number between 1 and 10, got {v} (type: {type(v).__name__})"
+                ) from e
         elif key == "cover-letter-style":
             if not isinstance(v, list) or len(v) == 0:
                 raise ValueError(

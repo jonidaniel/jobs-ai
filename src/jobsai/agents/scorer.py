@@ -64,7 +64,7 @@ class ScorerService:
 
         # Handle empty job list
         if not raw_jobs:
-            logger.warning("No job listings found to score.")
+            logger.warning(" No job listings found to score.")
             return []
 
         # Compute scores for all jobs

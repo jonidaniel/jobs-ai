@@ -66,8 +66,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             }
         )
 
-    logger.error("Validation error: %s", error_details)
-    logger.debug("Request body: %s", await request.body())
+    logger.error(" Validation error: %s", error_details)
+    logger.debug(" Request body: %s", await request.body())
 
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -104,8 +104,8 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
                     {"job-level": ["Expert", "Intermediate"]},
                     {"job-boards": ["Duunitori", "Jobly"]},
                     {"deep-mode": "Yes"},
-                    {"cover-letter-num": "5"},
-                    {"cover-letter-style": "Professional"}
+                    {"cover-letter-num": 5},  # Integer (1-10)
+                    {"cover-letter-style": ["Professional"]}  # Array of 1-2 strings
                 ],
                 "languages": [
                     {"javascript": 5},
@@ -142,11 +142,11 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
     # (e.g., "additional-info" instead of "additional_info")
     answers = payload.model_dump(by_alias=True)
 
-    logger.info(f"Received API request with {len(answers)} form fields")
-    logger.debug(f"Form data keys: {list(answers.keys())}")
+    logger.info(f" Received API request with {len(answers)} form fields")
+    logger.debug(f" Form data keys: {list(answers.keys())}")
     # Log structure of first few fields for debugging
     for key, value in list(answers.items())[:3]:
-        logger.debug(f"  {key}: {type(value).__name__} - {str(value)[:200]}")
+        logger.debug(f" {key}: {type(value).__name__} - {str(value)[:200]}")
 
     try:
         # Execute the complete JobsAI pipeline
@@ -160,7 +160,7 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
         # Validate pipeline result structure
         if not isinstance(cover_letters, dict):
             logger.error(
-                "Pipeline returned invalid result type: %s", type(cover_letters)
+                " Pipeline returned invalid result type: %s", type(cover_letters)
             )
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -173,14 +173,14 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
 
         # Validate that pipeline returned required fields
         if document is None:
-            logger.error("Pipeline did not return a document")
+            logger.error(" Pipeline did not return a document")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to generate cover letter document.",
             )
 
         if not filename:
-            logger.error("Pipeline did not return a filename")
+            logger.error(" Pipeline did not return a filename")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to generate document filename.",
@@ -196,7 +196,7 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
             # Reset buffer position to beginning for reading
             buffer.seek(0)
         except Exception as e:
-            logger.error("Failed to convert document to bytes: %s", str(e))
+            logger.error(" Failed to convert document to bytes: %s", str(e))
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to process document for download.",
@@ -217,25 +217,16 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
     except ValueError as e:
         # Handle validation errors from profiler (e.g., LLM didn't return parseable JSON)
         error_msg = str(e)
-        logger.error("Validation error in pipeline: %s", error_msg)
+        logger.error(" Validation error in pipeline: %s", error_msg)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid input data or LLM response: {error_msg}",
         )
 
-    # except ValidationError as e:
-    #     # Handle Pydantic validation errors (e.g., skill profile validation failed)
-    #     error_msg = "Invalid skill profile format."
-    #     logger.error("Pydantic validation error: %s", str(e))
-    #     raise HTTPException(
-    #         status_code=status.HTTP_400_BAD_REQUEST,
-    #         detail=error_msg,
-    #     )
-
     except KeyError as e:
         # Handle missing keys in result dictionary
         error_msg = f"Pipeline result missing required field: {str(e)}"
-        logger.error("KeyError in pipeline result: %s", str(e))
+        logger.error(" KeyError in pipeline result: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Pipeline returned incomplete results.",
@@ -244,7 +235,7 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
     except AttributeError as e:
         # Handle attribute access errors
         error_msg = "Pipeline encountered an internal error."
-        logger.error("AttributeError in pipeline: %s", str(e))
+        logger.error(" AttributeError in pipeline: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=error_msg,
@@ -253,7 +244,7 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
     except FileNotFoundError as e:
         # Handle missing file errors (e.g., config files, templates)
         error_msg = "Required file not found. Please check server configuration."
-        logger.error("FileNotFoundError: %s", str(e))
+        logger.error(" FileNotFoundError: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=error_msg,
@@ -262,7 +253,7 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
     except PermissionError as e:
         # Handle file permission errors
         error_msg = "File permission error. Please check server configuration."
-        logger.error("PermissionError: %s", str(e))
+        logger.error(" PermissionError: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=error_msg,
@@ -278,7 +269,7 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
             # Check for connection/timeout errors
             if "connection" in error_type.lower() or "timeout" in error_type.lower():
                 error_msg = "Unable to connect to AI service. Please try again later."
-                logger.error("OpenAI API connection/timeout error: %s", str(e))
+                logger.error(" OpenAI API connection/timeout error: %s", str(e))
                 raise HTTPException(
                     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                     detail=error_msg,
@@ -286,7 +277,7 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
             else:
                 # Other OpenAI errors (rate limits, authentication, API errors, etc.)
                 error_msg = "AI service error occurred. Please try again later."
-                logger.error("OpenAI API error: %s", str(e))
+                logger.error(" OpenAI API error: %s", str(e))
                 raise HTTPException(
                     status_code=status.HTTP_502_BAD_GATEWAY,
                     detail=error_msg,
@@ -294,7 +285,7 @@ async def run_pipeline(payload: FrontendPayload) -> Response:
 
         # Catch-all for any other unexpected errors
         error_msg = "An unexpected error occurred while processing your request."
-        logger.exception("Unexpected error in pipeline: %s", str(e))
+        logger.exception(" Unexpected error in pipeline: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=error_msg,

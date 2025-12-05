@@ -71,7 +71,7 @@ class AnalyzerAgent:
 
         # Validate input
         if not jobs:
-            logger.warning("No scored jobs found for analysis.")
+            logger.warning(" No scored jobs found for analysis.")
             raise ValueError("No scored jobs found for analysis.")
 
         # Initialize analysis report with header
@@ -127,9 +127,9 @@ class AnalyzerAgent:
         try:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(analysis_text)
-            logger.info(f"Saved job analysis to {path}")
+            logger.info(f" Saved job analysis to {path}")
         except Exception as e:
             # Log error but don't fail - analysis text is still returned
-            logger.error(f"Failed to save job analysis to disk: {e}")
+            logger.error(f" Failed to save job analysis to disk: {e}")
 
         return analysis_text

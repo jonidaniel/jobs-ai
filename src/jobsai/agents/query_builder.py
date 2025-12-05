@@ -78,13 +78,13 @@ class QueryBuilderAgent:
                 if json_text is None:
                     if attempt < max_retries:
                         logger.warning(
-                            f"LLM did not return parseable JSON (attempt {attempt + 1}/{max_retries + 1}). "
+                            f" LLM did not return parseable JSON (attempt {attempt + 1}/{max_retries + 1}). "
                             "Retrying..."
                         )
                         continue
                     else:
                         logger.error(
-                            f"LLM failed to return parseable JSON after {max_retries + 1} attempts. "
+                            f" LLM failed to return parseable JSON after {max_retries + 1} attempts. "
                             f"Raw response: {raw_response[:500]}"
                         )
                         raise ValueError(
@@ -98,13 +98,13 @@ class QueryBuilderAgent:
                 except json.JSONDecodeError as e:
                     if attempt < max_retries:
                         logger.warning(
-                            f"JSON parsing failed (attempt {attempt + 1}/{max_retries + 1}): {str(e)}. "
+                            f" JSON parsing failed (attempt {attempt + 1}/{max_retries + 1}): {str(e)}. "
                             "Retrying..."
                         )
                         continue
                     else:
                         logger.error(
-                            f"JSON parsing failed after {max_retries + 1} attempts: {str(e)}. "
+                            f" JSON parsing failed after {max_retries + 1} attempts: {str(e)}. "
                             f"Extracted JSON text: {json_text[:500]}"
                         )
                         raise ValueError(
@@ -115,7 +115,7 @@ class QueryBuilderAgent:
                 if not isinstance(keywords_dict, dict):
                     if attempt < max_retries:
                         logger.warning(
-                            f"LLM returned non-dict JSON (attempt {attempt + 1}/{max_retries + 1}). "
+                            f" LLM returned non-dict JSON (attempt {attempt + 1}/{max_retries + 1}). "
                             "Retrying..."
                         )
                         continue
@@ -131,14 +131,14 @@ class QueryBuilderAgent:
                 if not keywords:
                     if attempt < max_retries:
                         logger.warning(
-                            f"LLM returned empty keywords list (attempt {attempt + 1}/{max_retries + 1}). "
+                            f" LLM returned empty keywords list (attempt {attempt + 1}/{max_retries + 1}). "
                             "Retrying..."
                         )
                         continue
                     else:
                         raise ValueError("LLM returned an empty keywords list")
 
-                logger.info(f"Successfully extracted {len(keywords)} keywords")
+                logger.info(f" Successfully extracted {len(keywords)} keywords")
                 return keywords
 
             except ValueError:
@@ -148,13 +148,13 @@ class QueryBuilderAgent:
                 # Unexpected errors - retry if we have attempts left
                 if attempt < max_retries:
                     logger.warning(
-                        f"Unexpected error creating keywords (attempt {attempt + 1}/{max_retries + 1}): "
+                        f" Unexpected error creating keywords (attempt {attempt + 1}/{max_retries + 1}): "
                         f"{type(e).__name__}: {str(e)}. Retrying..."
                     )
                     continue
                 else:
                     logger.error(
-                        f"Failed to create keywords after {max_retries + 1} attempts: "
+                        f" Failed to create keywords after {max_retries + 1} attempts: "
                         f"{type(e).__name__}: {str(e)}"
                     )
                     raise

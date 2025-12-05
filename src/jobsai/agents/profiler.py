@@ -12,7 +12,6 @@ The profile is used throughout the pipeline for:
 - Writing personalized cover letters
 """
 
-import logging
 from typing import Dict
 
 from jobsai.utils.llms import call_llm
@@ -21,8 +20,6 @@ from jobsai.config.prompts import (
     PROFILER_SYSTEM_PROMPT as SYSTEM_PROMPT,
     PROFILER_USER_PROMPT as USER_PROMPT_BASE,
 )
-
-logger = logging.getLogger(__name__)
 
 
 class ProfilerAgent:

@@ -50,9 +50,25 @@ export function transformFormData(formData) {
   // Group general questions (index 0)
   // Always include all 5 general questions (required by backend)
   // Use formData directly to ensure we have the values (validation ensures they're present)
-  const generalQuestions = GENERAL_QUESTION_KEYS.map((key) => ({
-    [key]: formData[key],
-  }));
+  // Convert cover-letter-num to integer for backend
+  const generalQuestions = GENERAL_QUESTION_KEYS.map((key) => {
+    let value = formData[key];
+
+    // Convert cover-letter-num from string to integer
+    // Radio buttons return strings, but backend expects integer
+    if (key === "cover-letter-num") {
+      value = parseInt(value, 10);
+      // Validate conversion was successful
+      if (isNaN(value) || value < 1 || value > 10) {
+        console.warn(
+          `Invalid cover-letter-num value: ${formData[key]}, defaulting to 5`
+        );
+        value = 5;
+      }
+    }
+
+    return { [key]: value };
+  });
   // Backend requires exactly 5 items, so always include the array even if some values are empty
   result[QUESTION_SET_NAMES[GENERAL_QUESTIONS_INDEX]] = generalQuestions;
 

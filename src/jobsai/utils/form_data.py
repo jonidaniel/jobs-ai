@@ -6,16 +6,14 @@ submission data into a structured format suitable for the JobsAI pipeline.
 
 The main function, extract_form_data(), processes the complex nested structure
 from the frontend and extracts:
-- Job board selections and deep mode setting
-- Cover letter generation preferences (number and style)
-- Technology stack organized by category
-- Data type conversions and validations
+- The selected job boards
+- The deep mode setting
+- The number of cover letters to generate
+- The style of the cover letters
+- The technology stack organized by category
 """
 
-import logging
 from typing import Dict
-
-logger = logging.getLogger(__name__)
 
 
 def extract_form_data(form_submissions: Dict) -> Dict:
@@ -23,11 +21,11 @@ def extract_form_data(form_submissions: Dict) -> Dict:
     Extract and transform form submission data into structured format.
 
     Processes the frontend payload to extract:
-    - The selected job boards and deep mode setting
+    - The selected job boards
+    - The deep mode setting
     - The number of cover letters to generate
     - The style of the cover letters
-    - Converts and validates data types (e.g., cover_letter_num to int)
-    - Handles array-to-string conversion for cover_letter_style
+    - The technology stack
 
     Args:
         form_submissions (Dict): Form data from frontend containing:
@@ -44,39 +42,25 @@ def extract_form_data(form_submissions: Dict) -> Dict:
 
     Returns:
         Dict: Structured dictionary with keys:
-            - "job_boards": List of selected job boards
-            - "deep_mode": String ("Yes" or "No")
-            - "cover_letter_num": Integer (number of cover letters to generate)
-            - "cover_letter_style": String (style description, e.g., "Professional and Friendly")
-
-    Raises:
-        KeyError: If required form fields are missing
+            - "job_boards": Array of strings, contains one or more strings
+            - "deep_mode": String, either "Yes" or "No"
+            - "cover_letter_num": Integer, between 1 and 10
+            - "cover_letter_style": Array of strings, contains one or more strings
+            - "tech_stack": Array of arrays, contains one or more arrays of technology set items
     """
 
-    # The selected job boards and deep mode setting
+    # The selected job boards, deep mode setting, number of cover letters to generate, and style of the cover letters
+    # Always an array, contains one or more strings
     job_boards = form_submissions.get("general")[1].get("job-boards")
+    # Always a string, either "Yes" or "No"
     deep_mode = form_submissions.get("general")[2].get("deep-mode")
-
-    # Convert cover_letter_num to integer (comes from frontend as string)
-    try:
-        cover_letter_num = int(
-            form_submissions.get("general")[3].get("cover-letter-num")
-        )
-    except (ValueError, TypeError) as e:
-        logger.warning(f"Invalid cover_letter_num, defaulting to 5: {e}")
-        cover_letter_num = 5
-
-    # Handle cover_letter_style (can be string or array from frontend)
-    cover_letter_style_raw = form_submissions.get("general")[4].get(
-        "cover-letter-style"
-    )
-    if isinstance(cover_letter_style_raw, list):
-        # If array, join with " and " (e.g., ["Professional", "Friendly"] -> "Professional and Friendly")
-        cover_letter_style = " and ".join(cover_letter_style_raw)
-    else:
-        cover_letter_style = cover_letter_style_raw or "Professional"
+    # Always an integer, between 1 and 10
+    cover_letter_num = form_submissions.get("general")[3].get("cover-letter-num")
+    # Always an array of strings, contains one or more strings
+    cover_letter_style = form_submissions.get("general")[4].get("cover-letter-style")
 
     # Extract technology categories into a tech stack list
+    # Always an array of arrays, contains one or more arrays of technology set items
     tech_stack = [
         form_submissions.get("languages", []),
         form_submissions.get("databases", []),
@@ -89,9 +73,9 @@ def extract_form_data(form_submissions: Dict) -> Dict:
     ]
 
     return {
-        "tech_stack": tech_stack,
         "job_boards": job_boards,
         "deep_mode": deep_mode,
         "cover_letter_num": cover_letter_num,
         "cover_letter_style": cover_letter_style,
+        "tech_stack": tech_stack,
     }

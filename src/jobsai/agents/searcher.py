@@ -87,7 +87,7 @@ class SearcherService:
         # This creates a cartesian product: all boards × all keywords
         for query in keywords:
             for job_board in job_boards:
-                logger.info("Searching %s for query '%s'", job_board, query)
+                logger.info(" Searching %s for query '%s'", job_board, query)
 
                 # Route to appropriate scraper based on job board name
                 if job_board.lower() == "duunitori":
@@ -96,7 +96,7 @@ class SearcherService:
                     jobs = scrape_jobly(query, deep_mode=deep_mode)
                 else:
                     # Unknown job board - skip with empty result
-                    logger.warning(f"Unknown job board: {job_board}. Skipping.")
+                    logger.warning(f" Unknown job board: {job_board}. Skipping.")
                     jobs = []
 
                 # Collect jobs and save to disk for debugging
@@ -143,7 +143,7 @@ class SearcherService:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(jobs, f, ensure_ascii=False, indent=2)
 
-        logger.info("Saved %d raw jobs to %s", len(jobs), path)
+        logger.info(" Saved %d raw jobs to %s", len(jobs), path)
 
     def _deduplicate_jobs(self, jobs: List[Dict]) -> List[Dict]:
         """Remove duplicate job listings based on URL.
@@ -170,5 +170,5 @@ class SearcherService:
                 deduped.append(job)
                 seen_urls.add(url)
 
-        logger.info(f"Deduplicated {len(jobs)} jobs to {len(deduped)} unique listings")
+        logger.info(f" Deduplicated {len(jobs)} jobs to {len(deduped)} unique listings")
         return deduped
