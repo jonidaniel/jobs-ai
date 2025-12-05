@@ -25,8 +25,8 @@ class ProfilerAgent:
     """Creates the candidate profile.
 
     Responsibilities:
-        1. Call the LLM with the system prompt and user prompt
-        2. Return the raw response
+    1. Call the LLM with the system prompt and user prompt
+    2. Return the raw response
     """
 
     # ------------------------------
