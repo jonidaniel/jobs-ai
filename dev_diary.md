@@ -108,4 +108,13 @@
 - Made the transition from clicking 'Find Jobs' to showing 'Again' button, also clicking 'Again' and then ending up on a new form
 - Changed the way of passing data between agents to _in-memory_, instead of saving data in files and then loading it in the next agent
 - Designed and partly implemented changes to agent's responsibilities
-- Started planning removing 'skill_profile' and making agents communicate with strings instead Skill Profiles.
+- Started planning removing 'skill_profile' and making agents communicate with strings instead of SkillProfiles.
+
+### 2025/12/4
+
+- Finished the transformation of using LLM-generated candidate profile text instead of SkillProfiles as profile
+- Finished the transformation of creating search keywords with an LLM instead of doing it deterministically.
+
+### 2025/12/5
+
+- Implemented Server-Sent Events (SSE) with separate POST endpoint to allow users to see pipeline progress and to cancel it, if necessary
