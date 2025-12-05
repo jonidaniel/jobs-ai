@@ -5,10 +5,10 @@ CLASSES:
     ScorerService
 
 FUNCTIONS (in order of workflow):
-    score_jobs           (public)
-    _compute_scores      (internal)
-    _score_job_against_tech_stack (internal)
-    _save_scored_jobs    (internal)
+    score_jobs                      (public)
+    _compute_scores                 (internal)
+    _score_job_against_tech_stack   (internal)
+    _save_scored_jobs               (internal)
 """
 
 import os
@@ -32,60 +32,11 @@ class ScorerService:
     3. Save the scored job listings
 
     Args:
-        timestamp (str): The backend-wide timestamp of the moment when the main function was started.
+        timestamp (str): The backend-wide timestamp for consistent file naming.
     """
 
     def __init__(self, timestamp: str):
         self.timestamp = timestamp
-
-    def _compute_scores(self, raw_jobs: List[Dict], tech_stack: List) -> List[Dict]:
-        """
-        Compute a relevancy score for each job based on the candidate tech stack.
-
-        Args:
-            raw_jobs (List[Dict]): The raw job listings from the searcher.
-            tech_stack (List): A list of technology categories, where each category
-                is a list of dicts with format {technology_name: experience_level}.
-                Only technologies with experience_level > 0 are included.
-
-        Returns:
-            List[Dict]: The scored job listings with added score, matched_skills, and missing_skills.
-        """
-        # Flatten tech_stack into a single list of technology names
-        # Each category is a list of dicts: [{"Python": 7}, {"JavaScript": 6}, ...]
-        flattened_tech_stack = []
-        for category in tech_stack:
-            if isinstance(category, list):
-                for item in category:
-                    if isinstance(item, dict):
-                        # Extract technology names (keys) from dict
-                        # Only include technologies with experience level > 0
-                        for tech_name, experience_level in item.items():
-                            # Experience level is an integer (0-7), 0 means no experience
-                            if (
-                                isinstance(experience_level, int)
-                                and experience_level > 0
-                            ):
-                                flattened_tech_stack.append(tech_name)
-                            elif isinstance(experience_level, str):
-                                # Handle text fields or string values
-                                flattened_tech_stack.append(tech_name)
-                    elif isinstance(item, str):
-                        # Direct string technology name
-                        flattened_tech_stack.append(item)
-            elif isinstance(category, str):
-                flattened_tech_stack.append(category)
-
-        # Normalize the tech stack (deduplicate, standardize capitalization)
-        flattened_tech_stack = normalize_list(flattened_tech_stack)
-
-        # Score each job against the tech stack
-        scored_jobs = []
-        for job in raw_jobs:
-            scored_job = self._score_job_against_tech_stack(job, flattened_tech_stack)
-            scored_jobs.append(scored_job)
-
-        return scored_jobs
 
     # ------------------------------
     # Public interface
@@ -105,7 +56,7 @@ class ScorerService:
 
         if not raw_jobs:
             logger.warning(" No job listings found to score.")
-            return
+            return []
 
         scored_jobs = self._compute_scores(raw_jobs, tech_stack)
 
@@ -171,6 +122,55 @@ class ScorerService:
             }
         )
         return scored_job
+
+    def _compute_scores(self, raw_jobs: List[Dict], tech_stack: List) -> List[Dict]:
+        """
+        Compute a relevancy score for each job based on the candidate tech stack.
+
+        Args:
+            raw_jobs (List[Dict]): The raw job listings from the searcher.
+            tech_stack (List): A list of technology categories, where each category
+                is a list of dicts with format {technology_name: experience_level}.
+                Only technologies with experience_level > 0 are included.
+
+        Returns:
+            List[Dict]: The scored job listings with added score, matched_skills, and missing_skills.
+        """
+        # Flatten tech_stack into a single list of technology names
+        # Each category is a list of dicts: [{"Python": 7}, {"JavaScript": 6}, ...]
+        flattened_tech_stack = []
+        for category in tech_stack:
+            if isinstance(category, list):
+                for item in category:
+                    if isinstance(item, dict):
+                        # Extract technology names (keys) from dict
+                        # Only include technologies with experience level > 0
+                        for tech_name, experience_level in item.items():
+                            # Experience level is an integer (0-7), 0 means no experience
+                            if (
+                                isinstance(experience_level, int)
+                                and experience_level > 0
+                            ):
+                                flattened_tech_stack.append(tech_name)
+                            elif isinstance(experience_level, str):
+                                # Handle text fields or string values
+                                flattened_tech_stack.append(tech_name)
+                    elif isinstance(item, str):
+                        # Direct string technology name
+                        flattened_tech_stack.append(item)
+            elif isinstance(category, str):
+                flattened_tech_stack.append(category)
+
+        # Normalize the tech stack (deduplicate, standardize capitalization)
+        flattened_tech_stack = normalize_list(flattened_tech_stack)
+
+        # Score each job against the tech stack
+        scored_jobs = []
+        for job in raw_jobs:
+            scored_job = self._score_job_against_tech_stack(job, flattened_tech_stack)
+            scored_jobs.append(scored_job)
+
+        return scored_jobs
 
     def _save_scored_jobs(self, jobs: List[Dict]):
         """Save the scored jobs.
