@@ -5,10 +5,8 @@ CLASSES:
     GeneratorAgent
 
 FUNCTIONS (in order of workflow):
-    1. generate_letters     (public use)
-    2. _build_system_prompt (internal use)
-    3. _build_user_prompt   (internal use)
-    4. _write_letters        (internal use)
+    generate_letters     (public)
+    _write_letters        (internal)
 """
 
 import os
@@ -47,7 +45,7 @@ class GeneratorAgent:
         self,
         job_analysis: str,
         profile: str,
-        letter_style: str,
+        style: str,
     ) -> Document:
         """Produce a tailored job-application message based on the candidate's skills and the job analysis.
 
@@ -60,54 +58,26 @@ class GeneratorAgent:
             Document: The final cover letter.
         """
 
-        system_prompt = self._build_system_prompt(letter_style)
-        user_prompt = self._build_user_prompt(profile, job_analysis)
-
-        cover_letter = self._write_letters(system_prompt, user_prompt)
-
-        return cover_letter
-
-    # ------------------------------
-    # Internal functions
-    # ------------------------------
-
-    def _build_system_prompt(self, style: str) -> str:
-        """Build the system prompt that is used to write the cover letter.
-
-        Args:
-            style (str): The intended style/tone of the cover letter.
-
-        Returns:
-            str: The system prompt that is used to write the cover letter.
-        """
-
+        # Build the system prompt
         tone_instructions = {
             "Professional": "Write in a clear, respectful, concise, professional tone. Use well-structured paragraphs. Avoid exaggerations.",
             "friendly": "Write in a warm, positive tone but keep it professional.",
             "confident": "Write with a confident, proactive tone without sounding arrogant.",
         }
-
         base_style = tone_instructions.get(style, tone_instructions["Professional"])
+        system_prompt = SYSTEM_PROMPT.format(base_style=base_style)
 
-        return SYSTEM_PROMPT.format(base_style=base_style)
+        # Build the user prompt
+        user_prompt = USER_PROMPT.format(profile=profile, job_analysis=job_analysis)
 
-    def _build_user_prompt(
-        self,
-        profile: str,
-        job_analysis: str,
-    ) -> str:
-        """Build the user prompt that is used to write the cover letter.
+        # Write the cover letters
+        cover_letters = self._write_letters(system_prompt, user_prompt)
 
-        Args:
-            profile (SkillProfile): The candidate's skill profile.
-            job_analysis (str): The job analysis that contains instructions for what kind of cover letter to write.
+        return cover_letters
 
-        Returns:
-            str: The user prompt that is used to write the cover letter.
-        """
-
-        return USER_PROMPT.format(profile=profile, job_analysis=job_analysis)
-
+    # ------------------------------
+    # Internal function
+    # ------------------------------
     def _write_letters(self, system_prompt: str, user_prompt: str) -> Document:
         """
         Write the cover letters with proper formatting.

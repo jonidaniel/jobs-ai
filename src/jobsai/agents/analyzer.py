@@ -31,7 +31,7 @@ class AnalyzerAgent:
     2. Write an analysis of the top-scoring jobs
 
     Args:
-        timestamp (str): The backend-wide timestamp of the moment when the main function was started.
+        timestamp (str): The backend-wide timestamp for consistent file naming.
     """
 
     def __init__(self, timestamp: str):
